@@ -51,14 +51,14 @@ export default function SinglePackagePage() {
 
   useEffect(() => {
     if (!matchedId) return;
-    fetch("/api/packages", { cache: "no-store" })
+    // Fetch the specific package directly by its MongoDB ObjectId — never loads wrong one
+    fetch(`/api/packages?id=${encodeURIComponent(matchedId)}`, { cache: "no-store" })
       .then(r => r.json())
       .then(d => {
-        if (d.success) {
-          console.log("PACKAGE IDS:", d.data.map((p:any) => p.id), "LOOKING FOR:", matchedId);
-          // Try matching ID, or fallback to slug if the URL was a slug
-          const found = d.data.find((p: any) => String(p.id) === String(matchedId) || String(p.slug) === String(matchedId));
-          setPkg(found || null);
+        if (d.success && d.data) {
+          setPkg(d.data);
+        } else {
+          setPkg(null);
         }
       })
       .finally(() => setLoading(false));

@@ -1,7 +1,9 @@
 import Navbar from "./components/frontend/Navbar";
 import Footer from "./components/frontend/Footer";
 import PackageCard from "./components/frontend/PackageCard";
+import SearchBar from "./components/frontend/SearchBar";
 import Link from "next/link";
+import { getAllDestinations } from "./utils/getDestinations";
 
 async function getPackages() {
   try {
@@ -34,23 +36,36 @@ const HIGHLIGHTS = [
 ];
 
 export default async function HomePage() {
-  const packages = await getPackages();
+  const [packages, destinations] = await Promise.all([
+    getPackages(),
+    getAllDestinations()
+  ]);
   const featured = packages.slice(0, 6);
+  // Default destinations if none exist in DB yet
+  const displayDestinations = destinations.length > 0 
+    ? destinations.slice(0, 5) 
+    : [
+        { name: "Bali", slug: "bali", icon: "🌴" },
+        { name: "Rajasthan", slug: "rajasthan", icon: "🏰" },
+        { name: "Maldives", slug: "maldives", icon: "🌊" },
+        { name: "Dubai", slug: "dubai", icon: "🌆" },
+        { name: "Himachal", slug: "himachal", icon: "🏔️" }
+      ];
 
   return (
     <>
       <Navbar />
 
       {/* ─── HERO ─────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-bg">
+      <section className="relative min-h-screen flex items-center justify-center hero-bg">
         {/* Background decoration */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#2fa3f2]/10 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-[#F4F9E9]/5 rounded-full blur-2xl" />
         </div>
 
         {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-5"
+        <div className="absolute inset-0 opacity-5 overflow-hidden"
           style={{
             backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
             backgroundSize: "60px 60px"
@@ -77,25 +92,12 @@ export default async function HomePage() {
           </p>
 
           {/* Search bar */}
-          <div className="max-w-2xl mx-auto animate-fadeUp delay-300">
-            <div className="flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
-              <div className="flex-1 flex items-center gap-3 px-4 py-2">
-                <svg className="w-5 h-5 text-white/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
-                <span className="text-white/50 text-sm">Where do you want to go?</span>
-              </div>
-              <Link
-                href="/packages"
-                className="px-8 py-3 bg-[#2fa3f2] hover:bg-[#1a8fd8] text-white font-bold rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-[#2fa3f2]/30 text-sm whitespace-nowrap"
-              >
-                Search Packages
-              </Link>
-            </div>
+          <div className="max-w-2xl mx-auto mb-20 animate-fadeUp delay-300 relative z-50">
+            <SearchBar />
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-16 animate-fadeUp delay-400">
+          <div className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-16 animate-fadeUp delay-400 relative z-0">
             {[
               { num: "500+", label: "Happy Clients" },
               { num: "50+", label: "Destinations" },
@@ -215,16 +217,16 @@ export default async function HomePage() {
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white">Popular Destinations</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {["Bali", "Rajasthan", "Maldives", "Dubai", "Himachal"].map((dest, i) => (
+            {displayDestinations.map((dest, i) => (
               <Link
-                key={dest}
-                href={`/locations?q=${dest}`}
+                key={dest.slug}
+                href={`/activities/${dest.slug}`}
                 className="group text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#2fa3f2]/50 transition-all duration-200 hover:-translate-y-1"
               >
                 <div className="text-3xl mb-3">
-                  {["🌴", "🏰", "🌊", "🌆", "🏔️"][i]}
+                  {(dest as any).icon || "📍"}
                 </div>
-                <p className="text-white font-semibold text-sm group-hover:text-[#2fa3f2] transition-colors">{dest}</p>
+                <p className="text-white font-semibold text-sm group-hover:text-[#2fa3f2] transition-colors">{dest.name}</p>
               </Link>
             ))}
           </div>
