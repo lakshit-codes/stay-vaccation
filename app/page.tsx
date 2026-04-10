@@ -28,6 +28,10 @@ const CATEGORIES = [
   { label: "Religious", icon: "🕌", color: "from-yellow-400 to-amber-600", href: "/packages?type=Religious" },
 ];
 
+
+
+
+
 const HIGHLIGHTS = [
   { icon: "🌍", title: "50+ Destinations", desc: "Worldwide coverage from exotic islands to mountain retreats" },
   { icon: "⭐", title: "Luxury Curated", desc: "Handpicked premium experiences at every tier" },
