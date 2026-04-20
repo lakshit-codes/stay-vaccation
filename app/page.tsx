@@ -2,6 +2,7 @@ import Navbar from "./components/frontend/Navbar";
 import Footer from "./components/frontend/Footer";
 import PackageCard from "./components/frontend/PackageCard";
 import SearchBar from "./components/frontend/SearchBar";
+import TrendingDestinations from "./components/frontend/TrendingDestinations";
 import Link from "next/link";
 import { getAllDestinations } from "./utils/getDestinations";
 
@@ -122,6 +123,9 @@ export default async function HomePage() {
           </svg>
         </div>
       </section>
+
+      {/* ─── TRENDING DESTINATIONS ────────────────────────────────── */}
+      <TrendingDestinations destinations={destinations} />
 
       {/* ─── HIGHLIGHTS ───────────────────────────────────────────── */}
       <section className="section-pad bg-white">

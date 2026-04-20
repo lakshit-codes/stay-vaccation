@@ -3,12 +3,12 @@ import React from "react";
 import { Sidebar, Topbar, StoreContext } from "./AdminCore";
 import { usePathname, useRouter } from "next/navigation";
 
-export default function AdminLayoutWrapper({ children }: { children: React.ReactNode }) {
+export default function AdminLayoutWrapper({ children, section: propSection }: { children: React.ReactNode; section?: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
   const segments = pathname.split("/").filter(Boolean); // ['admin', 'packages', 'create']
-  const section = segments[1] || "dashboard"; // 'packages', 'transfers', 'dashboard', etc.
+  const section = propSection || segments[1] || "dashboard"; // 'packages', 'transfers', 'dashboard', etc.
 
   const setPage = (key: string) => {
     router.push(`/admin/${key}`);
@@ -55,6 +55,14 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
     "activity-pages": {
       title: "Activity Landing Pages",
       subtitle: store ? `${store.activityPages.length} pages managed` : "",
+    },
+    "page-cms": {
+      title: "Page CMS",
+      subtitle: "Manage content for dynamic web pages",
+    },
+    "business-settings": {
+      title: "Business Settings",
+      subtitle: "Manage your travel agency identity, branding, and contact information",
     },
     new: { title: "New Transfer Route", subtitle: "Add a new transfer route" },
   };

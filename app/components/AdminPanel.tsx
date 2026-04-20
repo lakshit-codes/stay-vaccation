@@ -464,6 +464,7 @@ const Ic = {
   X: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>,
   Tag: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
   Booking: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+  Settings: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" strokeWidth={1.8} /></svg>,
 };
 
 // ─── IMAGE UPLOADER ───────────────────────────────────────────────
@@ -3179,6 +3180,131 @@ const TransfersPage = () => {
   );
 };
 
+// ─── BUSINESS SETTINGS PAGE ───────────────────────────────────────
+const BusinessSettingsPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({
+    businessName: "",
+    address: "",
+    phoneNumber: "",
+    email: "",
+    logo: "",
+    facebook: "",
+    instagram: "",
+    twitter: "",
+    footerText: ""
+  });
+
+  useEffect(() => {
+    fetch("/api/business-settings").then(r => r.json()).then(res => {
+      if(res.success && res.data) {
+        setForm({
+          businessName: res.data.businessName || "",
+          address: res.data.address || "",
+          phoneNumber: res.data.phoneNumber || "",
+          email: res.data.email || "",
+          logo: res.data.logo || "",
+          facebook: res.data.facebook || "",
+          instagram: res.data.instagram || "",
+          twitter: res.data.twitter || "",
+          footerText: res.data.footerText || ""
+        });
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/business-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      if(data.success) {
+        alert("Settings saved successfully! ✅");
+      } else {
+        alert("Failed to save settings: " + (data.message || ""));
+      }
+    } catch(err) {
+      console.error(err);
+      alert("Error saving settings");
+    }
+  };
+
+  const upd = (k: string, v: string) => setForm(prev => ({...prev, [k]: v}));
+
+  if(loading) return <div className="py-16 text-center text-gray-500 font-semibold">Loading Settings...</div>;
+
+  return (
+    <div className="space-y-5">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+        <div className="text-blue-600 mt-0.5"><Ic.Info /></div>
+        <div>
+          <p className="text-sm font-semibold text-blue-900">Global Business Settings</p>
+          <p className="text-xs text-blue-700 mt-0.5">These settings reflect across all customer-facing pages dynamically.</p>
+        </div>
+      </div>
+
+      <Card className="p-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="col-span-2 md:col-span-1">
+            <FL required>Business Name</FL>
+            <Inp placeholder="e.g. Stay Vacation" value={form.businessName} onChange={e => upd("businessName", e.target.value)} />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <FL>Email Address</FL>
+            <Inp placeholder="e.g. contact@stayvacation.com" value={form.email} onChange={e => upd("email", e.target.value)} />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <FL>Phone Number</FL>
+            <Inp placeholder="e.g. +1 234 567 890" value={form.phoneNumber} onChange={e => upd("phoneNumber", e.target.value)} />
+          </div>
+          <div className="col-span-2 md:col-span-1">
+            <FL>HQ Address</FL>
+            <Inp placeholder="e.g. 123 Travel Street, NY" value={form.address} onChange={e => upd("address", e.target.value)} />
+          </div>
+
+          <div className="col-span-2">
+            <FL>Footer Text</FL>
+            <TA rows={3} placeholder="Brief description shown in the footer..." value={form.footerText} onChange={e => upd("footerText", e.target.value)} />
+          </div>
+
+          <div className="col-span-2 md:col-span-1">
+            <FL>Social Links</FL>
+            <div className="space-y-3 mt-1.5">
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-xs font-semibold text-gray-600">Facebook</span>
+                <Inp placeholder="https://facebook.com/..." value={form.facebook} onChange={e => upd("facebook", e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-xs font-semibold text-gray-600">Instagram</span>
+                <Inp placeholder="https://instagram.com/..." value={form.instagram} onChange={e => upd("instagram", e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-xs font-semibold text-gray-600">Twitter (X)</span>
+                <Inp placeholder="https://twitter.com/..." value={form.twitter} onChange={e => upd("twitter", e.target.value)} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="col-span-2 md:col-span-1">
+            <FL>Brand Logo</FL>
+            <div className="mt-1.5 max-w-[12rem]">
+              <ImageUploader images={form.logo ? [form.logo] : []} onAdd={url => upd("logo", url)} onRemove={() => upd("logo", "")} label="" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-5 mt-6 border-t border-gray-100">
+          <Btn variant="success" onClick={handleSave}>✓ Save Settings</Btn>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
 // ─── SIDEBAR ──────────────────────────────────────────────────────
 const Sidebar = ({ page, setPage, counts }) => {
   const nav = [
@@ -3187,6 +3313,7 @@ const Sidebar = ({ page, setPage, counts }) => {
     { key: "bookings", label: "Bookings", icon: <Ic.Booking />, group: "main", badge: counts.bookings },
     { key: "transfers", label: "Transfers", icon: <Ic.Car />, group: "main", badge: counts.transfers },
     { key: "coupons", label: "Coupons", icon: <Ic.Tag />, group: "main", badge: counts.coupons },
+    { key: "business-settings", label: "Business Settings", icon: <Ic.Settings />, group: "main" },
     { key: "master-activities", label: "Activities", icon: <Ic.Activity />, group: "master", badge: counts.activities },
     { key: "master-hotels", label: "Hotels", icon: <Ic.Hotel />, group: "master", badge: counts.hotels },
   ];
@@ -3370,6 +3497,7 @@ export default function App() {
     "coupons": { title: "Coupons", subtitle: `${coupons.length} discount coupon${coupons.length !== 1 ? "s" : ""}` },
     "bookings": { title: "Bookings", subtitle: "View and manage all guest bookings" },
     "transfers": { title: "Transfer Management", subtitle: `${transfers.length} active routes` },
+    "business-settings": { title: "Business Settings", subtitle: "Manage your global identity and contacts" },
   };
   const meta = PAGE_META[page] || PAGE_META.dashboard;
 
@@ -3508,6 +3636,7 @@ export default function App() {
             {page === "coupons" && <CouponsPage />}
             {page === "bookings" && <BookingsPage />}
             {page === "transfers" && <TransfersPage />}
+            {page === "business-settings" && <BusinessSettingsPage />}
           </div>
         </main>
         <DuplicatePackageModal isOpen={duplicateModalOpen} onClose={() => setDuplicateModalOpen(false)} basePkgId={duplicateBasePkgId} setBasePkgId={setDuplicateBasePkgId} packages={packages} onSubmit={handleDuplicateModalSubmit} />

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
 
@@ -9,6 +10,16 @@ export default function ContactPage() {
   });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [cmsData, setCmsData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/page-cms/contact")
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) setCmsData(result.data);
+      })
+      .catch(err => console.error("CMS FETCH ERROR:", err));
+  }, []);
 
   const upd = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
 
@@ -21,11 +32,44 @@ export default function ContactPage() {
     setSending(false);
   };
 
+  // Static Fallbacks
+  const contact = cmsData?.contactInfo || {};
+  const hero = cmsData?.hero || {};
+  const social = cmsData?.social || {};
+  const office = cmsData?.office || {};
+  const formSettings = cmsData?.formSettings || { enabled: true, successMessage: "" };
+
   const CONTACT_INFO = [
-    { icon: "📍", label: "Visit Us", value: "123 Travel Lane, Mumbai, India 400001", sub: "Mon–Sat 9am – 6pm" },
-    { icon: "📞", label: "Call Us", value: "+91 98765 43210", sub: "Support available daily" },
-    { icon: "✉️", label: "Email Us", value: "hello@stayvacation.com", sub: "We reply within 24 hours" },
-    { icon: "💬", label: "WhatsApp", value: "+91 98765 43210", sub: "Quick response guaranteed" },
+    { 
+      icon: "📍", 
+      label: "Visit Us", 
+      value: contact.address || "123 Travel Lane, Mumbai, India 400001", 
+      sub: contact.workingHours || "Mon–Sat 9am – 6pm" 
+    },
+    { 
+      icon: "📞", 
+      label: "Call Us", 
+      value: contact.phone || "+91 98765 43210", 
+      sub: contact.supportText || "Support available daily" 
+    },
+    { 
+      icon: "✉️", 
+      label: "Email Us", 
+      value: contact.email || "hello@stayvacation.com", 
+      sub: contact.emailText || "We reply within 24 hours" 
+    },
+    { 
+      icon: "💬", 
+      label: "WhatsApp", 
+      value: contact.whatsapp || "+91 98765 43210", 
+      sub: contact.whatsappText || "Quick response guaranteed" 
+    },
+  ];
+
+  const socialLinks = [
+    { label: "Instagram", url: social.instagram },
+    { label: "Facebook", url: social.facebook },
+    { label: "YouTube", url: social.youtube }
   ];
 
   return (
@@ -36,9 +80,11 @@ export default function ContactPage() {
       <section className="hero-bg pt-32 pb-20 text-center">
         <div className="container-sv">
           <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-4">Get in touch</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">Contact Us</h1>
+          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">
+            {hero.title || "Contact Us"}
+          </h1>
           <p className="text-white/70 text-lg max-w-xl mx-auto">
-            Have a question or want to plan your dream trip? Our travel experts are here to help.
+            {hero.description || "Have a question or want to plan your dream trip? Our travel experts are here to help."}
           </p>
         </div>
       </section>
@@ -66,10 +112,16 @@ export default function ContactPage() {
 
               {/* Social */}
               <div className="bg-[#1a3f4e] rounded-2xl p-6 text-white">
-                <p className="font-bold text-sm mb-3">Follow Our Journeys</p>
+                <p className="font-bold text-sm mb-3">{social.title || "Follow Our Journeys"}</p>
                 <div className="flex gap-3">
-                  {["Instagram", "Facebook", "YouTube"].map(s => (
-                    <button key={s} className="flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium transition-colors">{s}</button>
+                  {socialLinks.map(s => (
+                    <button 
+                      key={s.label} 
+                      onClick={() => s.url && window.open(s.url, "_blank")}
+                      className={`flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium transition-colors ${!s.url && "opacity-50 cursor-not-allowed"}`}
+                    >
+                      {s.label}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -82,7 +134,11 @@ export default function ContactPage() {
                   <div className="text-6xl mb-5">🎉</div>
                   <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Enquiry Sent!</h2>
                   <p className="text-gray-500 text-sm max-w-sm leading-relaxed mb-6">
-                    Thank you, <strong>{form.name}</strong>! Our travel expert will reach out to you within 24 hours.
+                    {formSettings.successMessage ? (
+                       formSettings.successMessage.replace("{name}", form.name)
+                    ) : (
+                       <>Thank you, <strong>{form.name}</strong>! Our travel expert will reach out to you within 24 hours.</>
+                    )}
                   </p>
                   <button
                     onClick={() => { setSent(false); setForm({ name: "", email: "", phone: "", destination: "", travelDate: "", adults: "2", message: "" }); }}
@@ -91,7 +147,7 @@ export default function ContactPage() {
                     Send Another Enquiry
                   </button>
                 </div>
-              ) : (
+              ) : formSettings.enabled !== false ? (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                   <h2 className="text-xl font-bold text-[#1a3f4e] mb-2">Plan Your Trip</h2>
                   <p className="text-gray-400 text-sm mb-7">Fill in the details below and we'll craft a personalised itinerary for you.</p>
@@ -180,6 +236,14 @@ export default function ContactPage() {
                     </p>
                   </form>
                 </div>
+              ) : (
+                <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center h-full flex flex-col items-center justify-center">
+                   <div className="text-6xl mb-5">📵</div>
+                   <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Form Temporarily Offline</h2>
+                   <p className="text-gray-500 text-sm max-w-sm leading-relaxed">
+                     Our online enquiry form is currently undergoing maintenance. Please use the contact details on the left to reach us directly.
+                   </p>
+                </div>
               )}
             </div>
           </div>
@@ -188,10 +252,12 @@ export default function ContactPage() {
 
       {/* Map placeholder */}
       <section className="h-80 bg-gradient-to-br from-[#1a3f4e] to-[#2a5f74] flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="text-5xl mb-3">🗺️</div>
-          <p className="font-bold text-lg">Visit Our Office</p>
-          <p className="text-white/60 text-sm mt-1">123 Travel Lane, Mumbai, India 400001</p>
+        <div className="text-center text-white p-6">
+          <div className="text-5xl mb-4">🗺️</div>
+          <p className="font-bold text-xl mb-1">{office.title || "Visit Our Office"}</p>
+          <p className="text-white/60 text-sm max-w-md mx-auto">
+            {office.address || "123 Travel Lane, Mumbai, India 400001"}
+          </p>
         </div>
       </section>
 

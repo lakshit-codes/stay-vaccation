@@ -443,7 +443,7 @@ export const Badge = ({ children, className = "" }: { children: React.ReactNode;
 export const Inp = ({ className = "", ...p }: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input className={cls("w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 placeholder:text-gray-400 transition-all", className)} {...p} />
 );
-const TA = ({ className = "", rows = 3, ...p }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+export const TA = ({ className = "", rows = 3, ...p }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
   <textarea rows={rows} className={cls("w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 placeholder:text-gray-400 transition-all resize-none", className)} {...p} />
 );
 export const Sel = ({ options, placeholder, value, onChange, className = "" }: { options: (string | { label: string; value: string })[]; placeholder?: string; value?: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; className?: string }) => (
@@ -537,6 +537,7 @@ export const Ic = {
   X: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>,
   Tag: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
   Booking: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
+  Document: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
 };
 
 // ─── IMAGE UPLOADER ───────────────────────────────────────────────
@@ -3072,13 +3073,207 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
   const [search, setSearch] = useState("");
   const [bookingModal, setBookingModal] = useState<Package | null>(null);
 
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+
+  const downloadSample = () => {
+    const sampleData = {
+      success: true,
+      data: [
+        {
+          title: "Jaipur Royal Getaway",
+          destination: "Jaipur, India",
+          tripDuration: "3 Days / 2 Nights",
+          travelStyle: "Premium",
+          tourType: "Leisure",
+          exclusivityLevel: "Standard",
+          price: {
+            currency: "INR",
+            amount: 8999
+          },
+          shortDescription: "Experience Jaipur’s royal heritage with forts, culture, and local experiences.",
+          
+          inclusions: [
+            "2 nights hotel stay",
+            "Daily breakfast",
+            "Private cab transfers",
+            "Sightseeing tours"
+          ],
+          
+          exclusions: [
+            "Airfare/train tickets",
+            "Personal expenses",
+            "Entry tickets (if not mentioned)"
+          ],
+
+          itinerary: [
+            {
+              id: "d1",
+              dayNumber: 1,
+              title: "Arrival & Local Market Visit",
+              city: "Jaipur",
+              dayType: "arrival",
+              mealsIncluded: ["Dinner"],
+              
+              hotelStays: [
+                {
+                  id: "h1",
+                  customRoomType: "Deluxe Room",
+                  checkInTime: "13:00",
+                  checkOutTime: "11:00",
+                  mealInclusions: {
+                    breakfast: true,
+                    lunch: false,
+                    dinner: true
+                  },
+                  hotelData: {
+                    hotelName: "Hotel Grand Eagle",
+                    city: "Jaipur",
+                    starRating: "3",
+                    amenities: ["Wi-Fi", "AC", "Room Service"]
+                  }
+                }
+              ],
+
+              transfers: [
+                {
+                  id: "t1",
+                  transferType: "Private",
+                  vehicleType: "Sedan",
+                  from: "Jaipur Railway Station",
+                  to: "Hotel Grand Eagle",
+                  pickupTime: "12:00",
+                  dropTime: "13:00"
+                }
+              ],
+
+              activities: [
+                {
+                  id: "a1",
+                  time: "17:00",
+                  activityData: {
+                    title: "Local Market Visit",
+                    description: "Explore Bapu Bazaar & Johari Bazaar for shopping and local culture.",
+                    location: "Jaipur"
+                  }
+                }
+              ]
+            },
+
+            {
+              id: "d2",
+              dayNumber: 2,
+              title: "Jaipur Sightseeing",
+              city: "Jaipur",
+              dayType: "sightseeing",
+              mealsIncluded: ["Breakfast"],
+
+              hotelStays: [
+                {
+                  id: "h2",
+                  customRoomType: "Deluxe Room",
+                  checkInTime: "13:00",
+                  checkOutTime: "11:00",
+                  mealInclusions: {
+                    breakfast: true,
+                    lunch: false,
+                    dinner: false
+                  },
+                  hotelData: {
+                    hotelName: "Hotel Grand Eagle",
+                    city: "Jaipur",
+                    starRating: "3"
+                  }
+                }
+              ],
+
+              transfers: [
+                {
+                  id: "t2",
+                  transferType: "Private",
+                  vehicleType: "Sedan",
+                  from: "Hotel",
+                  to: "Sightseeing",
+                  pickupTime: "09:00",
+                  dropTime: "17:00"
+                }
+              ],
+
+              activities: [
+                {
+                  id: "a2",
+                  time: "10:00",
+                  activityData: {
+                    title: "Amber Fort Visit",
+                    description: "Explore the historic Amber Fort.",
+                    location: "Jaipur"
+                  }
+                },
+                {
+                  id: "a3",
+                  time: "14:00",
+                  activityData: {
+                    title: "City Palace & Hawa Mahal",
+                    description: "Visit iconic landmarks of Jaipur.",
+                    location: "Jaipur"
+                  }
+                }
+              ]
+            },
+
+            {
+              id: "d3",
+              dayNumber: 3,
+              title: "Departure",
+              city: "Jaipur",
+              dayType: "departure",
+              mealsIncluded: ["Breakfast"],
+
+              hotelStays: [],
+
+              transfers: [
+                {
+                  id: "t3",
+                  transferType: "Private",
+                  vehicleType: "Sedan",
+                  from: "Hotel Grand Eagle",
+                  to: "Railway Station / Airport",
+                  pickupTime: "11:30",
+                  dropTime: "12:30"
+                }
+              ],
+
+              activities: []
+            }
+          ],
+
+          id: "pkg_3day_001",
+          packageId: "pkg_jaipur_3d"
+        }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(sampleData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "stayvacation_sample_package.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const filtered = packages.filter(p => !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.destination?.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></div><Inp className="pl-9" placeholder="Search packages…" value={search} onChange={e => setSearch(e.target.value)} /></div>
-        <Btn className="ml-auto" onClick={() => _pkgRouter.push('/admin/packages/create')}><Ic.Plus />Create Package</Btn>
+        <div className="ml-auto flex items-center gap-2">
+          <Btn variant="outline" onClick={() => setImportModalOpen(true)}>Import Packages</Btn>
+          <Btn onClick={() => _pkgRouter.push('/admin/packages/create')}><Ic.Plus />Create Package</Btn>
+        </div>
       </div>
       <Card>
         <div className="overflow-x-auto">
@@ -3145,10 +3340,103 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
         </div>
       </Card>
 
-      {/* New Booking Modal */}
       {bookingModal && (
         <BookingFormModal pkg={bookingModal} onClose={() => setBookingModal(null)} />
       )}
+
+      <Modal open={importModalOpen} onClose={() => !isImporting && setImportModalOpen(false)} title="Import Packages">
+        <div className="p-6 space-y-4">
+          <p className="text-sm text-gray-600">Select a valid .json file containing travel packages export data.</p>
+          <input 
+            type="file" 
+            accept=".json" 
+            onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-[1px] file:border-blue-100 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+          />
+
+          <details className="bg-gray-50 rounded-xl border border-gray-100 p-3 text-sm">
+            <summary className="font-semibold text-gray-700 cursor-pointer outline-none">View JSON Structure</summary>
+            <div className="mt-3 space-y-3 text-gray-600">
+              <p>The uploaded file must precisely match this format:</p>
+              <pre className="bg-slate-900 text-teal-400 p-3 rounded-lg text-xs overflow-x-auto">
+{`{
+  "success": true,
+  "data": [ 
+    { 
+      "title": "Package Title",
+      "destination": "...",
+      "tripDuration": "...",
+      "price": { "amount": 0, "currency": "USD" },
+      "itinerary": [ ... ]
+    } 
+  ]
+}`}
+              </pre>
+              <p className="pt-1"><b>Required array object properties:</b> <code className="bg-white border px-1 py-0.5 rounded text-gray-800">title</code>, <code className="bg-white border px-1 py-0.5 rounded text-gray-800">destination</code>, <code className="bg-white border px-1 py-0.5 rounded text-gray-800">tripDuration</code>, <code className="bg-white border px-1 py-0.5 rounded text-gray-800">price.amount</code>, <code className="bg-white border px-1 py-0.5 rounded text-gray-800">itinerary</code>.</p>
+              <p className="text-amber-700 text-xs mt-1 font-medium bg-amber-50 p-2 rounded-lg border border-amber-200">⚠️ Invalid or missing fields will be automatically skipped.</p>
+            </div>
+          </details>
+
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <Btn variant="outline" size="sm" onClick={downloadSample}>Download Sample JSON</Btn>
+            <div className="flex gap-3">
+              <Btn variant="ghost" onClick={() => setImportModalOpen(false)} disabled={isImporting}>Cancel</Btn>
+              <Btn 
+                variant="success" 
+                disabled={!importFile || isImporting} 
+                onClick={async () => {
+                if (!importFile) return;
+                try {
+                  setIsImporting(true);
+                  const text = await importFile.text();
+                  
+                  let parsed;
+                  try {
+                    parsed = JSON.parse(text);
+                  } catch (e) {
+                    alert("Invalid file: File must be a valid JSON.");
+                    setIsImporting(false);
+                    return;
+                  }
+
+                  if (typeof parsed.success !== "boolean" || !Array.isArray(parsed.data)) {
+                     alert("Invalid format: JSON must contain 'success' as boolean and 'data' as an array.");
+                     setIsImporting(false);
+                     return;
+                  }
+
+                  const dataToImport = parsed.data;
+                  const res = await fetch("/api/packages/import", { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(dataToImport) 
+                  });
+                  const result = await res.json();
+                  
+                  if (result.success) {
+                    let msg = `Import complete: ${result.imported} imported, ${result.skipped} skipped out of ${result.total} total.`;
+                    if (result.errors?.length) {
+                       msg += `\nErrors: ${result.errors.map((e:any) => e.packageTitle + " - " + e.reason).join(" | ")}`;
+                    }
+                    alert(msg);
+                  } else {
+                    alert("Import failed: " + result.message);
+                  }
+                  window.location.reload();
+                } catch (err: any) {
+                  console.error(err);
+                  alert("Failed to import. Error: " + err.message);
+                } finally {
+                  setIsImporting(false);
+                }
+              }}
+            >
+              {isImporting ? "Importing..." : "Upload File"}
+            </Btn>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
@@ -3420,6 +3708,8 @@ export const Sidebar = ({ page, setPage, counts }) => {
     { key: "transfers", label: "Transfers", icon: <Ic.Car />, group: "main", badge: counts.transfers },
     { key: "coupons", label: "Coupons", icon: <Ic.Tag />, group: "main", badge: counts.coupons },
     { key: "activity-pages", label: "Activities Pages", icon: <Ic.Activity />, group: "main", badge: counts.activityPages },
+    { key: "page-cms", label: "Page CMS", icon: <Ic.Document />, group: "main" },
+    { key: "business-settings", label: "Business Settings", icon: <Ic.Star />, group: "main" },
     { key: "master-activities", label: "Activities", icon: <Ic.Activity />, group: "master", badge: counts.activities },
     { key: "master-hotels", label: "Hotels", icon: <Ic.Hotel />, group: "master", badge: counts.hotels },
     { key: "destinations", label: "Destinations", icon: <Ic.Globe />, group: "master", badge: counts.destinations },

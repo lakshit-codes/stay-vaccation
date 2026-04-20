@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 const FOOTER_LINKS = {
   Explore: [
@@ -44,6 +46,26 @@ const SOCIAL = [
 ];
 
 export default function Footer() {
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/business-settings")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) setSettings(d.data);
+      })
+      .catch(e => console.error("FOOTER FETCH ERROR", e));
+  }, []);
+
+  const businessName = settings?.businessName || "Stay Vacation";
+  const footerText = settings?.footerText || "Crafting unforgettable journeys across the world. From serene beach escapes to thrilling mountain adventures — we curate every moment.";
+  
+  const socialLinks = [];
+  if (settings?.instagram) socialLinks.push({ label: "Instagram", href: settings.instagram, icon: SOCIAL[0].icon });
+  if (settings?.facebook) socialLinks.push({ label: "Facebook", href: settings.facebook, icon: SOCIAL[1].icon });
+  if (settings?.twitter) socialLinks.push({ label: "Twitter / X", href: settings.twitter, icon: SOCIAL[2].icon });
+  const socialToRender = socialLinks.length > 0 ? socialLinks : SOCIAL;
+
   return (
     <footer className="bg-[#1a3f4e] text-white">
       {/* Main footer */}
@@ -52,22 +74,35 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2fa3f2] to-[#1a7abf] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              {settings?.logo ? (
+                <img src={settings.logo} alt="Logo" className="w-10 h-10 object-contain" />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2fa3f2] to-[#1a7abf] flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              )}
               <div>
-                <div className="font-bold text-lg leading-none">Stay Vacation</div>
+                <div className="font-bold text-lg leading-none">{businessName}</div>
                 <div className="text-[#2fa3f2] text-xs">Premium Travel</div>
               </div>
             </div>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-              Crafting unforgettable journeys across the world. From serene beach escapes to thrilling mountain adventures — we curate every moment.
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs whitespace-pre-wrap">
+              {footerText}
             </p>
+            
+            {/* Contact Details */}
+            {(settings?.email || settings?.phoneNumber || settings?.address) && (
+              <div className="mt-5 space-y-1.5 border-l-2 border-[#2fa3f2]/30 pl-3">
+                {settings.email && <div className="text-white/80 text-sm font-medium">{settings.email}</div>}
+                {settings.phoneNumber && <div className="text-white/80 text-sm">{settings.phoneNumber}</div>}
+                {settings.address && <div className="text-white/50 text-xs leading-relaxed max-w-[200px] mt-1">{settings.address}</div>}
+              </div>
+            )}
             {/* Social */}
             <div className="flex gap-3 mt-6">
-              {SOCIAL.map((s) => (
+              {socialToRender.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
@@ -105,7 +140,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-sv py-5 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-white/40 text-xs">
-            © {new Date().getFullYear()} Stay Vacation. All rights reserved.
+            © {new Date().getFullYear()} {businessName}. All rights reserved.
           </p>
           <p className="text-white/40 text-xs">
             Premium travel experiences · Worldwide
