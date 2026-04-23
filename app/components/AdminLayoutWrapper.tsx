@@ -25,6 +25,7 @@ export default function AdminLayoutWrapper({ children, section: propSection }: {
       transfers: store.transfers.length,
       destinations: store.destinations.length,
       activityPages: store.activityPages.length,
+      categories: store.categories.length,
     }
     : { packages: 0, activities: 0, hotels: 0, coupons: 0, bookings: 0, transfers: 0, destinations: 0, activityPages: 0 };
 
@@ -60,9 +61,17 @@ export default function AdminLayoutWrapper({ children, section: propSection }: {
       title: "Locations",
       subtitle: "Manage travel locations",
     },
+    trending: {
+      title: "Trending Destinations",
+      subtitle: "Manage destinations shown on the homepage trending section",
+    },
     "business-settings": {
       title: "Business Settings",
       subtitle: "Manage your travel agency identity, branding, and contact information",
+    },
+    categories: {
+      title: "Homepage Categories",
+      subtitle: store ? `${store.categories.length} categories on homepage` : "",
     },
     new: { title: "New Transfer Route", subtitle: "Add a new transfer route" },
   };

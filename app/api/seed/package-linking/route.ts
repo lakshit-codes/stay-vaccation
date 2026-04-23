@@ -22,7 +22,12 @@ export async function GET(req: NextRequest) {
       if (matchingDest) {
         await db.collection("packages").updateOne(
           { _id: pkg._id },
-          { $set: { destinationId: matchingDest._id } }
+          { 
+            $set: { 
+              destinationId: matchingDest._id,
+              destinationSlug: matchingDest.slug
+            } 
+          }
         );
         linkedCount++;
         console.log(`[LINKING] Linked package "${pkg.title}" to destination "${matchingDest.name}"`);

@@ -18,44 +18,53 @@ async function getPackages() {
   }
 }
 
-const CATEGORIES = [
-  { label: "Beach & Islands", icon: "🏖️", color: "from-sky-400 to-blue-600", href: "/packages?type=Beach" },
-  { label: "Heritage & Culture", icon: "🏛️", color: "from-amber-400 to-orange-600", href: "/packages?type=Heritage" },
-  { label: "Adventure Sports", icon: "🧗", color: "from-emerald-400 to-teal-600", href: "/packages?type=Adventure%20Sports" },
-  { label: "Wildlife & Nature", icon: "🦁", color: "from-lime-400 to-green-600", href: "/packages?type=Wildlife" },
-  { label: "Honeymoon", icon: "💑", color: "from-rose-400 to-pink-600", href: "/packages?type=Honeymoon" },
-  { label: "Family Tours", icon: "👨‍👩‍👧", color: "from-violet-400 to-purple-600", href: "/packages?type=Family" },
-  { label: "Relaxation", icon: "🧘", color: "from-teal-400 to-cyan-600", href: "/packages?type=Relaxation" },
-  { label: "Religious", icon: "🕌", color: "from-yellow-400 to-amber-600", href: "/packages?type=Religious" },
-];
+async function getHomepageSettings() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/homepage`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch {
+    return null;
+  }
+}
 
-
-
-
-
-const HIGHLIGHTS = [
-  { icon: "🌍", title: "50+ Destinations", desc: "Worldwide coverage from exotic islands to mountain retreats" },
-  { icon: "⭐", title: "Luxury Curated", desc: "Handpicked premium experiences at every tier" },
-  { icon: "🛡️", title: "Fully Insured", desc: "Comprehensive travel protection on every booking" },
-  { icon: "🎯", title: "Custom Itineraries", desc: "Tailor-made journeys for every traveller" },
-];
+async function getCategories() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/categories`, { cache: "no-store" });
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch {
+    return [];
+  }
+}
 
 export default async function HomePage() {
-  const [packages, destinations] = await Promise.all([
+  const [packages, destinations, settings, categories] = await Promise.all([
     getPackages(),
-    getAllDestinations()
+    getAllDestinations(),
+    getHomepageSettings(),
+    getCategories()
   ]);
   const featured = packages.slice(0, 6);
-  // Default destinations if none exist in DB yet
-  const displayDestinations = destinations.length > 0 
-    ? destinations.slice(0, 5) 
-    : [
-        { title: "Bali", slug: "bali", image: "/destinations/bali.jpg", type: "international" },
-        { title: "Rajasthan", slug: "rajasthan", image: "/destinations/rajasthan.jpg", type: "india" },
-        { title: "Maldives", slug: "maldives", image: "/destinations/maldives.jpg", type: "international" },
-        { title: "Dubai", slug: "dubai", image: "/destinations/dubai.jpg", type: "international" },
-        { title: "Himachal", slug: "himachal", image: "/destinations/himachal.jpg", type: "india" }
-      ];
+
+  // Fallbacks if DB is empty (though seed should have run)
+  const hero = settings?.hero || {
+    headline: "Discover Your Perfect Getaway",
+    subheadline: "Curated luxury escapes, cultural journeys, and adventure tours — crafted for those who live to explore.",
+    badgeText: "Premium Travel Experiences Await"
+  };
+  const highlights = settings?.highlights || [];
+  const cta = settings?.cta || {
+    title: "Ready to Start Your Journey?",
+    subtitle: "Talk to our travel experts and get a custom itinerary crafted just for you.",
+    primaryButtonText: "Contact Us Today",
+    secondaryButtonText: "Browse All Packages"
+  };
+
+
 
   return (
     <>
@@ -81,19 +90,18 @@ export default async function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-8 animate-fadeUp">
             <span className="w-2 h-2 bg-[#2fa3f2] rounded-full animate-pulse" />
-            Premium Travel Experiences Await
+            {hero.badgeText}
           </div>
 
           {/* Headline */}
           <h1 className="font-display text-5xl md:text-7xl font-bold text-white leading-tight mb-6 animate-fadeUp delay-100">
-            Discover Your{" "}
-            <span className="gradient-text">Perfect</span>
-            <br />
-            Getaway
+            {hero.headline.split(' ').map((word: string, i: number) => 
+              word.toLowerCase() === "perfect" ? <span key={i} className="gradient-text mx-2">{word}</span> : word + ' '
+            )}
           </h1>
 
           <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fadeUp delay-200">
-            Curated luxury escapes, cultural journeys, and adventure tours — crafted for those who live to explore.
+            {hero.subheadline}
           </p>
 
           {/* Search bar */}
@@ -105,12 +113,12 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-16 animate-fadeUp delay-400 relative z-0">
             {[
               { num: "500+", label: "Happy Clients" },
-              { num: "50+", label: "Destinations" },
+              { num: `${destinations.length}+`, label: "Destinations" },
               { num: "10+", label: "Years Experience" },
             ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl font-bold text-white">{s.num}</div>
-                <div className="text-white/50 text-xs mt-0.5">{s.label}</div>
+              <div key={s.label}>
+                <p className="text-2xl font-bold text-white">{s.num}</p>
+                <p className="text-xs text-white/50 font-medium uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </div>
@@ -125,23 +133,29 @@ export default async function HomePage() {
       </section>
 
       {/* ─── TRENDING DESTINATIONS ────────────────────────────────── */}
-      <TrendingDestinations destinations={destinations} />
+      {/* Component self-fetches from /api/destinations/trending?category= */}
+      <TrendingDestinations />
 
       {/* ─── HIGHLIGHTS ───────────────────────────────────────────── */}
       <section className="section-pad bg-white">
         <div className="container-sv">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {HIGHLIGHTS.map((h, i) => (
-              <div
-                key={h.title}
-                className="text-center p-6 rounded-2xl hover:bg-[#F4F9E9] transition-colors group"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform inline-block">{h.icon}</div>
-                <h3 className="font-bold text-[#1a3f4e] text-sm mb-1">{h.title}</h3>
-                <p className="text-gray-400 text-xs leading-relaxed">{h.desc}</p>
-              </div>
-            ))}
+            {highlights.map((h: any, i: number) => {
+              const displayTitle = h.title.includes("Destinations") 
+                ? `${destinations.length}+ Destinations` 
+                : h.title;
+              return (
+                <div
+                  key={h.title}
+                  className="text-center p-6 rounded-2xl hover:bg-[#F4F9E9] transition-colors group"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform inline-block">{h.icon}</div>
+                  <h3 className="font-bold text-[#1a3f4e] text-sm mb-1">{displayTitle}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{h.desc}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -154,17 +168,22 @@ export default async function HomePage() {
             <h2 className="font-display text-4xl md:text-5xl font-bold text-[#1a3f4e]">Explore Categories</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {CATEGORIES.map((cat, i) => (
+            {categories.filter((c: any) => c.isActive).map((cat: any, i: number) => (
               <Link
-                key={cat.label}
-                href={cat.href}
-                className="group relative rounded-2xl overflow-hidden h-32 flex items-end p-4 card-hover"
+                key={cat._id}
+                href={`/categories/${cat.slug}`}
+                className="group relative rounded-2xl overflow-hidden h-32 flex items-end p-4 card-hover shadow-lg shadow-blue-900/5 hover:shadow-blue-900/10"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-90`} />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute top-4 right-4 text-3xl">{cat.icon}</div>
-                <span className="relative z-10 text-white text-sm font-bold leading-tight">{cat.label}</span>
+                <div className="absolute top-4 right-4 text-3xl group-hover:scale-110 transition-transform">{cat.icon}</div>
+                <div className="relative z-10">
+                  <span className="block text-white text-sm font-bold leading-tight">{cat.name}</span>
+                  <span className="block text-white/60 text-[10px] font-bold uppercase tracking-tighter mt-1">
+                    {packages.filter((p: any) => p.categoryId === cat._id).length} Packages
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
@@ -224,20 +243,31 @@ export default async function HomePage() {
             <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-3">Top picks</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white">Popular Destinations</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {displayDestinations.map((dest, i) => (
-              <Link
-                key={dest.slug}
-                href={`/destinations/${dest.slug}`}
-                className="group text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#2fa3f2]/50 transition-all duration-200 hover:-translate-y-1"
-              >
-                <div className="text-3xl mb-3">
-                  {(dest as any).icon || "📍"}
-                </div>
-                <p className="text-white font-semibold text-sm group-hover:text-[#2fa3f2] transition-colors">{dest.name}</p>
-              </Link>
-            ))}
-          </div>
+          {destinations.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {destinations.slice(0, 10).map((dest) => (
+                <Link
+                  key={dest.slug}
+                  href={`/destinations/${dest.slug}`}
+                  className="group flex flex-col items-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#2fa3f2]/50 transition-all duration-200 hover:-translate-y-1"
+                >
+                  <div className="text-3xl mb-3">
+                    {(dest as any).icon || "📍"}
+                  </div>
+                  <p className="text-white font-semibold text-sm group-hover:text-[#2fa3f2] transition-colors mb-2">{dest.name}</p>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 bg-white/5 px-2.5 py-1 rounded-full border border-white/5 group-hover:border-[#2fa3f2]/30 group-hover:text-[#2fa3f2]/80 transition-all">
+                    {(dest as any).packageCount || 0} {(dest as any).packageCount === 1 ? "Package" : "Packages"}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border-2 border-dashed border-white/10 rounded-2xl">
+              <div className="text-5xl mb-4">🗺️</div>
+              <p className="text-white/50 font-medium">No destinations yet</p>
+              <p className="text-white/30 text-sm mt-1">Add destinations via the admin panel</p>
+            </div>
+          )}
           <div className="text-center mt-8">
             <Link href="/locations" className="inline-flex items-center gap-2 text-[#2fa3f2] font-semibold text-sm hover:gap-3 transition-all">
               Explore all locations
@@ -253,23 +283,23 @@ export default async function HomePage() {
       <section className="section-pad bg-gradient-to-r from-[#2fa3f2] to-[#1a7abf]">
         <div className="container-sv text-center">
           <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-4">
-            Ready to Start Your Journey?
+            {cta.title}
           </h2>
           <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
-            Talk to our travel experts and get a custom itinerary crafted just for you.
+            {cta.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact"
               className="px-8 py-4 bg-white text-[#1a3f4e] font-bold text-sm rounded-xl hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
             >
-              Contact Us Today
+              {cta.primaryButtonText}
             </Link>
             <Link
               href="/packages"
               className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white border border-white/30 font-semibold text-sm rounded-xl hover:bg-white/30 transition-all duration-200"
             >
-              Browse All Packages
+              {cta.secondaryButtonText}
             </Link>
           </div>
         </div>
