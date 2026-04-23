@@ -12,7 +12,13 @@ export async function POST(req: NextRequest) {
     
     // Auto-generate or format slug from name
     if (insertData.name) {
-      insertData.slug = insertData.name.toLowerCase().trim().replace(/\s+/g, '-');
+      insertData.slug = insertData.name
+        .toLowerCase()
+        .trim()
+        .replace(/,/g, '')           // Remove commas
+        .replace(/[()]/g, '')        // Remove parentheses
+        .replace(/\s+/g, '-')        // Replace spaces with hyphens
+        .replace(/-+/g, '-');        // Remove double hyphens
     }
 
     const result = await db.collection("destinations").insertOne({
@@ -97,7 +103,13 @@ export async function PUT(req: NextRequest) {
 
     // Auto-generate or format slug from name
     if (updateData.name) {
-      updateData.slug = updateData.name.toLowerCase().trim().replace(/\s+/g, '-');
+      updateData.slug = updateData.name
+        .toLowerCase()
+        .trim()
+        .replace(/,/g, '')           // Remove commas
+        .replace(/[()]/g, '')        // Remove parentheses
+        .replace(/\s+/g, '-')        // Replace spaces with hyphens
+        .replace(/-+/g, '-');        // Remove double hyphens
     }
 
     const queryId = /^[0-9a-fA-F]{24}$/.test(_id) ? new ObjectId(_id) : _id;

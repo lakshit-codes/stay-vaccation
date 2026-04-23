@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
 
 interface Destination {
   _id?: string;
-  title: string;
+  name: string;
   slug: string;
   image?: string;
   label?: string;
@@ -21,27 +21,28 @@ interface Destination {
 
 const FALLBACK_DESTINATIONS: Destination[] = [
   // INDIA
-  { title: "Kashmir", slug: "kashmir", image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Paradise on Earth" },
-  { title: "Goa", slug: "goa", image: "https://images.unsplash.com/photo-1512356181113-853a150f1ea7?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Sun, Sand & Sea" },
-  { title: "Himachal", slug: "himachal", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Valley of Gods" },
-  { title: "Manali", slug: "manali", image: "https://images.unsplash.com/photo-1594142571210-9cf63657739f?q=80&w=1974&auto=format&fit=crop", type: "india", label: "Mountain Escapes" },
-  { title: "Kerala", slug: "kerala", image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2069&auto=format&fit=crop", type: "india", label: "Backwater Bliss" },
-  { title: "Jaipur", slug: "jaipur", image: "https://images.unsplash.com/photo-1603262110263-fb0112e7cc33?q=80&w=2071&auto=format&fit=crop", type: "india", label: "The Pink City" },
-  { title: "Munnar", slug: "munnar", image: "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Tea Garden Serenity" },
-  { title: "Andaman", slug: "andaman", image: "https://images.unsplash.com/photo-1589330273594-fade1ee91647?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Crystal Waters" },
-  { title: "Leh Ladakh", slug: "leh-ladakh", image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?q=80&w=2070&auto=format&fit=crop", type: "india", label: "High Pass Adventure" },
+  { name: "Kashmir", slug: "kashmir", image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Paradise on Earth" },
+  { name: "Goa", slug: "goa", image: "https://images.unsplash.com/photo-1512356181113-853a150f1ea7?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Sun, Sand & Sea" },
+  { name: "Himachal", slug: "himachal", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Valley of Gods" },
+  { name: "Manali", slug: "manali", image: "https://images.unsplash.com/photo-1594142571210-9cf63657739f?q=80&w=1974&auto=format&fit=crop", type: "india", label: "Mountain Escapes" },
+  { name: "Kerala", slug: "kerala", image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=2069&auto=format&fit=crop", type: "india", label: "Backwater Bliss" },
+  { name: "Jaipur", slug: "jaipur", image: "https://images.unsplash.com/photo-1603262110263-fb0112e7cc33?q=80&w=2071&auto=format&fit=crop", type: "india", label: "The Pink City" },
+  { name: "Munnar", slug: "munnar", image: "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Tea Garden Serenity" },
+  { name: "Andaman", slug: "andaman", image: "https://images.unsplash.com/photo-1589330273594-fade1ee91647?q=80&w=2070&auto=format&fit=crop", type: "india", label: "Crystal Waters" },
+  { name: "Leh Ladakh", slug: "leh-ladakh", image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?q=80&w=2070&auto=format&fit=crop", type: "india", label: "High Pass Adventure" },
 
   // INTERNATIONAL
-  { title: "Thailand", slug: "thailand", image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Tropical Gateway" },
-  { title: "Bali", slug: "bali", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938&auto=format&fit=crop", type: "international", label: "Island of Gods" },
-  { title: "Dubai", slug: "dubai", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Luxury & Innovation" },
-  { title: "Paris", slug: "paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop", type: "international", label: "City of Love" },
-  { title: "Tokyo", slug: "tokyo", image: "https://images.unsplash.com/photo-1540959733332-e94e270b2d42?q=80&w=2041&auto=format&fit=crop", type: "international", label: "Future & Heritage" },
-  { title: "Switzerland", slug: "switzerland", image: "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Alpine Escapes" },
-  { title: "Singapore", slug: "singapore", image: "https://images.unsplash.com/photo-1525625239514-75b436f0102b?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Garden City" },
-  { title: "Santorini", slug: "santorini", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Aegean Dream" },
-  { title: "London", slug: "london", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Historic Splendour" },
+  { name: "Thailand", slug: "thailand", image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Tropical Gateway" },
+  { name: "Bali", slug: "bali", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1938&auto=format&fit=crop", type: "international", label: "Island of Gods" },
+  { name: "Dubai", slug: "dubai", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Luxury & Innovation" },
+  { name: "Paris", slug: "paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop", type: "international", label: "City of Love" },
+  { name: "Tokyo", slug: "tokyo", image: "https://images.unsplash.com/photo-1540959733332-e94e270b2d42?q=80&w=2041&auto=format&fit=crop", type: "international", label: "Future & Heritage" },
+  { name: "Switzerland", slug: "switzerland", image: "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Alpine Escapes" },
+  { name: "Singapore", slug: "singapore", image: "https://images.unsplash.com/photo-1525625239514-75b436f0102b?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Garden City" },
+  { name: "Santorini", slug: "santorini", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Aegean Dream" },
+  { name: "London", slug: "london", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070&auto=format&fit=crop", type: "international", label: "Historic Splendour" },
 ];
+
 
 interface Package {
   id: string;
@@ -99,8 +100,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
   // We search for the destination title/slug in the package's fields
   const query: any = {
     $or: [
-      { destination: { $regex: destination.title, $options: "i" } },
-      { title: { $regex: destination.title, $options: "i" } },
+      { destination: { $regex: destination.name, $options: "i" } },
+      { title: { $regex: destination.name, $options: "i" } },
       { destinationSlug: slug }
     ]
   };
@@ -126,7 +127,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden">
         <Image
           src={destination.image || "/images/placeholder.jpg"}
-          alt={destination.title}
+          alt={destination.name}
           fill
           className="object-cover"
           priority
@@ -140,21 +141,21 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
             <span className="text-white/20">/</span>
             <Link href="/locations" className="hover:text-[#2fa3f2] transition-colors">Destinations</Link>
             <span className="text-white/20">/</span>
-            <span className="text-white">{destination.title}</span>
+            <span className="text-white">{destination.name}</span>
           </nav>
 
           <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-4 drop-shadow-md">
             {destination.type === "india" ? "India" : "International Gateway"}
           </p>
           <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-            {destination.title}
+            {destination.name}
           </h1>
           <p className="text-white/90 text-xl max-w-2xl mx-auto font-medium drop-shadow-md mb-10">
             {destination.label}
           </p>
 
           <div className="max-w-xl mx-auto">
-            <SearchBar placeholder={`Search packages in ${destination.title}...`} />
+            <SearchBar placeholder={`Search packages in ${destination.name}...`} />
           </div>
         </div>
       </section>
@@ -164,7 +165,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         <div className="container-sv">
           <FilteredPackageList
             packages={normalizedPackages}
-            destinationTitle={destination.title}
+            destinationTitle={destination.name}
           />
         </div>
       </section>
@@ -178,7 +179,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         <div className="container-sv relative z-10 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">Want something custom built?</h2>
           <p className="text-white/60 mb-10 max-w-xl mx-auto text-lg leading-relaxed">
-            Our travel experts can design a personalized itinerary for {destination.title} tailored exactly to your preferences.
+            Our travel experts can design a personalized itinerary for {destination.name} tailored exactly to your preferences.
           </p>
           <Link
             href="/contact"

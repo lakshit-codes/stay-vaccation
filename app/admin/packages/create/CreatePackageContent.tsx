@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 const emptyPackage = () => ({
   title: "",
   destination: "",
+  destinationId: "",
+  categoryId: "",
+  categorySlug: "",
   tripDuration: "",
   travelStyle: "",
   tourType: "",

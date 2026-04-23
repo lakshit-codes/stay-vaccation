@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDatabase } from "../../utils/getDatabase";
+import { getDatabase } from "@/app/utils/getDatabase";
 import { ObjectId } from "mongodb";
 import { randomUUID } from "crypto";
 
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       ...body,
       id: newPackageId,         
       destinationId: safeObjectId(body.destinationId),
+      categoryId: safeObjectId(body.categoryId),
       itinerary: cleanedItinerary,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -88,6 +89,8 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const singleId = searchParams.get("id");
+    const categoryId = searchParams.get("categoryId");
+    const destinationId = searchParams.get("destinationId");
 
     const db = await getDatabase();
     const packagesCollection = db.collection("packages");
@@ -122,7 +125,9 @@ export async function GET(req: NextRequest) {
       const normalized = {
         ...rest,
         id: _id.toString(),
-        packageId: originalId, // Preserve human-readable ID
+        packageId: originalId,
+        destinationId: rest.destinationId?.toString() || "",
+        categoryId: rest.categoryId?.toString() || "",
         itinerary: (rest.itinerary || []).map((day: any) => ({
           ...day,
           id: day.id || randomUUID(),
@@ -141,8 +146,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ── All packages fetch ──
-    const packages = await packagesCollection.find({}).toArray();
+    // ── Multiple packages fetch with filters ──
+    const filter: any = {};
+    if (categoryId) {
+      filter.categoryId = ObjectId.isValid(categoryId) ? new ObjectId(categoryId) : categoryId;
+    }
+    if (destinationId) {
+      filter.destinationId = ObjectId.isValid(destinationId) ? new ObjectId(destinationId) : destinationId;
+    }
+
+    const packages = await packagesCollection.find(filter).toArray();
 
     // Manual populate
     for (const pkg of packages) {
@@ -174,6 +187,8 @@ const normalizedPackages = packages.map((pkg) => {
     ...rest,
     id: _id.toString(), // Convert Mongo _id to string
     packageId: originalId, // Preserve human-readable ID
+    destinationId: rest.destinationId?.toString() || "",
+    categoryId: rest.categoryId?.toString() || "",
 
     itinerary: (rest.itinerary || []).map((day: any) => ({
       ...day,
@@ -269,6 +284,7 @@ export async function PUT(req: NextRequest) {
         $set: {
           ...body,
           destinationId: safeObjectId(body.destinationId),
+          categoryId: safeObjectId(body.categoryId),
           itinerary: cleanedItinerary,
           updatedAt: new Date(),
         },

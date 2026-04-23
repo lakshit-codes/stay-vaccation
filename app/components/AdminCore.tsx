@@ -25,8 +25,11 @@ export interface StoreContextType {
   setActivityPages: React.Dispatch<React.SetStateAction<ActivityPage[]>>;
   regions: Region[];
   setRegions: React.Dispatch<React.SetStateAction<Region[]>>;
+  categories: Category[];
+  setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
   refreshRegions: () => Promise<void>;
   refreshDestinations: () => Promise<void>;
+  refreshCategories: () => Promise<void>;
 }
 
 export const StoreContext = createContext<StoreContextType | null>(null);
@@ -39,7 +42,7 @@ export const useStore = () => {
 
 // ─── UTILS ───────────────────────────────────────────────────────
 const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-const cls = (...a) => a.filter(Boolean).join(" ");
+export const cls = (...a) => a.filter(Boolean).join(" ");
 const fmt12 = (t) => { if (!t) return "—"; const [h, m] = t.split(":").map(Number); return `${(h % 12) || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`; };
 export const getCurrSym = (code) => ({ INR: "₹", USD: "$", EUR: "€", GBP: "£", AED: "د.إ" }[code] || code);
 const parseDays = (dur) => { const m = dur?.match(/^(\d+)\s*Day/i); return m ? parseInt(m[1]) : 0; };
@@ -170,6 +173,21 @@ export interface Destination {
   isEnabled: boolean;
   isActive: boolean;
   packageCount?: number;
+  isTrending?: boolean;
+  category?: "India" | "International";
+}
+
+export interface Category {
+  _id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+  color?: string; // keeping for UI
+  link?: string;  // keeping for UI
+  order?: number; // keeping for UI
+  shortLocationList?: string;
 }
 
 export interface MasterHotel {
@@ -254,6 +272,8 @@ export interface Package {
   title: string;
   destination: string;
   destinationId?: string;
+  categoryId?: string;
+  categorySlug?: string;
   tripDuration: string;
   travelStyle: string;
   tourType: string;
@@ -340,6 +360,8 @@ const emptyFaq = (): Faq => ({ id: uid(), question: "", answer: "" });
 const emptyKBYG = (): KBYG => ({ id: uid(), point: "" });
 const emptyAdditionalInfo = () => ({ aboutDestination: "", quickInfo: { destinationsCovered: "", duration: "", startPoint: "", endPoint: "" }, experiencesCovered: [], notToMiss: [] });
 const makeDay = (n: number): ItineraryDay => ({ id: uid(), dayNumber: n, title: n === 1 ? "Arrival Day" : `Day ${n}`, city: "", dayType: n === 1 ? "arrival" : "sightseeing", mealsIncluded: [], notes: "", description: "", hotelStays: [], transfers: [], activities: [] });
+
+const emptyCategory = (): Category => ({ name: "", slug: "", icon: "Beach", color: "from-cyan-400 to-blue-500", link: "", order: 0, description: "", shortLocationList: "", isActive: true });
 
 // ─── RESOLVE HELPERS (two-way sync merge) ─────────────────────────
 const resolveActivity = (dayAct: DayActivity, masters: MasterActivity[]) => {
@@ -555,9 +577,11 @@ export const Ic = {
   Summary: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>,
   Check: (p: any) => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>,
   X: (p: any) => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>,
+  Flame: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>,
   Tag: (p: any) => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
   Booking: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
   Document: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+  Close: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
 };
 
 // ─── IMAGE UPLOADER ───────────────────────────────────────────────
@@ -1330,7 +1354,7 @@ export const MasterHotelsPage = () => {
 
 // ─── DESTINATION FORM ──────────────────────────────────────────
 export const DestinationForm = ({ initial, onSave, onCancel }) => {
-  const [data, setData] = useState(initial || { name: "", slug: "", image: "", description: "", isEnabled: true });
+  const [data, setData] = useState(initial || { name: "", slug: "", image: "", description: "", isEnabled: true, isTrending: false, category: "India" });
   
   const slugify = (text: string) => text.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
@@ -1372,6 +1396,44 @@ export const DestinationForm = ({ initial, onSave, onCancel }) => {
             onAdd={url => upd("image", url)} 
             onRemove={() => upd("image", "")} 
           />
+        </div>
+      </div>
+
+      {/* ─── Trending & Category ─── */}
+      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+        <div>
+          <FL>Category</FL>
+          <div className="flex gap-2 mt-1">
+            {(["India", "International"] as const).map(cat => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => upd("category", cat)}
+                className={cls(
+                  "flex-1 py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all",
+                  data.category === cat
+                    ? cat === "India"
+                      ? "border-orange-500 bg-orange-50 text-orange-700"
+                      : "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-200 bg-white text-gray-400 hover:border-gray-300"
+                )}
+              >
+                {cat === "India" ? "🇮🇳 India" : "🌍 International"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col justify-end">
+          <label className="flex items-center gap-3 cursor-pointer group pb-1">
+            <div className={cls("w-10 h-5 rounded-full relative transition-all", data.isTrending ? "bg-amber-500" : "bg-gray-300")}>
+              <div className={cls("absolute top-1 w-3 h-3 bg-white rounded-full transition-all", data.isTrending ? "right-1" : "left-1")} />
+            </div>
+            <input type="checkbox" className="sr-only" checked={!!data.isTrending} onChange={e => upd("isTrending", e.target.checked)} />
+            <div>
+              <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900 transition-colors block">Trending</span>
+              <span className="text-[10px] text-gray-400">Show on homepage</span>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -2646,6 +2708,22 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
             />
           </div>
           <div>
+            <FL>Category</FL>
+            <Sel 
+              placeholder="Select category…" 
+              options={useStore().categories.map(c => ({ label: c.name, value: c._id || "" }))} 
+              value={form.categoryId || ""} 
+              onChange={e => {
+                const cat = useStore().categories.find(c => c._id === e.target.value);
+                setForm(p => ({
+                  ...p,
+                  categoryId: cat?._id || "",
+                  categorySlug: cat?.slug || ""
+                }));
+              }} 
+            />
+          </div>
+          <div>
             <FL required>Trip Duration</FL>
             <Sel options={DURATION_OPTIONS} placeholder="Select duration" value={form.tripDuration || ""} onChange={e => handleDurationChange(e.target.value)} />
             {itinerary.length > 0 && <p className="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1"><Ic.Check />{itinerary.length} days auto-generated</p>}
@@ -3752,6 +3830,8 @@ export const Sidebar = ({ page, setPage, counts }) => {
     { key: "activity-pages", label: "Activities Pages", icon: <Ic.Activity />, group: "main", badge: counts.activityPages },
     { key: "page-cms", label: "Page CMS", icon: <Ic.Document />, group: "main" },
     { key: "locations", label: "Locations", icon: <Ic.Globe />, group: "main" },
+    { key: "categories", label: "Categories", icon: <Ic.Tag />, group: "main" },
+    { key: "trending", label: "Trending Destinations", icon: <Ic.Flame />, group: "main" },
     { key: "business-settings", label: "Business Settings", icon: <Ic.Star />, group: "main" },
     { key: "master-activities", label: "Activities", icon: <Ic.Activity />, group: "master", badge: counts.activities },
     { key: "master-hotels", label: "Hotels", icon: <Ic.Hotel />, group: "master", badge: counts.hotels },
@@ -3840,6 +3920,7 @@ export const AdminStateProvider = ({ children }: { children: React.ReactNode }) 
   const [activityPages, setActivityPages] = useState<ActivityPage[]>([]);
   const [masterActivities, setMasterActivities] = useState(INIT_ACTIVITIES);
   const [masterHotels, setMasterHotels] = useState(INIT_HOTELS);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedId, setSelectedId] = useState(null);
   const [regions, setRegions] = useState<Region[]>([]);
   const fetchPackages = async () => {
@@ -3887,12 +3968,21 @@ export const AdminStateProvider = ({ children }: { children: React.ReactNode }) 
     } catch (err) { console.error(err); }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const result = await res.json();
+      if (result.success) setCategories(result.data);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
     fetchPackages();
     fetchTransfers();
     fetchDestinations();
     fetchActivityPages();
     fetchRegions();
+    fetchCategories();
   }, []);
   const selectedPkg = packages.find(p => p.id === selectedId);
 
@@ -3905,7 +3995,9 @@ export const AdminStateProvider = ({ children }: { children: React.ReactNode }) 
     destinations, setDestinations,
     activityPages, setActivityPages,
     regions, setRegions,
-    refreshRegions: fetchRegions, refreshDestinations: fetchDestinations
+    categories, setCategories,
+    refreshRegions: fetchRegions, refreshDestinations: fetchDestinations,
+    refreshCategories: fetchCategories
   };
 
   const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
@@ -3978,11 +4070,12 @@ export const AdminStateProvider = ({ children }: { children: React.ReactNode }) 
     "transfers": { title: "Transfer Management", subtitle: `${transfers.length} active routes` },
     "destinations": { title: "Destinations", subtitle: `${destinations.length} destinations in catalog` },
     "activity-pages": { title: "Activities Pages", subtitle: `${activityPages.length} landing pages` },
+    "categories": { title: "Categories", subtitle: `${categories.length} homepage categories` },
   };
   const meta = PAGE_META[page] || PAGE_META.dashboard;
 
   const emptyPkg = () => ({
-    id: uid(), title: "", destination: "", tripDuration: "", travelStyle: "", tourType: "",
+    id: uid(), title: "", destination: "", destinationId: "", categoryId: "", categorySlug: "", tripDuration: "", travelStyle: "", tourType: "",
     exclusivityLevel: "Premium", price: { currency: "INR", amount: "" },
     shortDescription: "", longDescription: "",
     availability: { availableMonths: [], fixedDepartureDates: [], blackoutDates: [] },
@@ -4153,6 +4246,66 @@ export const TransferForm = ({ initial, onSave, onCancel }: { initial: any; onSa
       <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
         <Btn variant="outline" onClick={onCancel}>Cancel</Btn>
         <Btn variant="success" onClick={() => onSave(data)}>Save Route</Btn>
+      </div>
+    </div>
+  );
+};
+
+export const CategoryForm = ({ initial, onSave, onCancel }: { initial: Category; onSave: (d: Category) => void; onCancel: () => void }) => {
+  const [data, setData] = useState<Category>(initial || emptyCategory());
+  return (
+    <div className="bg-white p-6 space-y-6">
+      <div className="grid grid-cols-2 gap-6">
+        <div className="col-span-2 md:col-span-1">
+          <FL required>Category Name</FL>
+          <Inp value={data.name} onChange={e => {
+            const name = e.target.value;
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            setData({ ...data, name, slug });
+          }} placeholder="e.g. Beach & Islands" />
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <FL required>Slug</FL>
+          <Inp value={data.slug} onChange={e => setData({ ...data, slug: e.target.value })} placeholder="e.g. beach-islands" />
+        </div>
+        <div>
+          <FL>Icon (Emoji or Icon Name)</FL>
+          <Inp value={data.icon} onChange={e => setData({ ...data, icon: e.target.value })} placeholder="e.g. 🏖️" />
+        </div>
+        <div>
+          <FL>Display Order</FL>
+          <Inp type="number" value={data.order} onChange={e => setData({ ...data, order: Number(e.target.value) })} />
+        </div>
+        <div className="col-span-2">
+          <FL>Description</FL>
+          <TA value={data.description || ""} onChange={e => setData({ ...data, description: e.target.value })} placeholder="Describe this category..." rows={3} />
+        </div>
+        <div className="col-span-2">
+          <label className="flex items-center gap-3 cursor-pointer group p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all">
+            <input type="checkbox" className="w-5 h-5 rounded accent-blue-600" checked={data.isActive} onChange={e => setData({ ...data, isActive: e.target.checked })} />
+            <div>
+              <p className="text-sm font-bold text-gray-900">Active</p>
+              <p className="text-xs text-gray-400">Show this category on the website</p>
+            </div>
+          </label>
+        </div>
+        <div className="col-span-2 border-t border-gray-100 pt-6">
+          <p className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Visual Settings (Frontend)</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <FL>Gradient Color</FL>
+              <Inp value={data.color} onChange={e => setData({ ...data, color: e.target.value })} placeholder="from-cyan-400 to-blue-500" />
+            </div>
+            <div>
+              <FL>Target Link (Override)</FL>
+              <Inp value={data.link} onChange={e => setData({ ...data, link: e.target.value })} placeholder="/packages?type=Beach" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
+        <Btn variant="outline" onClick={onCancel}>Cancel</Btn>
+        <Btn variant="success" onClick={() => onSave(data)}>Save Category</Btn>
       </div>
     </div>
   );

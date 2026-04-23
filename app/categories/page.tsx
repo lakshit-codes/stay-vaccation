@@ -7,116 +7,47 @@ export const metadata = {
   description: "Browse our travel packages by category — Beach, Adventure, Heritage, Honeymoon, Family tours and more.",
 };
 
-const CATEGORIES = [
-  {
-    label: "Beach & Islands",
-    icon: "🏖️",
-    slug: "Beach",
-    count: "Bali · Maldives · Goa · Phuket",
-    description: "Crystal-clear waters, powdery white sands, and coral reefs waiting to be explored.",
-    color: "from-sky-500 to-blue-700",
-    lightColor: "bg-sky-50",
-    textColor: "text-sky-700",
-    packages: 12,
-  },
-  {
-    label: "Heritage & Culture",
-    icon: "🏛️",
-    slug: "Heritage",
-    count: "Rajasthan · Rome · Istanbul · Kyoto",
-    description: "Step back in time through ancient palaces, magnificent temples, and living heritage sites.",
-    color: "from-amber-500 to-orange-700",
-    lightColor: "bg-amber-50",
-    textColor: "text-amber-700",
-    packages: 9,
-  },
-  {
-    label: "Adventure Sports",
-    icon: "🧗",
-    slug: "Adventure%20Sports",
-    count: "Himachal · Rishikesh · New Zealand",
-    description: "Adrenaline-charged experiences from white-water rafting to skydiving and trekking.",
-    color: "from-emerald-500 to-teal-700",
-    lightColor: "bg-emerald-50",
-    textColor: "text-emerald-700",
-    packages: 7,
-  },
-  {
-    label: "Wildlife & Nature",
-    icon: "🦁",
-    slug: "Wildlife",
-    count: "Kenya · Ranthambore · Amazon",
-    description: "Get up close with the world's most spectacular wildlife in their natural habitats.",
-    color: "from-lime-500 to-green-700",
-    lightColor: "bg-lime-50",
-    textColor: "text-lime-700",
-    packages: 8,
-  },
-  {
-    label: "Honeymoon",
-    icon: "💑",
-    slug: "Honeymoon",
-    count: "Maldives · Paris · Santorini · Bali",
-    description: "Romantic escapes designed for couples — private villas, candlelit dinners, and more.",
-    color: "from-rose-500 to-pink-700",
-    lightColor: "bg-rose-50",
-    textColor: "text-rose-700",
-    packages: 14,
-  },
-  {
-    label: "Family Tours",
-    icon: "👨‍👩‍👧",
-    slug: "Family",
-    count: "Singapore · Thailand · Goa · Kerala",
-    description: "Child-friendly adventures that create memories the whole family will cherish forever.",
-    color: "from-violet-500 to-purple-700",
-    lightColor: "bg-violet-50",
-    textColor: "text-violet-700",
-    packages: 10,
-  },
-  {
-    label: "Relaxation & Wellness",
-    icon: "🧘",
-    slug: "Relaxation",
-    count: "Kerala · Bali · Coorg · Thailand",
-    description: "Rejuvenating retreats with yoga, Ayurveda, spa treatments, and peaceful surroundings.",
-    color: "from-teal-500 to-cyan-700",
-    lightColor: "bg-teal-50",
-    textColor: "text-teal-700",
-    packages: 6,
-  },
-  {
-    label: "Religious & Spiritual",
-    icon: "🕌",
-    slug: "Religious",
-    count: "Varanasi · Tirupati · Shirdi · Amritsar",
-    description: "Sacred journeys to holy sites — finding peace, purpose, and divine connection.",
-    color: "from-yellow-500 to-amber-700",
-    lightColor: "bg-yellow-50",
-    textColor: "text-yellow-700",
-    packages: 5,
-  },
-  {
-    label: "Culinary Tours",
-    icon: "🍜",
-    slug: "Culinary",
-    count: "Italy · Japan · India · Morocco",
-    description: "A feast for the senses — cooking classes, local markets, and iconic food trails.",
-    color: "from-orange-500 to-red-700",
-    lightColor: "bg-orange-50",
-    textColor: "text-orange-700",
-    packages: 4,
-  },
-];
+async function getCategories() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/categories`, { cache: "no-store" });
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch {
+    return [];
+  }
+}
 
-export default function CategoriesPage() {
+async function getPackages() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/packages`, { cache: "no-store" });
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function CategoriesPage() {
+  const [categories, packages] = await Promise.all([
+    getCategories(),
+    getPackages()
+  ]);
+
+  // Map package counts to categories
+  const categoriesWithCount = categories.map((cat: any) => {
+    const count = packages.filter((pkg: any) => pkg.categoryId === cat._id).length;
+    return { ...cat, packageCount: count };
+  });
+
   return (
     <>
       <Navbar />
 
       {/* Hero */}
-      <section className="hero-bg pt-32 pb-20 text-center">
-        <div className="container-sv">
+      <section className="hero-bg pt-32 pb-20 text-center relative overflow-hidden">
+        <div className="container-sv relative z-10">
           <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-4">Browse by interest</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-6">
             Tour Categories
@@ -125,7 +56,7 @@ export default function CategoriesPage() {
             From sun-soaked beaches to spiritual pilgrimages — find your perfect travel style.
           </p>
         </div>
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="absolute bottom-0 left-0 right-0 z-0">
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 60L60 50C120 40 240 22 360 18C480 14 600 22 720 26C840 32 960 36 1080 36C1200 36 1320 28 1380 24L1440 22V60H0Z" fill="white" />
           </svg>
@@ -135,58 +66,84 @@ export default function CategoriesPage() {
       {/* Categories Grid */}
       <section className="section-pad bg-white">
         <div className="container-sv">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {CATEGORIES.map((cat, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categoriesWithCount.filter((cat: any) => cat.isActive).map((cat: any) => (
               <Link
-                key={cat.label}
-                href={`/packages?type=${cat.slug}`}
-                className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-[#1a3f4e]/10 transition-all duration-300 hover:-translate-y-1"
+                key={cat._id}
+                href={`/categories/${cat.slug}`}
+                className="group rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full"
               >
                 {/* Top gradient banner */}
-                <div className={`h-28 bg-gradient-to-r ${cat.color} flex items-center justify-between px-6`}>
-                  <div>
-                    <h2 className="text-white font-bold text-lg">{cat.label}</h2>
-                    <p className="text-white/70 text-xs mt-1">{cat.count}</p>
+                <div className={`h-32 bg-gradient-to-r ${cat.color || 'from-blue-600 to-indigo-700'} flex items-center justify-between px-8 relative overflow-hidden`}>
+                   {/* Background pattern/overlay */}
+                  <div className="absolute inset-0 opacity-10 pointer-events-none">
+                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <path d="M0 100 L100 0 L100 100 Z" fill="white" />
+                    </svg>
                   </div>
-                  <div className="text-5xl">{cat.icon}</div>
+
+                  <div className="relative z-10">
+                    <h2 className="text-white font-bold text-xl drop-shadow-sm">{cat.name}</h2>
+                    <p className="text-white/80 text-xs mt-1 font-medium tracking-wide">
+                      {cat.packageCount} {cat.packageCount === 1 ? 'Package' : 'Packages'} Available
+                    </p>
+                  </div>
+                  <div className="text-5xl drop-shadow-lg group-hover:scale-110 transition-transform duration-500 relative z-10">
+                    {cat.icon}
+                  </div>
                 </div>
 
                 {/* Bottom content */}
-                <div className="p-5 bg-white">
-                  <p className="text-gray-500 text-sm leading-relaxed mb-4">{cat.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${cat.lightColor} ${cat.textColor}`}>
-                      {cat.packages} Packages
-                    </span>
-                    <span className="text-[#2fa3f2] text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Explore
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-6 bg-white flex flex-col flex-1">
+                  <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-3 italic">
+                    {cat.description || "Explore curated travel experiences specifically designed for this style."}
+                  </p>
+                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
+                    <span className="text-[#2fa3f2] text-xs font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                      View Packages
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </span>
+                    {cat.shortLocationList && (
+                       <span className="text-[10px] bg-gray-50 text-gray-400 px-2 py-1 rounded-full font-bold uppercase tracking-tighter">
+                         {cat.shortLocationList}
+                       </span>
+                    )}
                   </div>
                 </div>
               </Link>
             ))}
           </div>
+
+          {categoriesWithCount.length === 0 && (
+             <div className="text-center py-20">
+               <div className="text-6xl mb-4">🏝️</div>
+               <h3 className="text-2xl font-bold text-gray-900 mb-2">No categories found</h3>
+               <p className="text-gray-500">Check back later for exciting travel styles.</p>
+             </div>
+          )}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-[#F4F9E9]">
-        <div className="container-sv text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3f4e] mb-4">
+      <section className="py-24 bg-gray-50 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
+        
+        <div className="container-sv relative z-10 text-center">
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-[#1a3f4e] mb-6">
             Can't find what you're looking for?
           </h2>
-          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
-            Our travel experts can craft a completely custom itinerary based on your preferences, budget, and travel dates.
+          <p className="text-gray-500 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
+            Our travel experts can craft a completely custom itinerary based on your preferences, budget, and travel dates. Let's build your dream trip together.
           </p>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#1a3f4e] text-white font-bold rounded-xl hover:bg-[#2a5f74] hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-[#1a3f4e] text-white font-bold rounded-2xl hover:bg-[#2a5f74] hover:-translate-y-1 shadow-lg shadow-[#1a3f4e]/20 transition-all duration-300"
           >
             Request Custom Package
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>

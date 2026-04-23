@@ -38,25 +38,30 @@ export default function LocationsAdminPage() {
   const handleSaveRegion = async (data: any) => {
     try {
       const isEdit = !!selectedRegion;
+      // Always include _id for edit so the PUT can identify the document
+      const payload = isEdit ? { ...data, _id: selectedRegion!._id } : data;
       const res = await fetch("/api/regions", {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
       const result = await res.json();
       if (result.success) {
         if (isEdit) {
-           setRegions(p => p.map(r => r._id === data._id ? data : r));
+          setRegions(p => p.map(r => r._id === selectedRegion!._id ? payload : r));
         } else {
-           setRegions(p => [...p, { ...data, _id: result.insertedId }]);
+          setRegions(p => [...p, { ...payload, _id: result.insertedId }]);
         }
         setRegionModalOpen(false);
         setSelectedRegion(null);
+        // Sync store from DB
+        await refreshRegions();
       } else {
-        alert("Region save failed");
+        alert("Region save failed: " + (result.message || "Unknown error"));
       }
     } catch (err) {
       console.error("REGION SAVE ERROR:", err);
+      alert("Network error saving region.");
     }
   };
 
@@ -69,7 +74,7 @@ export default function LocationsAdminPage() {
         setRegions(p => p.filter(r => r._id !== regionToDelete._id));
         setRegionToDelete(null);
       } else {
-        alert("Region delete failed");
+        alert("Region delete failed: " + (result.message || "Unknown error"));
       }
     } catch (err) {
       console.error("REGION DELETE ERROR:", err);
@@ -79,7 +84,12 @@ export default function LocationsAdminPage() {
   const handleSaveDest = async (data: any) => {
     try {
       const isEdit = !!selectedDest;
-      const payload = { ...data, regionId: targetRegionId || data.regionId };
+      // Always include _id for edit; merge regionId
+      const payload = {
+        ...data,
+        regionId: targetRegionId || data.regionId,
+        ...(isEdit ? { _id: selectedDest!._id } : {}),
+      };
       const res = await fetch("/api/destinations", {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,18 +98,21 @@ export default function LocationsAdminPage() {
       const result = await res.json();
       if (result.success) {
         if (isEdit) {
-          setDestinations(p => p.map(d => d._id === data._id ? { ...data, regionId: payload.regionId } : d));
+          setDestinations(p => p.map(d => d._id === selectedDest!._id ? { ...payload } : d));
         } else {
           setDestinations(p => [...p, { ...payload, _id: result.insertedId }]);
         }
         setDestModalOpen(false);
         setSelectedDest(null);
         setTargetRegionId(null);
+        // Sync store from DB
+        await refreshDestinations();
       } else {
-        alert("Destination save failed");
+        alert("Destination save failed: " + (result.message || "Unknown error"));
       }
     } catch (err) {
       console.error("DEST SAVE ERROR:", err);
+      alert("Network error saving destination.");
     }
   };
 
@@ -170,6 +183,16 @@ export default function LocationsAdminPage() {
                         <Badge className={`border-0 ${dest.isActive ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
                           {dest.isActive ? "Active" : "Inactive"}
                         </Badge>
+                        {dest.isTrending && (
+                          <Badge className="bg-amber-50 text-amber-700 border-amber-200">
+                            🔥 Trending
+                          </Badge>
+                        )}
+                        {dest.category && (
+                          <Badge className={dest.category === "India" ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-blue-50 text-blue-700 border-blue-200"}>
+                            {dest.category === "India" ? "🇮🇳 India" : "🌍 Intl"}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     <div className="group/title flex items-center gap-2 cursor-pointer" onClick={() => router.push(`/admin/locations/edit/${dest._id}`)}>
@@ -251,13 +274,15 @@ export default function LocationsAdminPage() {
 
 
       {/* Destination Edit/Create Modal */}
-      <Modal open={destModalOpen} onClose={() => setDestModalOpen(false)} title={selectedDest ? "Quick Edit Destination" : "Add New Destination"}>
-        <DestinationForm initial={selectedDest} onSave={handleSaveDest} onCancel={() => setDestModalOpen(false)} />
+      <Modal open={destModalOpen} onClose={() => { setDestModalOpen(false); setSelectedDest(null); }} title={selectedDest ? "Quick Edit Destination" : "Add New Destination"}>
+        {/* key forces a fresh form state when switching between add/edit or different destinations */}
+        <DestinationForm key={selectedDest?._id || "new-dest"} initial={selectedDest} onSave={handleSaveDest} onCancel={() => { setDestModalOpen(false); setSelectedDest(null); }} />
       </Modal>
 
       {/* Region Edit/Create Modal */}
-      <Modal open={regionModalOpen} onClose={() => setRegionModalOpen(false)} title={selectedRegion ? "Edit Region" : "Add New Region"}>
-        <RegionForm initial={selectedRegion} onSave={handleSaveRegion} onCancel={() => setRegionModalOpen(false)} />
+      <Modal open={regionModalOpen} onClose={() => { setRegionModalOpen(false); setSelectedRegion(null); }} title={selectedRegion ? "Edit Region" : "Add New Region"}>
+        {/* key forces a fresh form state when switching between add/edit or different regions */}
+        <RegionForm key={selectedRegion?._id || "new-region"} initial={selectedRegion} onSave={handleSaveRegion} onCancel={() => { setRegionModalOpen(false); setSelectedRegion(null); }} />
       </Modal>
 
       {/* Region Delete Confirmation */}
