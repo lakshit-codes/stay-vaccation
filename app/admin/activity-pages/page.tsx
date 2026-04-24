@@ -1,4 +1,4 @@
-import { ActivityPagesPage } from "@/app/components/AdminCore";
+import { ActivityPageAdmin } from "@/app/components/AdminCore";
 
 export const metadata = {
   title: "Activity Landing Pages — Stay Vacation",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <ActivityPagesPage />;
+  return <ActivityPageAdmin />;
 }

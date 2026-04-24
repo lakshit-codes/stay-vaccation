@@ -1,43 +1,41 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ViewPackage, useStore } from "@/app/components/AdminCore";
+import { ViewPackage } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchPackages } from "@/app/store/features/packages/packageThunks";
 
 export default function ViewPackageContent({ id }: { id: string }) {
   const router = useRouter();
-  const { setPackages } = useStore();
-
+  const dispatch = useAppDispatch();
+  const { packages, loading: globalLoading } = useAppSelector(state => state.packages);
+  
   const [pkg, setPkg]               = useState<any>(null);
   const [loading, setLoading]       = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Fetch the package directly from the API using its MongoDB ObjectId.
-  // Never rely on shared state — ensures the correct package always loads.
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setFetchError(null);
-    setPkg(null);
-
-    fetch(`/api/packages?id=${encodeURIComponent(id)}`)
-      .then(r => r.json())
-      .then(result => {
-        if (cancelled) return;
-        if (result.success && result.data) {
-          setPkg(result.data);
+    const found = packages.find(p => p.id === id || (p as any)._id === id);
+    if (found) {
+      setPkg(found);
+      setLoading(false);
+    } else if (!globalLoading) {
+      dispatch(fetchPackages()).then((action) => {
+        if (fetchPackages.fulfilled.match(action)) {
+          const freshFound = action.payload.find(p => p.id === id || (p as any)._id === id);
+          if (freshFound) {
+            setPkg(freshFound);
+          } else {
+            setFetchError("Package not found");
+          }
         } else {
-          setFetchError(result.message || "Package not found");
+          setFetchError("Failed to load packages");
         }
-      })
-      .catch(() => {
-        if (!cancelled) setFetchError("Network error — could not load package");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       });
-
-    return () => { cancelled = true; };
-  }, [id]);
+    }
+  }, [id, packages, globalLoading, dispatch]);
 
   if (loading) {
     return (

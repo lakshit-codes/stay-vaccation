@@ -1,11 +1,16 @@
 "use client";
-import { PackagesListing, useStore, DuplicatePackageModal } from "@/app/components/AdminCore";
+import { PackagesListing, DuplicatePackageModal } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { createPackage } from "@/app/store/features/packages/packageThunks";
+
 export default function PackagesPageContent() {
   const router = useRouter();
-  const { packages, setPackages } = useStore();
+  const dispatch = useAppDispatch();
+  const { packages } = useAppSelector(state => state.packages);
+  
   const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
   const [duplicateBasePkgId, setDuplicateBasePkgId] = useState("");
 
@@ -53,15 +58,11 @@ export default function PackagesPageContent() {
       let finalItinerary: any[];
 
       if (days === currentLen) {
-        // Exact copy — no changes needed
         finalItinerary = baseItinerary;
       } else if (days < currentLen) {
-        // Trim itinerary
         finalItinerary = baseItinerary.slice(0, days);
       } else {
-        // Extend: duplicate the last day to fill up to `days`
         finalItinerary = [...baseItinerary];
-        // Snapshot the last day ONCE before the loop to avoid re-reading a pushed item
         const lastDay = JSON.parse(JSON.stringify(baseItinerary[baseItinerary.length - 1]));
 
         for (let i = 0; i < days - currentLen; i++) {
@@ -70,7 +71,6 @@ export default function PackagesPageContent() {
             id: undefined,
             dayNumber: currentLen + i + 1,
             title: `Day ${currentLen + i + 1}`,
-            // Fresh deep-copies of sub-arrays
             activities: (lastDay.activities || []).map((a: any) => ({ ...a, id: undefined })),
             hotelStays:  (lastDay.hotelStays  || []).map((h: any) => ({ ...h, id: undefined })),
             transfers:   (lastDay.transfers   || []).map((t: any) => ({ ...t, id: undefined })),
@@ -78,52 +78,28 @@ export default function PackagesPageContent() {
         }
       }
 
-      console.log(`[DEBUG] Expanding itinerary: ${currentLen} → ${finalItinerary.length} days`);
-
       const newTitle    = (deepCloned.title || deepCloned.destination || "Package") + " (Copy)";
       const newDuration = days === 1 ? "1 Day" : `${days} Days / ${days - 1} Night${days - 1 === 1 ? "" : "s"}`;
-
-      // Generate a unique slug for routing and SEO
       const baseSlug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       const newSlug  = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
 
-      // Build duplicate payload — no id/packageId here; server generates them
       const dupePayload = {
         ...deepCloned,
         title: newTitle,
-        slug: newSlug, // ← newly added unique slug
+        slug: newSlug,
         tripDuration: newDuration,
-        itinerary: finalItinerary, // ← guaranteed to be `days` items long
+        itinerary: finalItinerary,
         createdAt: undefined,
         updatedAt: undefined,
       };
 
-      const res = await fetch("/api/packages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dupePayload),
-      });
-      const result = await res.json();
-
-      if (result.success) {
-        const mongoId: string    = result.insertedId; // e.g. "67f8a1b2..."
-        const packageId: string  = result.packageId;  // e.g. "pkg_1712345678_abc1"
-
-        console.log(`[DEBUG] Duplicate saved → mongoId: ${mongoId}, packageId: ${packageId}, itinerary days: ${finalItinerary.length}`);
-
-        // Inject into state synchronously so the edit page finds it immediately
-        const newPkg = {
-          ...dupePayload,
-          id: mongoId,       // routing ID (matches EditPackageContent lookup)
-          packageId,         // human-readable unique ID stored in DB
-          itinerary: finalItinerary,
-        };
-        setPackages(prev => [...prev, newPkg as any]);
-
+      const resultAction = await dispatch(createPackage(dupePayload));
+      if (createPackage.fulfilled.match(resultAction)) {
+        const result = resultAction.payload as any;
         setDuplicateModalOpen(false);
-        router.push(`/admin/packages/edit/${mongoId}`);
+        router.push(`/admin/packages/edit/${result._id || result.id}`);
       } else {
-        alert("Duplicate failed: " + (result.message || "Unknown error"));
+        alert("Duplicate failed: " + (resultAction.error?.message || "Unknown error"));
       }
     } catch (e) {
       console.error(e);

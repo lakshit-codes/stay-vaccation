@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useAppSelector } from "@/app/store/hooks";
 
 const FOOTER_LINKS = {
   Explore: [
@@ -46,16 +46,7 @@ const SOCIAL = [
 ];
 
 export default function Footer() {
-  const [settings, setSettings] = useState<any>(null);
-
-  useEffect(() => {
-    fetch("/api/business-settings")
-      .then(r => r.json())
-      .then(d => {
-        if (d.success && d.data) setSettings(d.data);
-      })
-      .catch(e => console.error("FOOTER FETCH ERROR", e));
-  }, []);
+  const { settings } = useAppSelector(state => state.businessSettings);
 
   const businessName = settings?.businessName || "Stay Vacation";
   const footerText = settings?.footerText || "Crafting unforgettable journeys across the world. From serene beach escapes to thrilling mountain adventures — we curate every moment.";

@@ -20,11 +20,26 @@ export async function middleware(req: NextRequest) {
     "/api/activities",
     "/api/hotels",
     "/api/coupons",
+    "/api/categories",
+    "/api/regions",
+    "/api/activity-pages",
+    "/api/business-settings",
+    "/api/admin",
+    "/api/page-cms",
   ].some((p) => pathname.startsWith(p));
 
-  // If it's an admin UI route or a modifying admin API request
-  if (isAdminPath || (isAdminAPI && req.method !== "GET")) {
-    const token = req.cookies.get("sv_token")?.value;
+  // If it's an admin UI route or a modifying admin API request (or any request to /api/admin)
+  const isStrictAdminAPI = pathname.startsWith("/api/admin");
+  
+  if (isAdminPath || (isAdminAPI && req.method !== "GET") || isStrictAdminAPI) {
+    let token = req.cookies.get("sv_token")?.value;
+
+    if (!token) {
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
 
     if (!token) {
       if (isAdminAPI) {
@@ -74,6 +89,12 @@ export const config = {
     "/api/transfers/:path*",
     "/api/activities/:path*",
     "/api/hotels/:path*",
-    "/api/coupons/:path*"
+    "/api/coupons/:path*",
+    "/api/categories/:path*",
+    "/api/regions/:path*",
+    "/api/activity-pages/:path*",
+    "/api/business-settings/:path*",
+    "/api/admin/:path*",
+    "/api/page-cms/:path*"
   ],
 };

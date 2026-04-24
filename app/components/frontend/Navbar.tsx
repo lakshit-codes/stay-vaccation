@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import AuthModal from "./AuthModal";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { logout } from "@/app/store/features/auth/authThunks";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -13,23 +15,19 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-interface AuthUser {
-  email: string;
-  role: string;
-}
-
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { user, authChecked } = useAppSelector((state) => state.auth);
+  const { activityPages } = useAppSelector((state) => state.activityPages);
+  const { settings } = useAppSelector((state) => state.businessSettings);
+
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [activitiesPages, setActivitiesPages] = useState<{slug: string, city: string}[]>([]);
   const [activitiesMenuOpen, setActivitiesMenuOpen] = useState(false);
-  const [settings, setSettings] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   // Scroll listener
   useEffect(() => {
@@ -38,43 +36,17 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Check auth on route change
+  // Check route change effects
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => {
-        setUser(d.success ? { email: d.email, role: d.role } : null);
-        setAuthChecked(true);
-      })
-      .catch(() => { setUser(null); setAuthChecked(true); });
-
-    fetch("/api/activity-pages")
-      .then(r => r.json())
-      .then(d => {
-        if (d.success) setActivitiesPages(d.data);
-      })
-      .catch(e => console.error("NAV FETCH ERROR", e));
-
-    fetch("/api/business-settings")
-      .then(r => r.json())
-      .then(d => {
-        if (d.success && d.data) setSettings(d.data);
-      })
-      .catch(e => console.error("SETTINGS FETCH ERROR", e));
   }, [pathname]);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
+    await dispatch(logout());
     setUserMenuOpen(false);
     router.push("/");
     router.refresh();
-  };
-
-  const onAuthSuccess = (role: string, email: string) => {
-    setUser({ email, role });
   };
 
   const isHome = pathname === "/";
@@ -112,7 +84,6 @@ export default function Navbar() {
             <nav className="hidden md:flex items-center gap-1">
               {NAV_LINKS.map((link) => {
                 const active = pathname === link.href;
-                if (link.label === "Activities") return null; // Handle separately
                 return (
                   <Link key={link.href} href={link.href}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -137,8 +108,8 @@ export default function Navbar() {
                 {activitiesMenuOpen && (
                   <div className="absolute left-0 top-full pt-2 w-64 z-50">
                     <div className="bg-[#1a3f4e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2 backdrop-blur-xl">
-                      {activitiesPages.length > 0 ? (
-                        activitiesPages.map(p => (
+                      {activityPages.length > 0 ? (
+                        activityPages.map(p => (
                           <Link key={p.slug} href={`/destinations/${p.slug}`} className="block px-5 py-2.5 text-sm text-white/80 hover:bg-[#2fa3f2] hover:text-white transition-colors">
                             Things to do in {p.city}
                           </Link>
@@ -152,10 +123,7 @@ export default function Navbar() {
               </div>
             </nav>
 
-            {/* Right side: Explore + Auth */}
             <div className="flex items-center gap-3">
-
-              {/* Explore button */}
               <Link href="/packages"
                 className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 bg-[#2fa3f2] hover:bg-[#1a8fd8] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-[#2fa3f2]/30 hover:-translate-y-0.5">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,11 +132,9 @@ export default function Navbar() {
                 Explore
               </Link>
 
-              {/* Auth — only render after check to avoid flash */}
               {authChecked && (
                 <>
                   {user ? (
-                    /* ── Logged-in user avatar + dropdown ── */
                     <div className="relative hidden md:block">
                       <button
                         onClick={() => setUserMenuOpen((v) => !v)}
@@ -217,7 +183,6 @@ export default function Navbar() {
                       )}
                     </div>
                   ) : (
-                    /* ── Single Login button ── */
                     <button
                       id="navbar-login-btn"
                       onClick={() => setModalOpen(true)}
@@ -237,7 +202,6 @@ export default function Navbar() {
                 </>
               )}
 
-              {/* Hamburger */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-white/10 transition-colors"
@@ -252,19 +216,15 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Click-outside to close user dropdown */}
       {userMenuOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
       )}
 
-      {/* ── Auth Modal ── */}
       <AuthModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onAuthSuccess={onAuthSuccess}
       />
 
-      {/* ── Mobile Menu ── */}
       <div className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
         <div className={`absolute top-0 right-0 h-full w-72 bg-[#1a3f4e] shadow-2xl transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}>
@@ -280,7 +240,6 @@ export default function Navbar() {
             })}
 
             <div className="pt-4 space-y-2" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-              {/* Mobile Activities Section */}
               <div className="space-y-1">
                 <button
                   onClick={() => setActivitiesMenuOpen(!activitiesMenuOpen)}
@@ -295,8 +254,8 @@ export default function Navbar() {
                 
                 {activitiesMenuOpen && (
                   <div className="pl-6 space-y-1 mt-1">
-                    {activitiesPages.length > 0 ? (
-                      activitiesPages.map(p => (
+                    {activityPages.length > 0 ? (
+                      activityPages.map(p => (
                         <Link key={p.slug} href={`/destinations/${p.slug}`} 
                           onClick={() => setMobileOpen(false)}
                           className="block px-4 py-2.5 text-xs text-white/60 hover:text-[#2fa3f2] transition-colors">

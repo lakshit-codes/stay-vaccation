@@ -1,28 +1,28 @@
 "use client";
 import React, { useState } from "react";
-import { useStore, Card, Btn, Ic, cls, CategoryForm, Category } from "../../components/AdminCore";
+import { Card, Btn, Ic, cls, CategoryForm, Category } from "../../components/AdminCore";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { createCategory, updateCategory, deleteCategory } from "@/app/store/features/categories/categoryThunks";
 
 export default function CategoriesPage() {
-  const { categories, refreshCategories, packages } = useStore();
+  const dispatch = useAppDispatch();
+  const { categories } = useAppSelector(state => state.categories);
+  const { packages } = useAppSelector(state => state.packages);
+  
   const [editing, setEditing] = useState<Category | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSave = async (data: Category) => {
     try {
       const isNew = !data._id;
-      const url = isNew ? "/api/categories" : `/api/categories/${data._id}`;
-      const res = await fetch(url, {
-        method: isNew ? "POST" : "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.success) {
-        alert(`Category ${isNew ? "created" : "updated"} ✅`);
-        setEditing(null);
-        setIsCreating(false);
-        refreshCategories();
+      if (isNew) {
+        dispatch(createCategory(data));
+      } else {
+        dispatch(updateCategory(data));
       }
+      setEditing(null);
+      setIsCreating(false);
     } catch (err) {
       console.error(err);
       alert("Failed to save category");
@@ -31,17 +31,7 @@ export default function CategoriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
-    try {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        alert("Category deleted ✅");
-        refreshCategories();
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete category");
-    }
+    dispatch(deleteCategory(id));
   };
 
   return (
@@ -77,7 +67,7 @@ export default function CategoriesPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {categories.sort((a, b) => a.order - b.order).map((cat) => (
+        {[...categories].sort((a, b) => a.order - b.order).map((cat) => (
           <Card key={cat._id} className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300">
             <div className={cls("h-24 bg-gradient-to-br flex items-center justify-center text-white relative", cat.color)}>
               <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />

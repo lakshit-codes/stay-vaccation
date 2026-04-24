@@ -31,26 +31,6 @@ function normalize(item: any): Destination {
   };
 }
 
-async function fetchCategory(
-  category: "India" | "International"
-): Promise<Destination[]> {
-  try {
-    const res = await fetch(
-      `/api/destinations/trending?category=${category}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    if (data.success && Array.isArray(data.data)) {
-      return data.data
-        .map(normalize)
-        .filter((d: Destination) => Boolean(d.slug));
-    }
-    return [];
-  } catch {
-    return [];
-  }
-}
 
 // ─── Image card ───────────────────────────────────────────────────────────────
 function DestinationCardImage({ src, alt }: { src?: string | null; alt: string }) {
@@ -162,41 +142,23 @@ function DestinationCard({ dest, index }: { dest: Destination; index: number }) 
   );
 }
 
+import { useAppSelector } from "@/app/store/hooks";
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function TrendingDestinations() {
   const [activeTab, setActiveTab] = useState<"India" | "International">("India");
-  const [indiaItems,         setIndiaItems]         = useState<Destination[]>([]);
-  const [internationalItems, setInternationalItems] = useState<Destination[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error,   setError]     = useState(false);
+  const { trendingIndia, trendingInternational, loading: reduxLoading, error: reduxError } = useAppSelector(state => state.destinations);
+  
+  const loading = reduxLoading && trendingIndia.length === 0 && trendingInternational.length === 0;
+  const error = !!reduxError;
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Fetch both categories in parallel, once on mount — no fallback static data
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-
-    Promise.all([fetchCategory("India"), fetchCategory("International")])
-      .then(([india, intl]) => {
-        if (cancelled) return;
-        setIndiaItems(india);
-        setInternationalItems(intl);
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, []);
 
   const handleTabChange = (tab: "India" | "International") => {
     setActiveTab(tab);
     scrollRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
-  const displayedItems = activeTab === "India" ? indiaItems : internationalItems;
+  const displayedItems = activeTab === "India" ? trendingIndia : trendingInternational;
 
   return (
     <section className="section-pad bg-white border-b border-gray-50">

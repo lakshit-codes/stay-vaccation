@@ -1,11 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { TransferForm, useStore } from "@/app/components/AdminCore";
+import { TransferForm } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
+
+import { useAppDispatch } from "@/app/store/hooks";
+import { createTransfer } from "@/app/store/features/transfers/transferThunks";
 
 export default function NewTransferContent() {
   const router = useRouter();
-  const { setTransfers } = useStore();
+  const dispatch = useAppDispatch();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,17 +20,11 @@ export default function NewTransferContent() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/transfers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setTransfers(p => [...p, { ...data, _id: result.insertedId }]);
+      const resultAction = await dispatch(createTransfer(data));
+      if (createTransfer.fulfilled.match(resultAction)) {
         router.push("/admin/transfers");
       } else {
-        setError(result.message || "Failed to create transfer.");
+        setError(resultAction.error?.message || "Failed to create transfer.");
       }
     } catch (e) {
       console.error(e);

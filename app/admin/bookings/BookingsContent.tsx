@@ -1,67 +1,38 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useStore, Ic, Inp, Card, Badge, Modal, Btn, getCurrSym, Sel } from "@/app/components/AdminCore";
-
-// ─── TYPES ────────────────────────────────────────────────────────
-interface Booking {
-  id: string;
-  userName: string;
-  userEmail: string;
-  userPhone: string;
-  packageId?: string;
-  packageTitle?: string;
-  totalAmount: number;
-  currency: string;
-  status: "pending" | "confirmed" | "cancelled";
-  travelDate: string;
-  returnDate?: string;
-  adults: number;
-  children: number;
-  notes?: string;
-}
+import { Ic, Inp, Card, Badge, Modal, Btn, getCurrSym, Sel } from "@/app/components/AdminCore";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchBookings, updateBooking, deleteBooking } from "@/app/store/features/bookings/bookingThunks";
+import { Booking } from "@/app/store/types";
 
 export default function BookingsContent() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { bookings, loading } = useAppSelector(state => state.bookings);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selected, setSelected] = useState<Booking | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/bookings");
-      const data = await res.json();
-      if (data.success) setBookings(data.data);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { fetchBookings(); }, []);
+  useEffect(() => {
+    dispatch(fetchBookings());
+  }, [dispatch]);
 
   const handleStatusChange = async (booking: Booking, newStatus: string) => {
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...booking, status: newStatus }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus as Booking["status"] } : b));
-        if (selected?.id === booking.id) setSelected(b => b ? { ...b, status: newStatus as Booking["status"] } : b);
-      } else { alert("Status update failed."); }
-    } catch (e) { alert("Network error."); }
+    const updated = { ...booking, status: newStatus as Booking["status"] };
+    const result = await dispatch(updateBooking(updated));
+    if (updateBooking.fulfilled.match(result)) {
+      if (selected?.id === booking.id) setSelected(updated);
+    } else {
+      alert("Status update failed.");
+    }
   };
 
   const handleDelete = async (booking: Booking) => {
     if (!confirm(`Delete booking for "${booking.userName}"? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(`/api/bookings?id=\${booking.id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) setBookings(p => p.filter(b => b.id !== booking.id));
-    } catch (e) { alert("Delete failed."); }
+    const result = await dispatch(deleteBooking(booking.id));
+    if (!deleteBooking.fulfilled.match(result)) {
+      alert("Delete failed.");
+    }
   };
 
   const filtered = bookings.filter(b =>
@@ -90,7 +61,7 @@ export default function BookingsContent() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {loading ? (
+              {loading && bookings.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-12 text-gray-400">Loading...</td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-12 text-gray-400">No bookings found.</td></tr>

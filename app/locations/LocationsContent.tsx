@@ -6,32 +6,13 @@ import Footer from "../components/frontend/Footer";
 import SearchBar from "../components/frontend/SearchBar";
 import Link from "next/link";
 
-export default function LocationsContent() {
-  const [regions, setRegions] = useState<any[]>([]);
-  const [destinations, setDestinations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+import { useAppSelector } from "@/app/store/hooks";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [regRes, destRes] = await Promise.all([
-          fetch("/api/regions"),
-          fetch("/api/destinations")
-        ]);
-        const [regData, destData] = await Promise.all([
-          regRes.json(),
-          destRes.json()
-        ]);
-        if (regData.success) setRegions(regData.data);
-        if (destData.success) setDestinations(destData.data);
-      } catch (err) {
-        console.error("FETCH ERROR:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+export default function LocationsContent() {
+  const { regions, loading: regionsLoading } = useAppSelector(state => state.regions);
+  const { destinations, loading: destLoading } = useAppSelector(state => state.destinations);
+  const loading = regionsLoading || destLoading;
+
 
   return (
     <>

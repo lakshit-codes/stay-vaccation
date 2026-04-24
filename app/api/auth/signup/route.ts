@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDatabase } from "../../../utils/getDatabase";
+import { getDatabase } from "@/app/utils/getDatabase";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -54,7 +54,11 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({
       success: true,
+      userId: result.insertedId.toString(),
       role: "user",
+      email: email.toLowerCase().trim(),
+      name: name.trim(),
+      token,
       message: "Account created successfully.",
     });
 

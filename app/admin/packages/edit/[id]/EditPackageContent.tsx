@@ -1,11 +1,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { PackageForm, useStore } from "@/app/components/AdminCore";
+import { PackageForm } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchPackages, updatePackage } from "@/app/store/features/packages/packageThunks";
+import { Package } from "@/app/components/AdminCore";
 
 export default function EditPackageContent({ id }: { id: string }) {
   const router = useRouter();
-  const { setPackages } = useStore();
+  const dispatch = useAppDispatch();
+  const { packages, loading: globalLoading } = useAppSelector(state => state.packages);
 
   const [pkg, setPkg]               = useState<any>(null);
   const [loading, setLoading]       = useState(true);
@@ -14,36 +19,32 @@ export default function EditPackageContent({ id }: { id: string }) {
   const [saved, setSaved]           = useState(false);
   const [saveError, setSaveError]   = useState<string | null>(null);
 
-  // ── Fetch the package DIRECTLY from the API by its MongoDB _id ──
-  // Never rely on shared React state — state may be missing, stale, or injected
-  // with wrong data (e.g. right after duplication, hard refresh, or direct URL nav).
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setFetchError(null);
-    setPkg(null);
-
-    fetch(`/api/packages?id=${encodeURIComponent(id)}`)
-      .then(r => r.json())
-      .then(result => {
-        if (cancelled) return;
-        if (result.success && result.data) {
-          setPkg(result.data);
+    // Try to find in existing packages first, otherwise it's fine as we fetch all in StoreInitializer
+    // However, for direct URL nav, we should ensure packages are loaded.
+    const found = packages.find(p => p.id === id || (p as any)._id === id);
+    if (found) {
+      setPkg(found);
+      setLoading(false);
+    } else if (!globalLoading) {
+      // If not loading and not found, maybe we need to fetch specifically or wait
+      // For now, we'll fetch all packages if they aren't there
+      dispatch(fetchPackages()).then((action) => {
+        if (fetchPackages.fulfilled.match(action)) {
+          const freshFound = action.payload.find(p => p.id === id || (p as any)._id === id);
+          if (freshFound) {
+            setPkg(freshFound);
+          } else {
+            setFetchError("Package not found");
+          }
         } else {
-          setFetchError(result.message || "Package not found");
+          setFetchError("Failed to load packages");
         }
-      })
-      .catch(() => {
-        if (!cancelled) setFetchError("Network error — could not load package");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       });
+    }
+  }, [id, packages, globalLoading, dispatch]);
 
-    return () => { cancelled = true; };
-  }, [id]);
-
-  // ── Save handler ──
   const handleSave = async (data: any) => {
     if (!pkg) return;
     if (!data.title?.trim()) { setSaveError("Package title is required."); return; }
@@ -51,32 +52,21 @@ export default function EditPackageContent({ id }: { id: string }) {
     setSaveError(null);
     setSaved(false);
  
-    let saveResult: any = null;
     try {
-      const res = await fetch("/api/packages", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, id: pkg.id }), // pkg.id = real MongoDB _id hex string
-      });
-      saveResult = await res.json();
-
-      if (saveResult.success) {
-        // Also update the shared store so the package list reflects the new title/data immediately
-        setPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, ...data, id: pkg.id } : p));
+      const resultAction = await dispatch(updatePackage({ ...data, id: pkg.id || pkg._id } as Package));
+      if (updatePackage.fulfilled.match(resultAction)) {
         setSaved(true);
-        // Brief pause to show success state
         setTimeout(() => {
           router.push("/admin/packages");
         }, 1000);
       } else {
-        setSaveError(saveResult.message || "Failed to update package.");
+        setSaveError(resultAction.error?.message || "Failed to update package.");
+        setSaving(false);
       }
     } catch (err) {
       console.error(err);
       setSaveError("Network error. Please try again.");
-    } finally {
-      // Don't turn off saving immediately if we succeeded, to keep the layout stable during redirect
-      if (!saveResult?.success) setSaving(false);
+      setSaving(false);
     }
   };
 

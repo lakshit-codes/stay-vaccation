@@ -1,11 +1,15 @@
 "use client";
 import React, { useState } from "react";
-import { TransferForm, useStore } from "@/app/components/AdminCore";
+import { TransferForm } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { updateTransfer } from "@/app/store/features/transfers/transferThunks";
 
 export default function EditTransferContent({ id }: { id: string }) {
   const router = useRouter();
-  const { transfers, setTransfers } = useStore();
+  const dispatch = useAppDispatch();
+  const { transfers } = useAppSelector(state => state.transfers);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,17 +22,11 @@ export default function EditTransferContent({ id }: { id: string }) {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/transfers", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, _id: id }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setTransfers(p => p.map(item => item._id === id ? { ...data, _id: id } : item));
+      const resultAction = await dispatch(updateTransfer({ ...data, _id: id }));
+      if (updateTransfer.fulfilled.match(resultAction)) {
         router.push("/admin/transfers");
       } else {
-        setError(result.message || "Failed to update transfer.");
+        setError(resultAction.error?.message || "Failed to update transfer.");
       }
     } catch (e) {
       console.error(e);

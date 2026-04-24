@@ -1,6 +1,26 @@
 "use client";
 import React, { useState, useMemo, useRef, createContext, useContext, useEffect } from "react";
 import { useRouter as useNextRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { setPackages } from "@/app/store/features/packages/packageSlice";
+import { fetchPackages, createPackage, updatePackage, deletePackage, importPackages } from "@/app/store/features/packages/packageThunks";
+import { setMasterActivities } from "@/app/store/features/activities/activitySlice";
+import { fetchActivities, createActivity, updateActivity, deleteActivity } from "@/app/store/features/activities/activityThunks";
+import { setMasterHotels } from "@/app/store/features/hotels/hotelSlice";
+import { fetchHotels, createHotel, updateHotel, deleteHotel } from "@/app/store/features/hotels/hotelThunks";
+import { setCoupons } from "@/app/store/features/coupons/couponSlice";
+import { fetchCoupons, createCoupon, updateCoupon, deleteCoupon } from "@/app/store/features/coupons/couponThunks";
+import { setTransfers } from "@/app/store/features/transfers/transferSlice";
+import { fetchTransfers, createTransfer, updateTransfer, deleteTransfer } from "@/app/store/features/transfers/transferThunks";
+import { setDestinations } from "@/app/store/features/destinations/destinationSlice";
+import { fetchDestinations, createDestination, updateDestination, deleteDestination } from "@/app/store/features/destinations/destinationThunks";
+import { setActivityPages } from "@/app/store/features/activityPages/activityPageSlice";
+import { fetchActivityPages, createActivityPage, updateActivityPage, deleteActivityPage } from "@/app/store/features/activityPages/activityPageThunks";
+import { setRegions } from "@/app/store/features/regions/regionSlice";
+import { fetchRegions, createRegion, updateRegion, deleteRegion } from "@/app/store/features/regions/regionThunks";
+import { setCategories } from "@/app/store/features/categories/categorySlice";
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from "@/app/store/features/categories/categoryThunks";
+import { logout } from "@/app/store/features/auth/authThunks";
 
 // ══════════════════════════════════════════════════════════════════
 //   STAY VACATION — Admin Panel v6                                  
@@ -8,37 +28,7 @@ import { useRouter as useNextRouter } from "next/navigation";
 //   Summarised View · SaaS-level Architecture                      
 // ══════════════════════════════════════════════════════════════════
 
-export interface StoreContextType {
-  packages: Package[];
-  setPackages: React.Dispatch<React.SetStateAction<Package[]>>;
-  masterActivities: MasterActivity[];
-  setMasterActivities: React.Dispatch<React.SetStateAction<MasterActivity[]>>;
-  masterHotels: MasterHotel[];
-  setMasterHotels: React.Dispatch<React.SetStateAction<MasterHotel[]>>;
-  coupons: Coupon[];
-  setCoupons: React.Dispatch<React.SetStateAction<Coupon[]>>;
-  transfers: TransferRecord[];
-  setTransfers: React.Dispatch<React.SetStateAction<TransferRecord[]>>;
-  destinations: Destination[];
-  setDestinations: React.Dispatch<React.SetStateAction<Destination[]>>;
-  activityPages: ActivityPage[];
-  setActivityPages: React.Dispatch<React.SetStateAction<ActivityPage[]>>;
-  regions: Region[];
-  setRegions: React.Dispatch<React.SetStateAction<Region[]>>;
-  categories: Category[];
-  setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
-  refreshRegions: () => Promise<void>;
-  refreshDestinations: () => Promise<void>;
-  refreshCategories: () => Promise<void>;
-}
-
-export const StoreContext = createContext<StoreContextType | null>(null);
-
-export const useStore = () => {
-  const context = useContext(StoreContext);
-  if (!context) throw new Error("useStore must be used within StoreContext.Provider");
-  return context;
-};
+// Redux hooks are now used directly in components.
 
 // ─── UTILS ───────────────────────────────────────────────────────
 const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -268,10 +258,12 @@ export interface ItineraryDay {
 
 export interface Package {
   id: string;
+  _id?: string;
   slug?: string;
   title: string;
   destination: string;
   destinationId?: string;
+  destinationSlug?: string;
   categoryId?: string;
   categorySlug?: string;
   tripDuration: string;
@@ -581,6 +573,7 @@ export const Ic = {
   Tag: (p: any) => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
   Booking: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
   Document: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+  Logout: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>,
   Close: (p: any) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...p}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
 };
 
@@ -680,7 +673,7 @@ export const ImageUploader = ({ images = [], onAdd, onRemove, label = "Images" }
 
 // ─── MASTER ACTIVITY FORM ─────────────────────────────────────────
 const MasterActivityForm = ({ initial, onSave, onClose }) => {
-  const { destinations } = useStore();
+  const { destinations } = useAppSelector(state => state.destinations);
   const [form, setForm] = useState(initial || emptyMasterActivity());
   const [tagIn, setTagIn] = useState("");
   const [highIn, setHighIn] = useState("");
@@ -847,7 +840,7 @@ const MasterHotelForm = ({ initial, onSave, onClose }) => {
 
 // ─── ACTIVITY PAGE FORM ───────────────────────────────────────────
 export const ActivityPageForm = ({ initial, onSave, onClose }: { initial: any; onSave: (d: any) => void; onClose: () => void }) => {
-  const [data, setData] = useState<ActivityPage>(initial || {
+  const [data, setData] = useState(initial || {
     slug: "", city: "", heroImages: [], 
     description: { short: "", full: "" },
     activities: [], faqs: [], reviews: []
@@ -971,15 +964,17 @@ export const ActivityPageForm = ({ initial, onSave, onClose }: { initial: any; o
 };
 
 // ─── ACTIVITY PAGES LISTING ───────────────────────────────────────
-export const ActivityPagesPage = () => {
-  const { activityPages, setActivityPages } = useStore();
+export const ActivityPageAdmin = () => {
+  const dispatch = useAppDispatch();
+  const { activityPages } = useAppSelector(state => state.activityPages);
+  const { masterActivities } = useAppSelector(state => state.activities);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ActivityPage | null>(null);
 
   const fetchPages = async () => {
     const res = await fetch("/api/activity-pages");
     const d = await res.json();
-    if (d.success) setActivityPages(d.data);
+    if (d.success) dispatch(setActivityPages(d.data));
   };
 
   const onSave = async (data: ActivityPage) => {
@@ -1062,7 +1057,9 @@ export const ActivityPagesPage = () => {
 
 // ─── MASTER ACTIVITIES PAGE ───────────────────────────────────────
 export const MasterActivitiesPage = () => {
-  const { masterActivities, setMasterActivities, packages } = useStore();
+  const dispatch = useAppDispatch();
+  const { masterActivities } = useAppSelector(state => state.activities);
+  const { packages } = useAppSelector(state => state.packages);
   const [modal, setModal] = useState<{ mode: "create" | "edit"; data: MasterActivity | null } | null>(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -1081,49 +1078,13 @@ export const MasterActivitiesPage = () => {
     return map;
   }, [masterActivities, packages]);
 
-  useEffect(() => {
-    const fetchActivities = async () => {
-      const res = await fetch("/api/activities");
-      const result = await res.json();
-
-      if (result.success) {
-        setMasterActivities(result.data);
-      }
-    };
-
-    fetchActivities();
-  }, [setMasterActivities]);
-
   const handleSave = async (data: MasterActivity) => {
-    try {
-      if (modal?.mode === "create") {
-        const res = await fetch("/api/activities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const result = await res.json();
-        if (result.success) {
-          const newActivity = { ...data, _id: result.insertedId };
-          setMasterActivities(p => [...p, newActivity]);
-        }
-      } else {
-        const res = await fetch("/api/activities", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const result = await res.json();
-        if (result.success) {
-          setMasterActivities(p =>
-            p.map(a => a._id === data._id ? data : a)
-          );
-        }
-      }
-      setModal(null);
-    } catch (err) {
-      console.error("ACTIVITY SAVE ERROR:", err);
+    if (modal?.mode === "create") {
+      dispatch(createActivity(data));
+    } else {
+      dispatch(updateActivity(data));
     }
+    setModal(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -1135,32 +1096,14 @@ export const MasterActivitiesPage = () => {
         : "Delete this master activity?"
     )) return;
 
-    try {
-      const res = await fetch("/api/activities?id=" + id, { method: "DELETE" });
-      const result = await res.json();
-
-      if (result.success) {
-        setMasterActivities(p => p.filter(a => a._id !== id));
-      } else {
-        alert("Delete failed: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("DELETE ERROR:", err);
-      alert("Network error. Delete failed.");
-    }
+    dispatch(deleteActivity(id));
   };
 
   const typeCls: Record<string, string> = { meal: "text-amber-700 bg-amber-50 border-amber-200", sightseeing: "text-blue-700 bg-blue-50 border-blue-200", adventure: "text-emerald-700 bg-emerald-50 border-emerald-200", transfer: "text-orange-700 bg-orange-50 border-orange-200", leisure: "text-violet-700 bg-violet-50 border-violet-200", wellness: "text-pink-700 bg-pink-50 border-pink-200", shopping: "text-rose-700 bg-rose-50 border-rose-200" };
 
   return (
     <div className="space-y-5">
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
-        <div className="text-blue-600 mt-0.5"><Ic.Info /></div>
-        <div>
-          <p className="text-sm font-semibold text-blue-900">Master Activity Catalog — Global Reusable Records</p>
-          <p className="text-xs text-blue-700 mt-0.5">In production: <code className="bg-blue-100 px-1 rounded">MasterActivity</code> MongoDB collection. Packages reference activities via <code className="bg-blue-100 px-1 rounded">activityRef → ObjectId</code>. Editing a master record auto-updates all linked packages via populate().</p>
-        </div>
-      </div>
+
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-48"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></div><Inp className="pl-9" placeholder="Search activities…" value={search} onChange={e => setSearch(e.target.value)} /></div>
         <Sel className="w-40" options={OPTIONS.activityType} placeholder="All Types" value={filterType} onChange={e => setFilterType(e.target.value)} />
@@ -1208,26 +1151,11 @@ export const MasterActivitiesPage = () => {
 
 // ─── MASTER HOTELS PAGE ───────────────────────────────────────────
 export const MasterHotelsPage = () => {
-  const { masterHotels, setMasterHotels, packages } = useStore();
+  const dispatch = useAppDispatch();
+  const { masterHotels } = useAppSelector(state => state.hotels);
+  const { packages } = useAppSelector(state => state.packages);
   const [modal, setModal] = useState<{ mode: "create" | "edit"; data: MasterHotel | null } | null>(null);
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const fetchHotels = async () => {
-      try {
-        const res = await fetch("/api/hotels");
-        const result = await res.json();
-
-        if (result.success) {
-          setMasterHotels(result.data);
-        }
-      } catch (err) {
-        console.error("FETCH HOTEL ERROR:", err);
-      }
-    };
-
-    fetchHotels();
-  }, [setMasterHotels]);
 
   const filtered = masterHotels.filter(h => !search || h.hotelName.toLowerCase().includes(search.toLowerCase()) || (h.city && h.city.toLowerCase().includes(search.toLowerCase())));
 
@@ -1241,40 +1169,12 @@ export const MasterHotelsPage = () => {
   }, [masterHotels, packages]);
 
   const handleSave = async (data: MasterHotel) => {
-    try {
-      if (modal?.mode === "create") {
-        const res = await fetch("/api/hotels", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-          const newHotel = { ...data, _id: result.insertedId };
-          setMasterHotels(p => [...p, newHotel]);
-        }
-
-      } else {
-        const res = await fetch("/api/hotels", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-          setMasterHotels(p => p.map(h => h._id === data._id ? data : h));
-        }
-      }
-
-      setModal(null);
-
-    } catch (err) {
-      console.error("HOTEL SAVE ERROR:", err);
+    if (modal?.mode === "create") {
+      dispatch(createHotel(data));
+    } else {
+      dispatch(updateHotel(data));
     }
+    setModal(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -1286,30 +1186,12 @@ export const MasterHotelsPage = () => {
         : "Delete this hotel?"
     )) return;
 
-    try {
-      const res = await fetch("/api/hotels?id=" + id, { method: "DELETE" });
-      const result = await res.json();
-
-      if (result.success) {
-        setMasterHotels(p => p.filter(h => h._id !== id));
-      } else {
-        alert("Delete failed: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("DELETE HOTEL ERROR:", err);
-      alert("Network error. Delete failed.");
-    }
+    dispatch(deleteHotel(id));
   };
 
   return (
     <div className="space-y-5">
-      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-        <div className="text-emerald-600 mt-0.5"><Ic.Info /></div>
-        <div>
-          <p className="text-sm font-semibold text-emerald-900">Master Hotel Catalog — Global Reusable Records</p>
-          <p className="text-xs text-emerald-700 mt-0.5">In production: <code className="bg-emerald-100 px-1 rounded">MasterHotel</code> MongoDB collection. Packages reference hotels via <code className="bg-emerald-100 px-1 rounded">hotelRef → ObjectId</code>. Edit master → all packages reflect changes instantly via populate().</p>
-        </div>
-      </div>
+
       <div className="flex items-center gap-3">
         <div className="relative flex-1"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></div><Inp className="pl-9" placeholder="Search hotels, cities…" value={search} onChange={e => setSearch(e.target.value)} /></div>
         <Btn onClick={() => setModal({ mode: "create", data: null })}><Ic.Plus />New Hotel</Btn>
@@ -1519,8 +1401,60 @@ export const RegionForm = ({ initial, onSave, onCancel }) => {
   );
 };
 
+export const ActivityRefSelector = ({ value, onChange, label, className = "" }: { value: string | null; onChange: (id: string | null) => void; label?: string; className?: string }) => {
+  const { masterActivities } = useAppSelector(state => state.activities);
+  return (
+    <div className={className}>
+      {label && <FL>{label}</FL>}
+      <Sel 
+        placeholder="— Select from catalog —"
+        options={masterActivities.map(a => ({ label: a.title, value: a._id }))}
+        value={value || ""}
+        onChange={e => onChange(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export const HotelRefSelector = ({ value, onChange, label, className = "" }: { value: string | null; onChange: (id: string | null) => void; label?: string; className?: string }) => {
+  const { masterHotels } = useAppSelector(state => state.hotels);
+  return (
+    <div className={className}>
+      {label && <FL>{label}</FL>}
+      <Sel 
+        placeholder="— Select from catalog —"
+        options={masterHotels.map(h => ({ label: h.hotelName, value: h._id }))}
+        value={value || ""}
+        onChange={e => onChange(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export const TransferRefSelector = ({ value, onChange, label, className = "" }: { value: string | null; onChange: (id: string | null) => void; label?: string; className?: string }) => {
+  const { transfers } = useAppSelector(state => state.transfers);
+  return (
+    <div className={className}>
+      {label && <FL>{label}</FL>}
+      <Sel 
+        placeholder="— Select from routes —"
+        options={transfers.map(t => ({ label: `${t.pickupLocation} → ${t.dropLocation}`, value: t._id }))}
+        value={value || ""}
+        onChange={e => onChange(e.target.value)}
+      />
+    </div>
+  );
+};
+
+export const QuickPackageBuilder = ({ onAdd }: { onAdd: (p: Package) => void }) => {
+  const { masterActivities } = useAppSelector(state => state.activities);
+  const { masterHotels } = useAppSelector(state => state.hotels);
+  const { transfers } = useAppSelector(state => state.transfers);
+  // Implementation...
+};
+
 const ActivityPicker = ({ dayAct, dayId, onUpdate, onRemove }) => {
-  const { masterActivities } = useStore();
+  const { masterActivities } = useAppSelector(state => state.activities);
   const [open, setOpen] = useState(true);
   const resolved = resolveActivity(dayAct, masterActivities);
   const upd = (f, v) => onUpdate(dayId, dayAct.id, f, v);
@@ -1580,9 +1514,8 @@ const ActivityPicker = ({ dayAct, dayId, onUpdate, onRemove }) => {
 };
 
 // ─── HOTEL PICKER (two-way sync) ──────────────────────────────────
-// ─── HOTEL PICKER (two-way sync) ──────────────────────────────────
 const HotelPicker = ({ dayHotel, dayId, onUpdate, onRemove }) => {
-  const { masterHotels } = useStore();
+  const { masterHotels } = useAppSelector(state => state.hotels);
   const [open, setOpen] = useState(true);
   const resolved = resolveHotel(dayHotel, masterHotels);
   const upd = (f, v) => onUpdate(dayId, dayHotel.id, f, v);
@@ -1665,7 +1598,7 @@ const HotelPicker = ({ dayHotel, dayId, onUpdate, onRemove }) => {
 
 // ─── TRANSFER PICKER (manual + existing) ──────────────────────────
 const TransferPicker = ({ dayTr, dayId, onUpdate, onRemove }) => {
-  const { transfers } = useStore();
+  const { transfers } = useAppSelector(state => state.transfers);
   const [open, setOpen] = useState(true);
   const resolved = resolveTransfer(dayTr, transfers);
   const upd = (f, v) => onUpdate(dayId, dayTr.id, f, v);
@@ -1741,7 +1674,9 @@ const TransferPicker = ({ dayTr, dayId, onUpdate, onRemove }) => {
 
 // ─── SUMMARISED VIEW ──────────────────────────────────────────────
 const SummarisedView = ({ itinerary, pkg }) => {
-  const { masterActivities, masterHotels, transfers } = useStore();
+  const { masterActivities } = useAppSelector(state => state.activities);
+  const { masterHotels } = useAppSelector(state => state.hotels);
+  const { transfers } = useAppSelector(state => state.transfers);
   const [openDays, setOpenDays] = useState(() => new Set([itinerary[0]?.id]));
   const toggle = (id) => setOpenDays(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const mealCls = { Breakfast: "bg-amber-100 text-amber-800", Lunch: "bg-orange-100 text-orange-800", Dinner: "bg-rose-100 text-rose-800" };
@@ -2675,8 +2610,8 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
     });
   };
 
-  const currObj = CURRENCIES.find(c => c.code === (form.price?.currency || "INR")) || CURRENCIES[0];
-  const sym = currObj.symbol;
+  const { destinations } = useAppSelector(state => state.destinations);
+  const { categories } = useAppSelector(state => state.categories);
 
   return (
     <div className="max-w-5xl mx-auto pb-10 space-y-6">
@@ -2692,10 +2627,10 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
             <FL required>Destination</FL>
             <Sel 
               placeholder="Select destination…" 
-              options={useStore().destinations.map(d => ({ label: d.name, value: d._id }))} 
+              options={destinations.map(d => ({ label: d.name, value: d._id }))} 
               value={form.destinationId || ""} 
               onChange={e => {
-                const dest = useStore().destinations.find(d => d._id === e.target.value);
+                const dest = destinations.find(d => d._id === e.target.value);
                 if (dest) {
                   setForm(p => ({
                     ...p,
@@ -2711,10 +2646,10 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
             <FL>Category</FL>
             <Sel 
               placeholder="Select category…" 
-              options={useStore().categories.map(c => ({ label: c.name, value: c._id || "" }))} 
+              options={categories.map(c => ({ label: c.name, value: c._id || "" }))} 
               value={form.categoryId || ""} 
               onChange={e => {
-                const cat = useStore().categories.find(c => c._id === e.target.value);
+                const cat = categories.find(c => c._id === e.target.value);
                 setForm(p => ({
                   ...p,
                   categoryId: cat?._id || "",
@@ -2744,7 +2679,7 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
               </div>
               {/* Amount input with symbol prefix */}
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold select-none">{sym}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold select-none">{getCurrSym(form.price?.currency || "INR")}</span>
                 <Inp
                   type="number"
                   placeholder="0.00"
@@ -2757,7 +2692,7 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
             {form.price?.amount && Number(form.price.amount) > 0 && (
               <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
                 <Ic.Check />
-                Display: <strong className="ml-1 text-blue-900">{sym}{Number(form.price.amount).toLocaleString("en-IN")} {form.price?.currency}</strong>
+                Display: <strong className="ml-1 text-blue-900">{getCurrSym(form.price?.currency || "INR")}{Number(form.price.amount).toLocaleString("en-IN")} {form.price?.currency}</strong>
               </p>
             )}
           </div>
@@ -2824,7 +2759,7 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
 
 // ─── VIEW PACKAGE ─────────────────────────────────────────────────
 export const ViewPackage = ({ pkg, onEdit }: any) => {
-  const { transfers } = useStore();
+  const { transfers } = useAppSelector(state => state.transfers);
   const [tab, setTab] = useState("summary");
   const sym = getCurrSym(pkg.price?.currency);
   const [kbygOpen, setKbygOpen] = useState(true);
@@ -3053,16 +2988,15 @@ const emptyCouponForm = (): CouponFormData => ({
 });
 
 export const CouponsPage = () => {
-  const { coupons, setCoupons } = useStore();
+  const dispatch = useAppDispatch();
+  const { coupons } = useAppSelector(state => state.coupons);
   const [modal, setModal] = useState<{ mode: "create" | "edit"; data: Coupon | null } | null>(null);
   const [form, setForm] = useState<CouponFormData>(emptyCouponForm());
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/coupons").then(r => r.json())
-      .then(res => { if (res.success) setCoupons(res.data); })
-      .catch(console.error);
-  }, [setCoupons]);
+    dispatch(fetchCoupons());
+  }, [dispatch]);
 
   const filtered = coupons.filter(c =>
     !search || c.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -3079,35 +3013,28 @@ export const CouponsPage = () => {
 
   const handleSave = async () => {
     if (!form.code.trim()) { alert("Coupon code is required"); return; }
-    try {
-      const payload = { ...form, discountValue: Number(form.discountValue) || 0, minOrderValue: Number(form.minOrderValue) || 0, maxUses: Number(form.maxUses) || 0 };
-      if (modal?.mode === "create") {
-        const res = await fetch("/api/coupons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        const result = await res.json();
-        if (result.success) { setCoupons(p => [...p, { ...payload, _id: result.insertedId, usedCount: 0 }]); setModal(null); }
-      } else if (modal?.data) {
-        const full = { ...modal.data, ...payload };
-        const res = await fetch("/api/coupons", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(full) });
-        const result = await res.json();
-        if (result.success) { setCoupons(p => p.map(c => c._id === modal.data!._id ? full : c)); setModal(null); }
-      }
-    } catch (err) { console.error(err); }
+    const payload = { ...form, discountValue: Number(form.discountValue) || 0, minOrderValue: Number(form.minOrderValue) || 0, maxUses: Number(form.maxUses) || 0 };
+    
+    if (modal?.mode === "create") {
+      dispatch(createCoupon(payload)).then((res) => {
+        if (createCoupon.fulfilled.match(res)) setModal(null);
+        else alert("Failed to create coupon: " + (res.error?.message || "Unknown error"));
+      });
+    } else if (modal?.data) {
+      dispatch(updateCoupon({ ...modal.data, ...payload })).then((res) => {
+        if (updateCoupon.fulfilled.match(res)) setModal(null);
+        else alert("Failed to update coupon: " + (res.error?.message || "Unknown error"));
+      });
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this coupon?")) return;
-    try {
-      const res = await fetch("/api/coupons?id=" + id, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        setCoupons(p => p.filter(c => c._id !== id));
-      } else {
-        alert("Delete failed: " + (result.message || "Unknown error"));
+    dispatch(deleteCoupon(id)).then((res) => {
+      if (!deleteCoupon.fulfilled.match(res)) {
+        alert("Delete failed: " + (res.error?.message || "Unknown error"));
       }
-    } catch (err) {
-      console.error(err);
-      alert("Network error. Delete failed.");
-    }
+    });
   };
 
   const getStatus = (c: Coupon) => {
@@ -3188,7 +3115,8 @@ export const CouponsPage = () => {
 
 // ─── PACKAGES LISTING ─────────────────────────────────────────────
 export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
-  const { packages, setPackages } = useStore();
+  const dispatch = useAppDispatch();
+  const { packages } = useAppSelector(state => state.packages);
   const _pkgRouter = useNextRouter();
   const [search, setSearch] = useState("");
   const [bookingModal, setBookingModal] = useState<Package | null>(null);
@@ -3445,7 +3373,7 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
                         <button onClick={() => _pkgRouter.push('/admin/packages/view/' + pkg.id)} className="p-1.5 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors" title="View"><Ic.Eye /></button>
                         <button onClick={() => _pkgRouter.push('/admin/packages/edit/' + pkg.id)} className="p-1.5 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors" title="Edit"><Ic.Edit /></button>
                         <button onClick={() => onDuplicate(pkg)} className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1" title="Duplicate Package"><Ic.Package /></button>
-                        <button onClick={async () => { if (!window.confirm("Delete this package?")) return; try { const res = await fetch("/api/packages?id=" + pkg.id, { method: "DELETE" }); const result = await res.json(); if (result.success) setPackages(p => p.filter(x => x.id !== pkg.id)); else alert("Delete failed: " + (result.message || "Unknown error")); } catch { alert("Network error. Delete failed."); } }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Delete"><Ic.Trash /></button>
+                        <button onClick={async () => { if (!window.confirm("Delete this package?")) return; dispatch(deletePackage(pkg.id)).then((res) => { if (!deletePackage.fulfilled.match(res)) alert("Delete failed: " + (res.error?.message || "Unknown error")); }); }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Delete"><Ic.Trash /></button>
                         <button onClick={() => setBookingModal(pkg)} className="ml-2 px-2.5 py-1 text-xs font-bold text-white bg-blue-900 hover:bg-blue-800 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"><Ic.Plus />Book</button>
                       </div>
                     </td>
@@ -3526,27 +3454,23 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
                   }
 
                   const dataToImport = parsed.data;
-                  const res = await fetch("/api/packages/import", { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(dataToImport) 
-                  });
-                  const result = await res.json();
-                  
-                  if (result.success) {
-                    let msg = `Import complete: ${result.imported} imported, ${result.skipped} skipped out of ${result.total} total.`;
-                    if (result.errors?.length) {
-                       msg += `\nErrors: ${result.errors.map((e:any) => e.packageTitle + " - " + e.reason).join(" | ")}`;
+                  dispatch(importPackages(dataToImport)).then((res) => {
+                    if (importPackages.fulfilled.match(res)) {
+                      const result = res.payload;
+                      let msg = `Import complete: ${result.imported} imported, ${result.skipped} skipped out of ${result.total} total.`;
+                      if (result.errors?.length) {
+                        msg += `\nErrors: ${result.errors.map((e: any) => e.packageTitle + " - " + e.reason).join(" | ")}`;
+                      }
+                      alert(msg);
+                      dispatch(fetchPackages()); // Refresh the list
+                    } else {
+                      alert("Import failed: " + (res.error?.message || "Unknown error"));
                     }
-                    alert(msg);
-                  } else {
-                    alert("Import failed: " + result.message);
-                  }
-                  window.location.reload();
+                    setIsImporting(false);
+                  });
                 } catch (err: any) {
                   console.error(err);
                   alert("Failed to import. Error: " + err.message);
-                } finally {
                   setIsImporting(false);
                 }
               }}
@@ -3708,8 +3632,10 @@ const BookingFormModal = ({ pkg, onClose }: { pkg: Package; onClose: () => void 
 
 
 // ─── DASHBOARD ────────────────────────────────────────────────────
-export const Dashboard = ({ setPage, onOpenDuplicateModal, transfers, setTransfers, destinations, setDestinations }: any) => {
-  const { packages, masterActivities, masterHotels } = useStore();
+export const Dashboard = ({ setPage, onOpenDuplicateModal }: any) => {
+  const { packages } = useAppSelector(state => state.packages);
+  const { masterActivities } = useAppSelector(state => state.activities);
+  const { masterHotels } = useAppSelector(state => state.hotels);
   const totalDays = packages.reduce((s, p) => s + (p.itinerary?.length || 0), 0);
   const linkedActs = packages.reduce((s, p) => s + (p.itinerary?.reduce((sd, d) => sd + (d.activities?.filter(a => a.activityRef).length || 0), 0) || 0), 0);
   const linkedHotels = packages.reduce((s, p) => s + (p.itinerary?.reduce((sd, d) => sd + (d.hotelStays?.filter(h => h.hotelRef).length || 0), 0) || 0), 0);
@@ -3724,21 +3650,7 @@ export const Dashboard = ({ setPage, onOpenDuplicateModal, transfers, setTransfe
 
   return (
     <div className="space-y-6">
-      {/* Sync banner */}
-      <div className="p-4 bg-gradient-to-r from-blue-950 to-blue-900 rounded-xl text-white flex items-start gap-4">
-        <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0"><Ic.Sync /></div>
-        <div className="flex-1">
-          <p className="text-sm font-bold">Two-Way Sync Architecture Active</p>
-          <p className="text-xs text-blue-300 mt-0.5">
-            Master Activities & Hotels sync to all packages via <code className="bg-white/10 px-1 rounded">activityRef</code> / <code className="bg-white/10 px-1 rounded">hotelRef</code> ObjectIds.
-            Edit a master record → all packages reflect changes instantly via MongoDB populate().
-          </p>
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <Btn variant="ghost" size="sm" className="text-blue-200 hover:bg-white/10" onClick={() => setPage("master-activities")}><Ic.Activity />Activities</Btn>
-          <Btn variant="ghost" size="sm" className="text-blue-200 hover:bg-white/10" onClick={() => setPage("master-hotels")}><Ic.Hotel />Hotels</Btn>
-        </div>
-      </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
@@ -3821,6 +3733,14 @@ const STATUS_COLORS = {
 
 // ─── SIDEBAR ──────────────────────────────────────────────────────
 export const Sidebar = ({ page, setPage, counts }) => {
+  const dispatch = useAppDispatch();
+  const router = useNextRouter();
+  const { user } = useAppSelector(state => state.auth);
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    router.push("/");
+  };
   const nav = [
     { key: "dashboard", label: "Dashboard", icon: <Ic.Dashboard />, group: "main" },
     { key: "packages", label: "Travel Packages", icon: <Ic.Package />, group: "main", badge: counts.packages },
@@ -3842,7 +3762,7 @@ export const Sidebar = ({ page, setPage, counts }) => {
       <div className="px-5 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg"><Ic.Globe /></div>
-          <div><div className="font-bold text-sm tracking-wide">Stay Vacation</div><div className="text-xs text-blue-400">Admin Panel v6</div></div>
+          <div><div className="font-bold text-sm tracking-wide">Stay Vacation</div></div>
         </div>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -3866,13 +3786,26 @@ export const Sidebar = ({ page, setPage, counts }) => {
           ))}
         </div>
       </nav>
-      <div className="px-4 py-3 mx-3 mb-4 bg-blue-900/50 rounded-xl border border-blue-800/60 text-xs text-blue-300 space-y-0.5">
-        <p className="font-bold text-blue-200">v6 Features</p>
-        <p>✓ Master Activity catalog</p><p>✓ Master Hotel catalog</p>
-        <p>✓ Two-way activityRef/hotelRef sync</p>
-        <p>✓ Summarised View tab</p><p>✓ Override fields per package</p>
+
+      <div className="px-4 py-3 border-t border-white/10 bg-black/10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">
+            {user?.email?.[0]?.toUpperCase() || "A"}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white truncate">{user?.email || "Admin User"}</p>
+            <p className="text-[9px] text-blue-400 uppercase tracking-tighter">Administrator</p>
+          </div>
+        </div>
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all uppercase tracking-wider"
+        >
+          <Ic.Logout className="w-3.5 h-3.5" />
+          Sign Out
+        </button>
       </div>
-      <div className="px-5 py-3 border-t border-white/10"><p className="text-xs text-blue-600">© 2025 Stay Vacation</p></div>
+      <div className="px-5 py-3 border-t border-white/5 opacity-40"><p className="text-[9px] text-blue-600">© 2025 Stay Vacation</p></div>
     </aside>
   );
 };
@@ -3889,153 +3822,6 @@ export const Topbar = ({ title, subtitle }) => (
 
 // ─── APP ROOT ─────────────────────────────────────────────────────
 export const AdminStateProvider = ({ children }: { children: React.ReactNode }) => {
-  const [formData, setFormData] = useState({
-    title: "",
-    destination: "",
-    duration: "",
-    price: {
-      currency: "INR",
-      amount: ""
-    },
-    travelStyle: "",
-    exclusivity: "",
-    shortDescription: "",
-    fullDescription: "",
-    itinerary: [],
-    inclusions: [],
-    exclusions: [],
-    faqs: [],
-    guidelines: [],
-    aboutDestination: "",
-    quickInfo: {},
-    experiencesCovered: [],
-    notToMiss: [],
-  });
-  const [duplicatePkgData, setDuplicatePkgData] = useState<any>(null);
-  const [page, setPage] = useState("dashboard");
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [transfers, setTransfers] = useState<TransferRecord[]>([]);
-  const [destinations, setDestinations] = useState<Destination[]>([]);
-  const [activityPages, setActivityPages] = useState<ActivityPage[]>([]);
-  const [masterActivities, setMasterActivities] = useState(INIT_ACTIVITIES);
-  const [masterHotels, setMasterHotels] = useState(INIT_HOTELS);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedId, setSelectedId] = useState(null);
-  const [regions, setRegions] = useState<Region[]>([]);
-  const fetchPackages = async () => {
-    try {
-      const res = await fetch("/api/packages");
-      const result = await res.json();
-
-      if (result.success) {
-        setPackages(result.data);   // backend already normalized
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchTransfers = async () => {
-    try {
-      const res = await fetch("/api/transfers");
-      const result = await res.json();
-      if (result.success) setTransfers(result.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const fetchDestinations = async () => {
-    try {
-      const res = await fetch("/api/destinations");
-      const result = await res.json();
-      if (result.success) setDestinations(result.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const fetchActivityPages = async () => {
-    try {
-      const res = await fetch("/api/activity-pages");
-      const result = await res.json();
-      if (result.success) setActivityPages(result.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const fetchRegions = async () => {
-    try {
-      const res = await fetch("/api/regions");
-      const result = await res.json();
-      if (result.success) setRegions(result.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      const result = await res.json();
-      if (result.success) setCategories(result.data);
-    } catch (err) { console.error(err); }
-  };
-
-  useEffect(() => {
-    fetchPackages();
-    fetchTransfers();
-    fetchDestinations();
-    fetchActivityPages();
-    fetchRegions();
-    fetchCategories();
-  }, []);
-  const selectedPkg = packages.find(p => p.id === selectedId);
-
-  const store = { 
-    packages, setPackages, 
-    masterActivities, setMasterActivities, 
-    masterHotels, setMasterHotels, 
-    coupons, setCoupons, 
-    transfers, setTransfers,
-    destinations, setDestinations,
-    activityPages, setActivityPages,
-    regions, setRegions,
-    categories, setCategories,
-    refreshRegions: fetchRegions, refreshDestinations: fetchDestinations,
-    refreshCategories: fetchCategories
-  };
-
-  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
-  const [duplicateBasePkgId, setDuplicateBasePkgId] = useState("");
-
-  const handleDuplicateModalSubmit = (basePkg: Package | undefined, days: number) => {
-    if (!basePkg) return alert("Select base package");
-    if (days < 1 || days > 15) return alert("Validation Failed: Duration must be between 1 and 15 days");
-
-    const cloned = JSON.parse(JSON.stringify(basePkg));
-
-    // OVERRIDE: Prevent DB overwrite by vigorously stripping IDs
-    delete cloned._id;
-    delete cloned.id;
-    delete cloned.createdAt;
-    delete cloned.updatedAt;
-
-    cloned.id = uid();
-    cloned.title = (cloned.title || "Untitled") + " (Copy)";
-    cloned.slug = (cloned.slug || cloned.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) + "-" + Date.now();
-    cloned.tripDuration = `${days} Days / ${days - 1} Nights`;
-    
-    if (!cloned.itinerary) cloned.itinerary = [];
-    const currentLen = cloned.itinerary.length;
-    
-    if (days < currentLen) cloned.itinerary = cloned.itinerary.slice(0, days);
-    else if (days > currentLen) {
-      cloned.itinerary = [
-         ...cloned.itinerary, 
-         ...Array.from({ length: days - currentLen }, (_, i) => makeDay(currentLen + i + 1))
-      ];
-    }
-    
-    setDuplicatePkgData(cloned);
-    setDuplicateModalOpen(false);
-    setPage("create");
-  };
-
   const handleSeed = async () => {
     if (!confirm("Are you sure? This will safely inject demo data. Existing user data will be kept intact.")) return;
     try {
@@ -4052,152 +3838,14 @@ export const AdminStateProvider = ({ children }: { children: React.ReactNode }) 
     }
   };
 
-  // Expose seed function to window for the button in Dashboard
   useEffect(() => {
     (window as any).handleGlobalSeed = handleSeed;
-  }, [packages]);
-
-  const PAGE_META = {
-    dashboard: { title: "Dashboard", subtitle: "Stay Vacation — Travel Management" },
-    packages: { title: "Travel Packages", subtitle: `${packages.length} packages in catalog` },
-    create: { title: "Create Package", subtitle: "Add a new travel package" },
-    edit: { title: "Edit Package", subtitle: selectedPkg ? `Editing: ${selectedPkg.title || selectedPkg.destination}` : "" },
-    view: { title: "Package Details", subtitle: selectedPkg ? `${selectedPkg.destination} · ${selectedPkg.tripDuration}` : "" },
-    "master-activities": { title: "Master Activities", subtitle: `${masterActivities.length} reusable activities in global catalog` },
-    "master-hotels": { title: "Master Hotels", subtitle: `${masterHotels.length} hotels in global catalog` },
-    "coupons": { title: "Coupons", subtitle: `${coupons.length} discount coupon${coupons.length !== 1 ? "s" : ""}` },
-    "bookings": { title: "Bookings", subtitle: "View and manage all guest bookings" },
-    "transfers": { title: "Transfer Management", subtitle: `${transfers.length} active routes` },
-    "destinations": { title: "Destinations", subtitle: `${destinations.length} destinations in catalog` },
-    "activity-pages": { title: "Activities Pages", subtitle: `${activityPages.length} landing pages` },
-    "categories": { title: "Categories", subtitle: `${categories.length} homepage categories` },
-  };
-  const meta = PAGE_META[page] || PAGE_META.dashboard;
-
-  const emptyPkg = () => ({
-    id: uid(), title: "", destination: "", destinationId: "", categoryId: "", categorySlug: "", tripDuration: "", travelStyle: "", tourType: "",
-    exclusivityLevel: "Premium", price: { currency: "INR", amount: "" },
-    shortDescription: "", longDescription: "",
-    availability: { availableMonths: [], fixedDepartureDates: [], blackoutDates: [] },
-    inclusions: [], exclusions: [], knowBeforeYouGo: [], additionalInfo: emptyAdditionalInfo(), faqs: [], itinerary: [], createdAt: new Date().toISOString().split("T")[0],
-  });
-
-  // const handleInputChange = (e:any) => {
-  //   const {name, value} = e.target
-  // }
-
-  const handleCreate = async (data) => {
-    try {
-
-      if (!data.itinerary) {
-        data.itinerary = [];
-      }
-
-      const formattedPackage = {
-        ...data,
-
-        itinerary: (data.itinerary || []).map((day, index) => ({
-          id: day.id,
-          dayNumber: index + 1,
-          title: day.title,
-          city: day.city,
-          dayType: day.dayType,
-          mealsIncluded: day.mealsIncluded || [],
-          notes: day.notes,
-          description: day.description,
-
-          hotelStays: (day.hotelStays || []).map((hotel) => ({
-            id: hotel.id,
-            hotelRef: hotel.hotelRef,
-            roomType: hotel.roomType,
-            checkInTime: hotel.checkInTime,
-            checkOutTime: hotel.checkOutTime,
-            mealInclusions: hotel.mealInclusions,
-            notes: hotel.notes,
-          })),
-
-          activities: (day.activities || []).map((act) => ({
-            id: act.id,
-            activityRef: act.activityRef,
-            time: act.time,
-            coverTitle: act.coverTitle,
-            customTitle: act.customTitle,
-            customDescription: act.customDescription,
-            guideIncluded: act.guideIncluded,
-            ticketIncluded: act.ticketIncluded,
-          })),
-
-          transfers: (day.transfers || []).map((tr) => ({
-            id: tr.id,
-            source: tr.source || "custom",
-            transferId: tr.transferId || null,
-            transferType: tr.transferType,
-            vehicleType: tr.vehicleType,
-            from: tr.from,
-            to: tr.to,
-            startTime: tr.startTime,
-            endTime: tr.endTime,
-            notes: tr.notes,
-          })),
-        })),
-      };
-
-      const res = await fetch("/api/packages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedPackage),
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        alert("Package saved ✅");
-        fetchPackages();
-        setDuplicatePkgData(null);
-        setPage("packages");
-      } else {
-        alert("Failed to save: " + (result.message || "Unknown error"));
-      }
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const handleEdit = async (data) => {
-    try {
-      console.log("EDIT DATA", data);
-
-      const formattedPackage = {
-        ...data,
-        id: selectedId,   // ✅ ensure id is always sent
-      };
-
-      const res = await fetch("/api/packages", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedPackage),
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        alert("Package updated ✅");
-        fetchPackages();
-        setPage("packages");
-      } else {
-        alert("Update failed: " + (result.message || "Unknown error"));
-      }
-
-    } catch (err) {
-      console.error(err);
-      alert("Update failed due to a network or server error.");
-    }
-  };
+  }, []);
 
   return (
-        <StoreContext.Provider value={store}>
+    <>
       {children}
-    </StoreContext.Provider>
+    </>
   );
 };
 

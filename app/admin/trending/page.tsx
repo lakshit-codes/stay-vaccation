@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Ic, Badge, useStore } from "@/app/components/AdminCore";
+import { Ic, Badge } from "@/app/components/AdminCore";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Category = "India" | "International";
@@ -11,31 +11,23 @@ interface RowState {
   category: Category;
 }
 
-// ─── Save a single destination's trending + category to the DB ────────────────
-async function saveDestination(id: string, patch: RowState): Promise<void> {
-  const res = await fetch("/api/destinations", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ _id: id, ...patch }),
-  });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.message || "Save failed");
-}
-
 // ─── Main page ────────────────────────────────────────────────────────────────
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { updateDestination, fetchDestinations } from "@/app/store/features/destinations/destinationThunks";
+import { Destination } from "@/app/components/AdminCore";
+
 export default function TrendingDestinationsAdminPage() {
-  const { destinations, setDestinations, refreshDestinations } = useStore();
+  const dispatch = useAppDispatch();
+  const { destinations } = useAppSelector(state => state.destinations);
 
   const [search,    setSearch]    = useState("");
   const [filterTab, setFilterTab] = useState<"All" | "Trending" | "India" | "International">("All");
 
-  // Per-row dirty state: { [_id]: { isTrending, category } }
   const [edits,   setEdits]   = useState<Record<string, RowState>>({});
   const [saving,  setSaving]  = useState<Record<string, boolean>>({});
   const [saved,   setSaved]   = useState<Record<string, boolean>>({});
   const [errors,  setErrors]  = useState<Record<string, string>>({});
 
-  // ── Normalise store into a flat list ──────────────────────────────────────
   const rows = useMemo(() =>
     destinations.map((d) => ({
       _id:          d._id ?? "",
@@ -44,19 +36,16 @@ export default function TrendingDestinationsAdminPage() {
       image:        d.image,
       packageCount: d.packageCount ?? 0,
       isActive:     (d as any).isActive,
-      // committed (DB) values
       isTrending: d.isTrending ?? false,
       category:   (d.category === "International" ? "International" : "India") as Category,
     })),
   [destinations]);
 
-  // Effective value = pending edit OR committed DB value
   const get = (id: string, field: keyof RowState, committed: any) =>
     edits[id]?.[field] !== undefined ? edits[id][field] : committed;
 
   const isDirty = (id: string) => !!edits[id];
 
-  // ── Change handlers (local only — not saved yet) ───────────────────────────
   const setField = (id: string, field: keyof RowState, value: any) => {
     setSaved((p) => { const n = { ...p }; delete n[id]; return n; });
     setErrors((p) => { const n = { ...p }; delete n[id]; return n; });
@@ -71,7 +60,6 @@ export default function TrendingDestinationsAdminPage() {
     }));
   };
 
-  // ── Save one row ───────────────────────────────────────────────────────────
   const handleSave = async (id: string) => {
     const row = rows.find((r) => r._id === id);
     if (!row) return;
@@ -84,16 +72,18 @@ export default function TrendingDestinationsAdminPage() {
     setErrors((p) => { const n = { ...p }; delete n[id]; return n; });
 
     try {
-      await saveDestination(id, patch);
+      const dest = destinations.find(d => d._id === id);
+      if (!dest) throw new Error("Destination not found");
 
-      // Commit to store
-      setDestinations((prev) =>
-        prev.map((d) => d._id === id ? { ...d, ...patch } : d)
-      );
-      // Clear dirty state
-      setEdits((p) => { const n = { ...p }; delete n[id]; return n; });
-      setSaved((p) => ({ ...p, [id]: true }));
-      setTimeout(() => setSaved((p) => { const n = { ...p }; delete n[id]; return n; }), 2500);
+      const resultAction = await dispatch(updateDestination({ ...dest, ...patch } as Destination));
+      
+      if (updateDestination.fulfilled.match(resultAction)) {
+        setEdits((p) => { const n = { ...p }; delete n[id]; return n; });
+        setSaved((p) => ({ ...p, [id]: true }));
+        setTimeout(() => setSaved((p) => { const n = { ...p }; delete n[id]; return n; }), 2500);
+      } else {
+        setErrors((p) => ({ ...p, [id]: resultAction.error?.message || "Save failed" }));
+      }
     } catch (err: any) {
       setErrors((p) => ({ ...p, [id]: err?.message || "Save failed" }));
     } finally {
@@ -141,7 +131,7 @@ export default function TrendingDestinationsAdminPage() {
           </p>
         </div>
         <button
-          onClick={() => refreshDestinations()}
+          onClick={() => dispatch(fetchDestinations())}
           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl border border-transparent hover:border-gray-100 transition-all shadow-sm"
           title="Refresh"
         >

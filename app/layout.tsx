@@ -12,6 +12,8 @@ export const metadata = {
   description: "Discover world-class travel packages with Stay Vacation. Luxury escapes, adventure tours, cultural journeys — curated for every traveller.",
 };
 
+import ReduxProvider from "./store/ReduxProvider";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
@@ -26,7 +28,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${inter.variable} antialiased`}>
-        {children}
+        <ReduxProvider>
+          {children}
+        </ReduxProvider>
       </body>
     </html>
   );

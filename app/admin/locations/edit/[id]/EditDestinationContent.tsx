@@ -2,64 +2,54 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DestinationForm, Destination, useStore, Ic, Btn } from "../../../../components/AdminCore";
+import { DestinationForm, Destination, Ic, Btn } from "../../../../components/AdminCore";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchDestinations, updateDestination } from "@/app/store/features/destinations/destinationThunks";
 
 export default function EditDestinationContent({ id }: { id: string }) {
   const router = useRouter();
-  const { destinations, setDestinations } = useStore();
+  const dispatch = useAppDispatch();
+  const { destinations, loading: globalLoading } = useAppSelector(state => state.destinations);
   const [dest, setDest] = useState<Destination | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved]           = useState(false);
 
   useEffect(() => {
-    // 1. Try to find in store first
     const existing = destinations.find(d => d._id === id);
     if (existing) {
       setDest(existing);
       setLoading(false);
-      return;
-    }
-
-    // 2. Otherwise fetch from API
-    const fetchDest = async () => {
-      try {
-        const res = await fetch(`/api/destinations?id=${id}`);
-        const result = await res.json();
-        if (result.success) {
-          setDest(result.data);
+    } else if (!globalLoading) {
+      dispatch(fetchDestinations()).then((action) => {
+        if (fetchDestinations.fulfilled.match(action)) {
+          const freshFound = action.payload.find(d => d._id === id);
+          if (freshFound) {
+            setDest(freshFound);
+          } else {
+            setError("Destination not found");
+          }
         } else {
-          setError(result.message || "Destination not found");
+          setError("Failed to load destinations");
         }
-      } catch (err) {
-        setError("Failed to load destination");
-        console.error("FETCH ERROR:", err);
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchDest();
-  }, [id, destinations]);
+      });
+    }
+  }, [id, destinations, globalLoading, dispatch]);
 
   const handleSave = async (data: Destination) => {
     setSaving(true);
     try {
-      const res = await fetch("/api/destinations", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setDestinations(p => p.map(d => d._id === data._id ? data : d));
+      const resultAction = await dispatch(updateDestination(data));
+      if (updateDestination.fulfilled.match(resultAction)) {
         setSaved(true);
         setTimeout(() => {
           router.push("/admin/locations");
         }, 1500);
       } else {
-        alert("Failed to save changes");
+        alert(resultAction.error?.message || "Failed to save changes");
       }
     } catch (err) {
       console.error("SAVE ERROR:", err);

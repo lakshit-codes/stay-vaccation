@@ -2,11 +2,18 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, Ic, Btn, Badge, useStore, Modal, RegionForm, Region, DestinationForm, Destination } from "@/app/components/AdminCore";
+import { Card, Ic, Btn, Badge, Modal, RegionForm, Region, DestinationForm, Destination } from "@/app/components/AdminCore";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchRegions, updateRegion, deleteRegion, createRegion } from "@/app/store/features/regions/regionThunks";
+import { fetchDestinations, updateDestination, deleteDestination, createDestination } from "@/app/store/features/destinations/destinationThunks";
 
 export default function LocationsAdminPage() {
   const router = useRouter();
-  const { regions, setRegions, destinations, setDestinations, refreshRegions, refreshDestinations } = useStore();
+  const dispatch = useAppDispatch();
+  const { regions } = useAppSelector(state => state.regions);
+  const { destinations } = useAppSelector(state => state.destinations);
+  
   const [deletingId, setDeletingId] = useState<string | null>(null);
   
   // Region CRUD State
@@ -21,99 +28,43 @@ export default function LocationsAdminPage() {
 
   const handleDelete = async () => {
     if (!deletingId) return;
-    try {
-      const res = await fetch("/api/destinations?id=" + deletingId, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        setDestinations(p => p.filter(d => d._id !== deletingId));
-        setDeletingId(null);
-      } else {
-        alert("Delete failed");
-      }
-    } catch (err) {
-      console.error("DELETE ERROR:", err);
-    }
+    dispatch(deleteDestination(deletingId)).then(() => setDeletingId(null));
   };
 
   const handleSaveRegion = async (data: any) => {
-    try {
-      const isEdit = !!selectedRegion;
-      // Always include _id for edit so the PUT can identify the document
-      const payload = isEdit ? { ...data, _id: selectedRegion!._id } : data;
-      const res = await fetch("/api/regions", {
-        method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const result = await res.json();
-      if (result.success) {
-        if (isEdit) {
-          setRegions(p => p.map(r => r._id === selectedRegion!._id ? payload : r));
-        } else {
-          setRegions(p => [...p, { ...payload, _id: result.insertedId }]);
-        }
-        setRegionModalOpen(false);
-        setSelectedRegion(null);
-        // Sync store from DB
-        await refreshRegions();
-      } else {
-        alert("Region save failed: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("REGION SAVE ERROR:", err);
-      alert("Network error saving region.");
+    const isEdit = !!selectedRegion;
+    const payload = isEdit ? { ...data, _id: selectedRegion!._id } : data;
+    
+    if (isEdit) {
+      dispatch(updateRegion(payload));
+    } else {
+      dispatch(createRegion(payload));
     }
+    setRegionModalOpen(false);
+    setSelectedRegion(null);
   };
 
   const handleDeleteRegion = async () => {
     if (!regionToDelete) return;
-    try {
-      const res = await fetch(`/api/regions?id=${regionToDelete._id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        setRegions(p => p.filter(r => r._id !== regionToDelete._id));
-        setRegionToDelete(null);
-      } else {
-        alert("Region delete failed: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("REGION DELETE ERROR:", err);
-    }
+    dispatch(deleteRegion(regionToDelete._id)).then(() => setRegionToDelete(null));
   };
 
   const handleSaveDest = async (data: any) => {
-    try {
-      const isEdit = !!selectedDest;
-      // Always include _id for edit; merge regionId
-      const payload = {
-        ...data,
-        regionId: targetRegionId || data.regionId,
-        ...(isEdit ? { _id: selectedDest!._id } : {}),
-      };
-      const res = await fetch("/api/destinations", {
-        method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const result = await res.json();
-      if (result.success) {
-        if (isEdit) {
-          setDestinations(p => p.map(d => d._id === selectedDest!._id ? { ...payload } : d));
-        } else {
-          setDestinations(p => [...p, { ...payload, _id: result.insertedId }]);
-        }
-        setDestModalOpen(false);
-        setSelectedDest(null);
-        setTargetRegionId(null);
-        // Sync store from DB
-        await refreshDestinations();
-      } else {
-        alert("Destination save failed: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("DEST SAVE ERROR:", err);
-      alert("Network error saving destination.");
+    const isEdit = !!selectedDest;
+    const payload = {
+      ...data,
+      regionId: targetRegionId || data.regionId,
+      ...(isEdit ? { _id: selectedDest!._id } : {}),
+    };
+
+    if (isEdit) {
+      dispatch(updateDestination(payload as Destination));
+    } else {
+      dispatch(createDestination(payload));
     }
+    setDestModalOpen(false);
+    setSelectedDest(null);
+    setTargetRegionId(null);
   };
 
   return (
@@ -126,7 +77,7 @@ export default function LocationsAdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={async () => { await Promise.all([refreshRegions(), refreshDestinations()]); }}
+            onClick={async () => { await Promise.all([dispatch(fetchRegions()), dispatch(fetchDestinations())]); }}
             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl border border-transparent hover:border-gray-100 transition-all shadow-sm"
             title="Refresh Data"
           >

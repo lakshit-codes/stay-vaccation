@@ -1,11 +1,23 @@
 "use client";
 import React from "react";
-import { Sidebar, Topbar, StoreContext } from "./AdminCore";
+import { Sidebar, Topbar } from "./AdminCore";
 import { usePathname, useRouter } from "next/navigation";
+import { useAppSelector } from "@/app/store/hooks";
 
 export default function AdminLayoutWrapper({ children, section: propSection }: { children: React.ReactNode; section?: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, authChecked, loading: authLoading } = useAppSelector(state => state.auth);
+
+  React.useEffect(() => {
+    if (authChecked) {
+      if (!user) {
+        router.push(`/login?from=${encodeURIComponent(pathname)}`);
+      } else if (user.role !== "admin") {
+        router.push("/unauthorized");
+      }
+    }
+  }, [user, authChecked, router, pathname]);
 
   const segments = pathname.split("/").filter(Boolean); // ['admin', 'packages', 'create']
   const section = propSection || segments[1] || "dashboard"; // 'packages', 'transfers', 'dashboard', etc.
@@ -14,44 +26,50 @@ export default function AdminLayoutWrapper({ children, section: propSection }: {
     router.push(`/admin/${key}`);
   };
 
-  const store = React.useContext(StoreContext);
-  const counts = store
-    ? {
-      packages: store.packages.length,
-      activities: store.masterActivities.length,
-      hotels: store.masterHotels.length,
-      coupons: store.coupons.length,
-      bookings: 0,
-      transfers: store.transfers.length,
-      destinations: store.destinations.length,
-      activityPages: store.activityPages.length,
-      categories: store.categories.length,
-    }
-    : { packages: 0, activities: 0, hotels: 0, coupons: 0, bookings: 0, transfers: 0, destinations: 0, activityPages: 0 };
+  const packages = useAppSelector(state => state.packages.packages);
+  const masterActivities = useAppSelector(state => state.activities.masterActivities);
+  const masterHotels = useAppSelector(state => state.hotels.masterHotels);
+  const coupons = useAppSelector(state => state.coupons.coupons);
+  const transfers = useAppSelector(state => state.transfers.transfers);
+  const destinations = useAppSelector(state => state.destinations.destinations);
+  const activityPages = useAppSelector(state => state.activityPages.activityPages);
+  const categories = useAppSelector(state => state.categories.categories);
+
+  const counts = {
+    packages: packages.length,
+    activities: masterActivities.length,
+    hotels: masterHotels.length,
+    coupons: coupons.length,
+    bookings: 0,
+    transfers: transfers.length,
+    destinations: destinations.length,
+    activityPages: activityPages.length,
+    categories: categories.length,
+  };
 
   const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     dashboard: { title: "Dashboard", subtitle: "Stay Vacation — Travel Management" },
-    packages: { title: "Travel Packages", subtitle: store ? `${store.packages.length} packages in catalog` : "" },
+    packages: { title: "Travel Packages", subtitle: `${packages.length} packages in catalog` },
     create: { title: "Create Package", subtitle: "Add a new travel package to your catalog" },
     edit: { title: "Edit Package", subtitle: "Modify an existing travel package" },
     view: { title: "Package Details", subtitle: "Viewing package details" },
     "master-activities": {
       title: "Master Activities",
-      subtitle: store ? `${store.masterActivities.length} reusable activities` : "",
+      subtitle: `${masterActivities.length} reusable activities`,
     },
     "master-hotels": {
       title: "Master Hotels",
-      subtitle: store ? `${store.masterHotels.length} hotels in global catalog` : "",
+      subtitle: `${masterHotels.length} hotels in global catalog`,
     },
-    coupons: { title: "Coupons & Discounts", subtitle: store ? `${store.coupons.length} active coupons` : "" },
+    coupons: { title: "Coupons & Discounts", subtitle: `${coupons.length} active coupons` },
     bookings: { title: "Bookings", subtitle: "View and manage all guest bookings" },
     transfers: {
       title: "Transfer Management",
-      subtitle: store ? `${store.transfers.length} active transfer routes` : "",
+      subtitle: `${transfers.length} active transfer routes`,
     },
     "activity-pages": {
       title: "Activity Landing Pages",
-      subtitle: store ? `${store.activityPages.length} pages managed` : "",
+      subtitle: `${activityPages.length} pages managed`,
     },
     "page-cms": {
       title: "Page CMS",
@@ -71,7 +89,7 @@ export default function AdminLayoutWrapper({ children, section: propSection }: {
     },
     categories: {
       title: "Homepage Categories",
-      subtitle: store ? `${store.categories.length} categories on homepage` : "",
+      subtitle: `${categories.length} categories on homepage`,
     },
     new: { title: "New Transfer Route", subtitle: "Add a new transfer route" },
   };
@@ -84,6 +102,21 @@ export default function AdminLayoutWrapper({ children, section: propSection }: {
   else if (segments[2] === "new") metaKey = "new";
 
   const meta = PAGE_META[metaKey] || PAGE_META.dashboard;
+
+  if (!authChecked || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+          <p className="text-gray-500 font-medium animate-pulse">Verifying credentials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/80">

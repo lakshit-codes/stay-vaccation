@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { PackageForm, useStore } from "@/app/components/AdminCore";
+import { PackageForm } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
 
 const emptyPackage = () => ({
@@ -30,9 +30,12 @@ const emptyPackage = () => ({
   itinerary: [],
 });
 
+import { useAppDispatch } from "@/app/store/hooks";
+import { createPackage } from "@/app/store/features/packages/packageThunks";
+
 export default function CreatePackageContent() {
   const router = useRouter();
-  const { setPackages } = useStore();
+  const dispatch = useAppDispatch();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,20 +48,11 @@ export default function CreatePackageContent() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/packages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.success) {
-        // Refresh packages in store
-        const refreshRes = await fetch("/api/packages");
-        const refreshData = await refreshRes.json();
-        if (refreshData.success) setPackages(refreshData.data);
+      const resultAction = await dispatch(createPackage(data));
+      if (createPackage.fulfilled.match(resultAction)) {
         router.push("/admin/packages");
       } else {
-        setError(result.message || "Failed to create package. Please try again.");
+        setError(resultAction.error?.message || "Failed to create package. Please try again.");
       }
     } catch (err) {
       console.error("Create package error:", err);

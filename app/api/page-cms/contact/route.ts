@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDatabase } from "../../../utils/getDatabase";
+import { getDatabase } from "@/app/utils/getDatabase";
 
 const DEFAULT_CONTACT_DATA = {
   hero: {

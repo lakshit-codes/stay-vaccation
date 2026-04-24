@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "../../components/frontend/Navbar";
 import Footer from "../../components/frontend/Footer";
 import Link from "next/link";
+import { useAppSelector } from "@/app/store/hooks";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   INR: "₹", USD: "$", EUR: "€", GBP: "£", AED: "د.إ", SGD: "S$", AUD: "A$", THB: "฿",
@@ -37,8 +38,10 @@ export default function SinglePackagePage() {
   const params = useParams();
   const matchedId = params?.id as string;
 
-  const [pkg, setPkg] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { packages, loading: reduxLoading } = useAppSelector(state => state.packages);
+  const pkg = packages.find(p => p.id === matchedId || p._id === matchedId);
+  const loading = reduxLoading && !pkg;
+
   const [activeTab, setActiveTab] = useState("Overview");
   const [openDays, setOpenDays] = useState<Set<number>>(new Set([0]));
 
@@ -48,21 +51,6 @@ export default function SinglePackagePage() {
   const [sending, setSending] = useState(false);
 
   const tabBarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!matchedId) return;
-    // Fetch the specific package directly by its MongoDB ObjectId — never loads wrong one
-    fetch(`/api/packages?id=${encodeURIComponent(matchedId)}`, { cache: "no-store" })
-      .then(r => r.json())
-      .then(d => {
-        if (d.success && d.data) {
-          setPkg(d.data);
-        } else {
-          setPkg(null);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [matchedId]);
 
   const toggleDay = (i: number) => {
     setOpenDays(prev => {

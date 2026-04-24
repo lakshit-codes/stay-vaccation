@@ -1,26 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useStore, Ic, Inp, Btn, Card, Badge, getCurrSym } from "@/app/components/AdminCore";
+import { Ic, Inp, Btn, Card, Badge, getCurrSym } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
 
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchTransfers, deleteTransfer } from "@/app/store/features/transfers/transferThunks";
+
 export default function TransfersPageContent() {
-  const { transfers, setTransfers } = useStore();
+  const dispatch = useAppDispatch();
+  const { transfers, loading } = useAppSelector(state => state.transfers);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(transfers.length === 0);
   const router = useRouter();
 
-  // Fetch transfers on mount if not already loaded
+  // Fetch transfers on mount if not already loaded (though StoreInitializer does this)
   useEffect(() => {
     if (transfers.length === 0) {
-      fetch("/api/transfers")
-        .then(r => r.json())
-        .then(res => { if (res.success) setTransfers(res.data); })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+      dispatch(fetchTransfers());
     }
-  }, []);
+  }, [dispatch, transfers.length]);
 
   const filtered = transfers.filter(t =>
     !search ||
@@ -31,18 +28,7 @@ export default function TransfersPageContent() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this transfer route? This cannot be undone.")) return;
-    try {
-      const res = await fetch(`/api/transfers?id=${id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (result.success) {
-        setTransfers(p => p.filter(t => t._id !== id));
-      } else {
-        alert("Delete failed: " + (result.message || "Unknown error"));
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Network error. Delete failed.");
-    }
+    dispatch(deleteTransfer(id));
   };
 
   if (loading) {

@@ -1,4 +1,4 @@
-import { getDatabase } from "../../utils/getDatabase";
+import { getDatabase } from "@/app/utils/getDatabase";
 import { ObjectId } from "mongodb";
 import Navbar from "../../components/frontend/Navbar";
 import Footer from "../../components/frontend/Footer";

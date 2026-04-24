@@ -1,11 +1,15 @@
 "use client";
 import React, { useState } from "react";
-import { Dashboard, useStore, DuplicatePackageModal } from "@/app/components/AdminCore";
+import { Dashboard, DuplicatePackageModal } from "@/app/components/AdminCore";
 import { useRouter } from "next/navigation";
+
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { createPackage } from "@/app/store/features/packages/packageThunks";
 
 export default function DashboardContent() {
   const router = useRouter();
-  const { packages, setPackages } = useStore();
+  const dispatch = useAppDispatch();
+  const { packages } = useAppSelector(state => state.packages);
   const [isDupeModalOpen, setIsDupeModalOpen] = useState(false);
   const [basePkgId, setBasePkgId] = useState("");
 
@@ -22,7 +26,7 @@ export default function DashboardContent() {
           if (existingDay) {
             return {
               ...existingDay,
-              id: undefined, // let server generate new IDs
+              id: undefined,
               day: i + 1
             };
           }
@@ -38,22 +42,13 @@ export default function DashboardContent() {
         updatedAt: undefined,
       };
 
-      const res = await fetch("/api/packages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dupeData),
-      });
-      const result = await res.json();
-      if (result.success) {
-        // Refresh packages list
-        const refreshRes = await fetch("/api/packages");
-        const refreshData = await refreshRes.json();
-        if (refreshData.success) setPackages(refreshData.data);
-        
+      const resultAction = await dispatch(createPackage(dupeData));
+      if (createPackage.fulfilled.match(resultAction)) {
+        const result = resultAction.payload as any;
         setIsDupeModalOpen(false);
-        router.push(`/admin/packages/edit/${result.insertedId}`);
+        router.push(`/admin/packages/edit/${result._id || result.id}`);
       } else {
-        alert("Duplicate failed: " + (result.message || "Unknown error"));
+        alert("Duplicate failed: " + (resultAction.error?.message || "Unknown error"));
       }
     } catch (e) {
       console.error(e);

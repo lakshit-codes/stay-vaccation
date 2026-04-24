@@ -1,24 +1,26 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { login, signup } from "@/app/store/features/auth/authThunks";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: "login" | "signup";
-  onAuthSuccess: (role: string, email: string) => void;
 }
 
-export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAuthSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) {
   const [tab, setTab] = useState<"login" | "signup">(defaultTab);
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { loading, error: authError } = useAppSelector(state => state.auth);
 
   // ─── Login State ──────────────────
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [localError, setLocalError] = useState("");
 
   // ─── Signup State ─────────────────
   const [signupForm, setSignupForm] = useState({
@@ -26,8 +28,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
   });
   const [showSignupPw, setShowSignupPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
-  const [signupLoading, setSignupLoading] = useState(false);
-  const [signupError, setSignupError] = useState("");
 
   const updSignup = (k: keyof typeof signupForm, v: string) =>
     setSignupForm((p) => ({ ...p, [k]: v }));
@@ -37,67 +37,39 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
   // ─── Handlers ─────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError("");
-    setLoginLoading(true);
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setLoginError(data.message || "Login failed.");
-        setLoginLoading(false);
-        return;
-      }
-      onAuthSuccess(data.role, loginEmail);
+    setLocalError("");
+    const result = await dispatch(login({ email: loginEmail, password: loginPassword }));
+    if (login.fulfilled.match(result)) {
       onClose();
-      if (data.role === "admin") router.push("/admin");
+      if (result.payload.role === "admin") router.push("/admin");
       else router.refresh();
-    } catch {
-      setLoginError("Network error. Please try again.");
-      setLoginLoading(false);
     }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSignupError("");
+    setLocalError("");
     if (signupForm.password !== signupForm.confirmPassword) {
-      setSignupError("Passwords do not match.");
+      setLocalError("Passwords do not match.");
       return;
     }
     if (signupForm.password.length < 6) {
-      setSignupError("Password must be at least 6 characters.");
+      setLocalError("Password must be at least 6 characters.");
       return;
     }
-    setSignupLoading(true);
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: signupForm.name,
-          email: signupForm.email,
-          phone: signupForm.phone,
-          password: signupForm.password,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setSignupError(data.message || "Registration failed.");
-        setSignupLoading(false);
-        return;
-      }
-      onAuthSuccess("user", signupForm.email);
+    const result = await dispatch(signup({
+      name: signupForm.name,
+      email: signupForm.email,
+      phone: signupForm.phone,
+      password: signupForm.password,
+    }));
+    if (signup.fulfilled.match(result)) {
       onClose();
       router.refresh();
-    } catch {
-      setSignupError("Network error. Please try again.");
-      setSignupLoading(false);
     }
   };
+
+  const currentError = localError || authError;
 
   // ─── Shared input styles ──────────
   const inputCls = "w-full px-4 py-3 rounded-xl text-sm text-white outline-none transition-all placeholder-white/30";
@@ -117,12 +89,12 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
       style={{ color: "rgba(255,255,255,0.35)" }}>
       {show ? (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268-2.943-9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
         </svg>
       ) : (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
       )}
     </button>
@@ -130,14 +102,12 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         style={{ animation: "fadeIn 0.2s ease" }}
       />
 
-      {/* Modal */}
       <div
         className="fixed z-[101] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4"
         style={{ animation: "modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}
@@ -151,21 +121,18 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
             border: "1px solid rgba(255,255,255,0.12)",
           }}
         >
-          {/* Header row: tabs + close */}
           <div className="flex items-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            {/* Tabs */}
             <div className="flex flex-1">
               {(["login", "signup"] as const).map((t) => (
                 <button
                   key={t}
-                  onClick={() => { setTab(t); setLoginError(""); setSignupError(""); }}
+                  onClick={() => { setTab(t); setLocalError(""); }}
                   className="flex-1 py-4 text-sm font-bold uppercase tracking-widest transition-all relative"
                   style={{
                     color: tab === t ? "#2fa3f2" : "rgba(255,255,255,0.35)",
                   }}
                 >
                   {t === "login" ? "Login" : "Sign Up"}
-                  {/* Active underline */}
                   {tab === t && (
                     <span
                       className="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full"
@@ -176,7 +143,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
               ))}
             </div>
 
-            {/* Close */}
             <button
               onClick={onClose}
               className="mr-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
@@ -188,7 +154,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
             </button>
           </div>
 
-          {/* ── LOGIN TAB ── */}
           {tab === "login" && (
             <form onSubmit={handleLogin} className="p-7 space-y-4">
               <div>
@@ -200,13 +165,13 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
                 </p>
               </div>
 
-              {loginError && (
+              {currentError && (
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm"
                   style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5" }}>
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
-                  {loginError}
+                  {currentError}
                 </div>
               )}
 
@@ -229,10 +194,10 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
                 </a>
               </div>
 
-              <button type="submit" disabled={loginLoading}
+              <button type="submit" disabled={loading}
                 className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #2fa3f2, #1a7abf)", boxShadow: "0 6px 20px rgba(47,163,242,0.35)" }}>
-                {loginLoading ? (
+                {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -252,7 +217,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
             </form>
           )}
 
-          {/* ── SIGNUP TAB ── */}
           {tab === "signup" && (
             <form onSubmit={handleSignup} className="p-7 space-y-3.5">
               <div>
@@ -264,13 +228,13 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
                 </p>
               </div>
 
-              {signupError && (
+              {currentError && (
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm"
                   style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5" }}>
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
-                  {signupError}
+                  {currentError}
                 </div>
               )}
 
@@ -302,7 +266,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
                 <EyeBtn show={showConfirmPw} toggle={() => setShowConfirmPw((v) => !v)} />
               </div>
 
-              {/* Password match indicator */}
               {signupForm.confirmPassword && (
                 <p className="text-xs font-medium flex items-center gap-1"
                   style={{ color: signupForm.password === signupForm.confirmPassword ? "#34d399" : "#f87171" }}>
@@ -317,10 +280,10 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
                 <a href="/privacy" className="underline" style={{ color: "rgba(255,255,255,0.6)" }}>Privacy Policy</a>.
               </p>
 
-              <button type="submit" disabled={signupLoading}
+              <button type="submit" disabled={loading}
                 className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #2fa3f2, #1a7abf)", boxShadow: "0 6px 20px rgba(47,163,242,0.35)" }}>
-                {signupLoading ? (
+                {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -342,7 +305,6 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login", onAut
         </div>
       </div>
 
-      {/* Animation keyframes */}
       <style>{`
         @keyframes modalIn {
           from { opacity: 0; transform: translate(-50%, -46%) scale(0.95); }

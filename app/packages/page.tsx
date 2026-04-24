@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
 import PackageCard from "../components/frontend/PackageCard";
+import { useAppSelector } from "@/app/store/hooks";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   INR: "₹", USD: "$", EUR: "€", GBP: "£", AED: "د.إ", SGD: "S$", AUD: "A$", THB: "฿",
@@ -37,8 +38,8 @@ function PackagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [packages, setPackages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { packages, loading: reduxLoading } = useAppSelector(state => state.packages);
+  const loading = reduxLoading && packages.length === 0;
 
   // Filters from URL
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -48,13 +49,6 @@ function PackagesContent() {
   const [duration, setDuration] = useState(searchParams.get("duration") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "default");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/packages", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => { if (d.success) setPackages(d.data); })
-      .finally(() => setLoading(false));
-  }, []);
 
   const filtered = useMemo(() => {
     let list = [...packages];

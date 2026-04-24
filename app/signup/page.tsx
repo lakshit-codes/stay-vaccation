@@ -4,11 +4,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { signup } from "@/app/store/features/auth/authThunks";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/";
+  const dispatch = useAppDispatch();
+  const { user, loading, error: authError } = useAppSelector(state => state.auth);
 
   const [form, setForm] = useState({
     name: "",
@@ -20,64 +24,47 @@ function SignupForm() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
 
   const upd = (k: keyof typeof form, v: string | boolean) =>
     setForm((p) => ({ ...p, [k]: v }));
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success) router.replace(d.role === "admin" ? "/admin" : from !== "/signup" ? from : "/");
-      })
-      .catch(() => {});
-  }, []);
+    if (user) {
+      router.replace(user.role === "admin" ? "/admin" : from !== "/signup" ? from : "/");
+    }
+  }, [user, from, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setLocalError("");
 
     if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
+      setLocalError("Passwords do not match.");
       return;
     }
     if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setLocalError("Password must be at least 6 characters.");
       return;
     }
     if (!form.terms) {
-      setError("Please accept the terms & conditions to continue.");
+      setLocalError("Please accept the terms & conditions to continue.");
       return;
     }
 
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          password: form.password,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        setError(data.message || "Registration failed. Please try again.");
-        setLoading(false);
-        return;
-      }
-
+    const result = await dispatch(signup({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+    }));
+    
+    if (signup.fulfilled.match(result)) {
       router.replace(from && from !== "/signup" ? from : "/");
-    } catch {
-      setError("Network error. Please check your connection.");
-      setLoading(false);
     }
   };
+
+  const currentError = localError || authError;
 
   const inputStyle = {
     background: "rgba(255,255,255,0.07)",
@@ -124,12 +111,12 @@ function SignupForm() {
     <button type="button" onClick={toggle} tabIndex={-1} className="transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>
       {show ? (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268-2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
         </svg>
       ) : (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
       )}
     </button>
@@ -139,21 +126,18 @@ function SignupForm() {
     <>
       <Navbar />
       <div className="min-h-screen hero-bg pt-24 pb-16 flex items-center justify-center relative overflow-hidden">
-        {/* Blobs */}
         <div className="absolute top-1/4 right-1/3 w-80 h-80 rounded-full pointer-events-none"
           style={{ background: "rgba(47,163,242,0.07)", filter: "blur(70px)" }} />
         <div className="absolute bottom-1/3 left-1/4 w-56 h-56 rounded-full pointer-events-none"
           style={{ background: "rgba(244,249,233,0.04)", filter: "blur(50px)" }} />
 
         <div className="relative z-10 w-full max-w-lg mx-auto px-4">
-          {/* Breadcrumb */}
           <p className="text-white/40 text-xs text-center mb-6 tracking-widest uppercase">
             <Link href="/" className="hover:text-white/70 transition-colors">Home</Link>
             {" / "}
             <span className="text-[#2fa3f2]">Create Account</span>
           </p>
 
-          {/* Heading */}
           <div className="text-center mb-8">
             <h1 className="font-display text-4xl font-bold text-white mb-2">
               Join Stay Vacation
@@ -167,7 +151,6 @@ function SignupForm() {
             </p>
           </div>
 
-          {/* Card */}
           <div className="rounded-3xl overflow-hidden shadow-2xl"
             style={{
               background: "rgba(255,255,255,0.05)",
@@ -176,30 +159,25 @@ function SignupForm() {
               border: "1px solid rgba(255,255,255,0.10)",
             }}>
             <form onSubmit={handleSubmit} className="p-8 space-y-4">
-              {/* Error */}
-              {error && (
+              {currentError && (
                 <div className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm"
                   style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5" }}>
                   <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
-                  {error}
+                  {currentError}
                 </div>
               )}
 
-              {/* Name */}
               <InputField id="sv-name" label="Full Name" value={form.name}
                 onChange={(v) => upd("name", v)} placeholder="John Doe" required autoComplete="name" />
 
-              {/* Email */}
               <InputField id="sv-email" label="Email Address" type="email" value={form.email}
                 onChange={(v) => upd("email", v)} placeholder="you@example.com" required autoComplete="email" />
 
-              {/* Phone */}
               <InputField id="sv-phone" label="Phone Number (optional)" type="tel" value={form.phone}
                 onChange={(v) => upd("phone", v)} placeholder="+91 98765 43210" autoComplete="tel" />
 
-              {/* Password */}
               <div>
                 <label htmlFor="sv-password" className="block text-xs font-semibold uppercase tracking-widest mb-2"
                   style={{ color: "rgba(255,255,255,0.55)" }}>Password</label>
@@ -223,7 +201,6 @@ function SignupForm() {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label htmlFor="sv-confirm" className="block text-xs font-semibold uppercase tracking-widest mb-2"
                   style={{ color: "rgba(255,255,255,0.55)" }}>Confirm Password</label>
@@ -245,7 +222,6 @@ function SignupForm() {
                     <EyeBtn show={showConfirm} toggle={() => setShowConfirm((v) => !v)} />
                   </div>
                 </div>
-                {/* Password match indicator */}
                 {form.confirmPassword && (
                   <p className="mt-1.5 text-xs font-medium flex items-center gap-1"
                     style={{ color: form.password === form.confirmPassword ? "#34d399" : "#f87171" }}>
@@ -254,7 +230,6 @@ function SignupForm() {
                 )}
               </div>
 
-              {/* Terms */}
               <label className="flex items-start gap-3 cursor-pointer pt-1">
                 <div className="relative mt-0.5 flex-shrink-0">
                   <input
@@ -286,7 +261,6 @@ function SignupForm() {
                 </span>
               </label>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -316,7 +290,6 @@ function SignupForm() {
           </p>
         </div>
 
-        {/* Wave */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 60L60 52C120 44 240 28 360 22C480 16 600 22 720 27C840 32 960 38 1080 38C1200 38 1320 32 1380 29L1440 27V60H0Z" fill="white" />

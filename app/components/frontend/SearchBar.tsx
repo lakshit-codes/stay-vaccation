@@ -1,24 +1,10 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-
-interface Destination {
-  name: string;
-  type: "city" | "state" | "destination";
-  state?: string;
-  country: string;
-  slug: string;
-  emoji: string;
-  tags: string[];
-  _score?: number;
-}
-
-interface SearchResult {
-  success: boolean;
-  query: string;
-  results: Destination[];
-  popular?: boolean;
-}
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchSuggestions } from "@/app/store/features/search/searchThunks";
+import { clearSearch } from "@/app/store/features/search/searchSlice";
+import { SearchDestination as Destination } from "@/app/store/types";
 
 // Highlight matched text within a string
 function Highlight({ text, query }: { text: string; query: string }) {
@@ -58,41 +44,32 @@ export default function SearchBar({
   className = "",
 }: SearchBarProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { results, popular, loading } = useAppSelector(state => state.search);
+  
   const [query, setQuery]         = useState("");
-  const [results, setResults]     = useState<Destination[]>([]);
-  const [loading, setLoading]     = useState(false);
   const [open, setOpen]           = useState(false);
-  const [popular, setPopular]     = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
 
   const inputRef     = useRef<HTMLInputElement>(null);
   const dropdownRef  = useRef<HTMLDivElement>(null);
   const debounceRef  = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const fetchSuggestions = useCallback(async (q: string) => {
-    setLoading(true);
-    try {
-      const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      const data: SearchResult = await res.json();
-      if (data.success) {
-        setResults(data.results);
-        setPopular(!!data.popular);
-      }
-    } catch { /* silent */ }
-    setLoading(false);
-  }, []);
+  const handleFetch = useCallback((q: string) => {
+    dispatch(fetchSuggestions(q));
+  }, [dispatch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setQuery(val);
     setActiveIdx(-1);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchSuggestions(val), 280);
+    debounceRef.current = setTimeout(() => handleFetch(val), 280);
   };
 
   const handleFocus = () => {
     setOpen(true);
-    if (!query && results.length === 0) fetchSuggestions("");
+    if (!query && results.length === 0) handleFetch("");
   };
 
   useEffect(() => {
@@ -180,7 +157,7 @@ export default function SearchBar({
           {query && (
             <button
               type="button"
-              onClick={() => { setQuery(""); setResults([]); setOpen(false); inputRef.current?.focus(); }}
+              onClick={() => { setQuery(""); dispatch(clearSearch()); setOpen(false); inputRef.current?.focus(); }}
               className="flex-shrink-0 transition-colors"
               style={{ color: "rgba(255,255,255,0.35)" }}
             >
@@ -230,7 +207,6 @@ export default function SearchBar({
               </div>
             ) : results.length > 0 ? (
               <>
-                {/* Dropdown Header */}
                 <div className="px-4 py-3 flex items-center justify-between sticky top-0 z-10 bg-[#0c1e28] shadow-sm"
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#2fa3f2]">
@@ -241,7 +217,6 @@ export default function SearchBar({
                   </span>
                 </div>
 
-                {/* List Items */}
                 <ul className="py-1">
                   {results.map((dest, i) => {
                     const typeInfo = TYPE_LABEL[dest.type] || TYPE_LABEL.destination;
@@ -290,7 +265,6 @@ export default function SearchBar({
                 </ul>
               </>
             ) : query.length > 0 && (
-              /* No Results State */
               <div className="p-12 text-center bg-[#0c1e28]">
                 <div className="text-4xl mb-4 opacity-50">🏝️</div>
                 <p className="text-sm font-bold text-white mb-1">No destinations found</p>
@@ -305,7 +279,6 @@ export default function SearchBar({
             )}
           </div>
 
-          {/* Fixed Footer Hint */}
           <div className="px-5 py-3.5 bg-[#09171f] border-t border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-white/20 font-medium">Use ↑↓ to navigate</span>
