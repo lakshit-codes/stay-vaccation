@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { DestinationsState } from "./types";
+import { Destination, DestinationsState } from "./types";
 import {
   fetchDestinations,
   fetchTrending,

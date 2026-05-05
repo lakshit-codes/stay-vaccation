@@ -1,4 +1,17 @@
-import { Category } from "@/app/components/AdminCore";
+export interface Category {
+  _id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+  color?: string;
+  gradient?: string;
+  image?: string;
+  link?: string;
+  order?: number;
+  shortLocationList?: string;
+}
 
 export interface CategoriesState {
   categories: Category[];

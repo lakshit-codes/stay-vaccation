@@ -4,41 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCurrency } from "@/app/hooks/useCurrency";
 
-interface Package {
-  id: string;
-  title: string;
-  destination: string;
-  tripDuration: string;
-  travelStyle: string;
-  tourType: string;
-  exclusivityLevel: string;
-  price: { 
-    currency: string; 
-    amount: number | string;
-    originalAmount?: number | string; 
-  };
-  shortDescription: string;
-  inclusions?: string[];
-  itinerary?: any[];
-  additionalInfo?: {
-    quickInfo?: {
-      destinationsCovered?: string;
-    };
-  };
-  images?: string[];
-}
+import { Package } from "@/app/store/features/packages/types";
 
 export default function PackageCard({ pkg, index = 0 }: { pkg: Package; index?: number }) {
   const { convert, formatPrice } = useCurrency();
-  const baseAmount = Number(pkg.price?.amount) || 0;
-  const baseOriginalAmount = Number(pkg.price?.originalAmount) || 0;
+  const basePriceValue = Number(pkg.price?.amount) || 0;
+  const discountedPriceValue = Number(pkg.price?.originalAmount) || 0;
 
-  const currentPrice = convert(baseAmount, "INR");
-  const originalPrice = convert(baseOriginalAmount, "INR");
-
-  const amount = currentPrice.amount;
-  const hasDiscount = originalPrice.amount > amount;
-  const discountPercent = hasDiscount ? Math.round(((originalPrice.amount - amount) / originalPrice.amount) * 100) : 0;
+  const hasDiscount = discountedPriceValue > 0 && discountedPriceValue < basePriceValue;
+  const savingsValue = hasDiscount ? basePriceValue - discountedPriceValue : 0;
+  
+  const mainPriceFormatted = hasDiscount ? formatPrice(discountedPriceValue, "INR") : formatPrice(basePriceValue, "INR");
+  const strikePriceFormatted = hasDiscount ? formatPrice(basePriceValue, "INR") : null;
+  const savingsFormatted = hasDiscount ? formatPrice(savingsValue, "INR") : "";
 
   // Format Duration
   const daysMatch = pkg.tripDuration?.match(/(\d+)\s*Days?/i);
@@ -56,7 +34,8 @@ export default function PackageCard({ pkg, index = 0 }: { pkg: Package; index?: 
   const locations = pkg.additionalInfo?.quickInfo?.destinationsCovered || pkg.destination;
 
   // Featured Image
-  const featuredImage = pkg.images?.[0] || 
+  const featuredImage = pkg.coverImage || 
+    pkg.images?.[0] || 
     pkg.itinerary?.find(d => d.hotelStays?.[0]?.hotelData?.images?.[0])?.hotelStays?.[0]?.hotelData?.images?.[0] ||
     "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop";
 
@@ -78,11 +57,12 @@ export default function PackageCard({ pkg, index = 0 }: { pkg: Package; index?: 
         {/* Top Badges */}
         <div className="absolute top-4 left-4 flex gap-2">
           {hasDiscount && (
-            <div className="bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">
-              {discountPercent}% OFF
+            <div className="bg-[#1a3f4e] text-white text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Save {savingsFormatted}
             </div>
           )}
-          <div className="bg-white/90 backdrop-blur-md text-[#1a3f4e] text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm">
+          <div className="bg-white/90 backdrop-blur-md text-[#1a3f4e] text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
             {pkg.travelStyle}
           </div>
         </div>
@@ -135,14 +115,14 @@ export default function PackageCard({ pkg, index = 0 }: { pkg: Package; index?: 
         {/* ── Footer ────────────────────────────────────────────────────── */}
         <div className="mt-auto pt-5 border-t border-gray-100 flex items-end justify-between gap-4">
           <div className="shrink-0">
-            {hasDiscount && (
-              <p className="text-xs text-gray-400 line-through mb-0.5">
-                {formatPrice(baseOriginalAmount, "INR")}
+            {strikePriceFormatted && (
+              <p className="text-xs text-gray-400 line-through mb-0.5 font-bold">
+                {strikePriceFormatted}
               </p>
             )}
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-[#1a3f4e] tracking-tight">
-                {formatPrice(baseAmount, "INR")}
+                {mainPriceFormatted}
               </span>
               <span className="text-[10px] text-gray-400 font-bold uppercase">/ Person</span>
             </div>
@@ -150,9 +130,9 @@ export default function PackageCard({ pkg, index = 0 }: { pkg: Package; index?: 
 
           <Link
             href={`/packages/${pkg.id}`}
-            className="flex-1 max-w-[140px] py-3 bg-[#1a3f4e] text-white text-xs font-bold rounded-xl text-center shadow-lg shadow-[#1a3f4e]/20 hover:bg-[#2fa3f2] hover:shadow-[#2fa3f2]/30 hover:-translate-y-0.5 transition-all duration-300"
+            className="flex-1 max-w-[140px] py-3 bg-[#1a3f4e] text-white text-xs font-bold rounded-xl text-center shadow-lg shadow-[#1a3f4e]/20 hover:bg-[#2fa3f2] hover:shadow-[#2fa3f2]/30 hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-widest"
           >
-            View Details
+            Details
           </Link>
         </div>
       </div>

@@ -41,7 +41,6 @@ interface ActivityPage {
 export default function ActivityPageContent({ page }: { page: ActivityPage }) {
   const [readMore, setReadMore] = useState(false);
   const [currentHero, setCurrentHero] = useState(0);
-  console.log("page---", page);
   // Auto-play hero carousel
   useEffect(() => {
     if (!page.heroImages?.length) return;
@@ -76,11 +75,7 @@ export default function ActivityPageContent({ page }: { page: ActivityPage }) {
         ))}
 
         <div className="container-sv relative z-10 text-center text-white pt-20 animate-fadeUp">
-          <nav className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest mb-6 opacity-70">
-            <Link href="/" className="hover:text-[#2fa3f2] transition-colors">Home</Link>
-            <span className="w-1 h-1 bg-white/40 rounded-full" />
-            <span className="text-[#2fa3f2]">Activities</span>
-          </nav>
+          {/* Breadcrumb removed */}
 
           <h1 className="text-5xl md:text-7xl font-display font-black mb-6 uppercase tracking-tighter leading-none">
             Things to do in <br />

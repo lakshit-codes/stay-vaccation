@@ -5,19 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCurrency } from "@/app/hooks/useCurrency";
 
-interface Package {
-  id: string;
-  title: string;
-  images: string[];
-  price: {
-    currency: string;
-    amount: number;
-    originalAmount: number;
-  };
-  tripDuration: string;
-  destination: string;
-  travelStyle: string;
-}
+import { Package } from "@/app/store/features/packages/types";
 
 interface BestSellerCardProps {
   pkg: Package;

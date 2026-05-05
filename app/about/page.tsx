@@ -1,6 +1,7 @@
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
 import Link from "next/link";
+import LucideIcon from "../components/LucideIcon";
 
 export const metadata = {
   title: "About Us — Stay Vacation",
@@ -8,26 +9,26 @@ export const metadata = {
 };
 
 const TEAM = [
-  { name: "Arjun Mehta", role: "Founder & CEO", emoji: "👨‍💼", desc: "15 years in luxury travel. Passionate about crafting journeys that change lives." },
-  { name: "Priya Sharma", role: "Head of Operations", emoji: "👩‍💼", desc: "Logistics expert who ensures every trip runs flawlessly from start to finish." },
-  { name: "Rohan Verma", role: "Destination Expert", emoji: "🧳", desc: "Explored 40+ countries and curates our international package portfolio." },
-  { name: "Aisha Khan", role: "Customer Experience", emoji: "🌟", desc: "Dedicated to making every client feel valued from first enquiry to return." },
+  { name: "Arjun Mehta", role: "Founder & CEO", icon: "UserCircle", desc: "15 years in luxury travel. Passionate about crafting journeys that change lives." },
+  { name: "Priya Sharma", role: "Head of Operations", icon: "ShieldCheck", desc: "Logistics expert who ensures every trip runs flawlessly from start to finish." },
+  { name: "Rohan Verma", role: "Destination Expert", icon: "Map", desc: "Explored 40+ countries and curates our international package portfolio." },
+  { name: "Aisha Khan", role: "Customer Experience", icon: "HeartHandshake", desc: "Dedicated to making every client feel valued from first enquiry to return." },
 ];
 
 const STATS = [
-  { num: "500+", label: "Happy Travellers", icon: "😊" },
-  { num: "50+", label: "Destinations", icon: "🌍" },
-  { num: "10+", label: "Years Experience", icon: "🏆" },
-  { num: "4.9★", label: "Average Rating", icon: "⭐" },
+  { num: "500+", label: "Happy Travellers", icon: "Smile" },
+  { num: "50+", label: "Destinations", icon: "Globe" },
+  { num: "10+", label: "Years Experience", icon: "Award" },
+  { num: "4.9★", label: "Average Rating", icon: "Star" },
 ];
 
 const VALUES = [
-  { icon: "🎯", title: "Personalised Service", desc: "Every itinerary is crafted specifically for you — we don't believe in one-size-fits-all travel." },
-  { icon: "🌿", title: "Responsible Travel", desc: "We partner with eco-conscious operators and promote sustainable tourism practices." },
-  { icon: "🔒", title: "Transparent Pricing", desc: "No hidden fees. What you see is what you pay — always." },
-  { icon: "🤝", title: "24/7 Support", desc: "Our team is reachable round-the-clock during your trip for any assistance." },
-  { icon: "✈️", title: "Expert Curation", desc: "Every destination, hotel, and activity is personally vetted by our travel experts." },
-  { icon: "💎", title: "Premium Quality", desc: "We partner only with the best hotels, guides, and local operators." },
+  { icon: "Target", title: "Personalised Service", desc: "Every itinerary is crafted specifically for you — we don't believe in one-size-fits-all travel." },
+  { icon: "Leaf", title: "Responsible Travel", desc: "We partner with eco-conscious operators and promote sustainable tourism practices." },
+  { icon: "Lock", title: "Transparent Pricing", desc: "No hidden fees. What you see is what you pay — always." },
+  { icon: "Headphones", title: "24/7 Support", desc: "Our team is reachable round-the-clock during your trip for any assistance." },
+  { icon: "Plane", title: "Expert Curation", desc: "Every destination, hotel, and activity is personally vetted by our travel experts." },
+  { icon: "Gem", title: "Premium Quality", desc: "We partner only with the best hotels, guides, and local operators." },
 ];
 
 export default function AboutPage() {
@@ -63,7 +64,9 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {STATS.map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-3xl mb-2">{s.icon}</div>
+                <div className="text-[#2fa3f2] mb-2 flex justify-center">
+                  <LucideIcon name={s.icon} size={32} />
+                </div>
                 <div className="text-3xl font-bold text-[#1a3f4e] font-display">{s.num}</div>
                 <div className="text-gray-400 text-sm mt-0.5">{s.label}</div>
               </div>
@@ -106,14 +109,14 @@ export default function AboutPage() {
             {/* Visual */}
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
-                {["🏝️", "🏔️", "🌆", "🌺"].map((emoji, i) => (
+                {["Umbrella", "Mountain", "Building2", "Palmtree"].map((iconName, i) => (
                   <div
                     key={i}
-                    className={`rounded-2xl flex items-center justify-center text-5xl ${
+                    className={`rounded-2xl flex items-center justify-center text-white/80 ${
                       i % 2 === 0 ? "h-44 bg-[#1a3f4e]" : "h-56 bg-[#2fa3f2]"
                     } ${i > 1 ? "-mt-6" : ""}`}
                   >
-                    {emoji}
+                    <LucideIcon name={iconName} size={48} strokeWidth={1} />
                   </div>
                 ))}
               </div>
@@ -135,7 +138,9 @@ export default function AboutPage() {
                 key={v.title}
                 className="p-6 rounded-2xl border border-gray-100 hover:shadow-md hover:border-[#2fa3f2]/30 hover:-translate-y-1 transition-all group"
               >
-                <div className="text-3xl mb-4 group-hover:scale-110 transition-transform inline-block">{v.icon}</div>
+                <div className="text-[#2fa3f2] mb-4 group-hover:scale-110 transition-transform inline-block">
+                  <LucideIcon name={v.icon} size={32} strokeWidth={1.5} />
+                </div>
                 <h3 className="font-bold text-[#1a3f4e] text-base mb-2">{v.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
               </div>
@@ -157,7 +162,9 @@ export default function AboutPage() {
                 key={member.name}
                 className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:-translate-y-1 transition-all text-center"
               >
-                <div className="text-5xl mb-4">{member.emoji}</div>
+                <div className="text-[#2fa3f2] mb-4 flex justify-center">
+                  <LucideIcon name={member.icon} size={48} strokeWidth={1} />
+                </div>
                 <h3 className="font-bold text-white text-sm mb-0.5">{member.name}</h3>
                 <p className="text-[#2fa3f2] text-xs font-semibold mb-3">{member.role}</p>
                 <p className="text-white/50 text-xs leading-relaxed">{member.desc}</p>

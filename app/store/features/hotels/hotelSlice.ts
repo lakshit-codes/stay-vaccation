@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HotelsState } from "./types";
-import { MasterHotel } from "@/app/components/AdminCore";
+import { MasterHotel } from "./types";
 import {
   fetchHotels,
   createHotel,

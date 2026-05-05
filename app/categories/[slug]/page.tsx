@@ -1,8 +1,10 @@
 import Navbar from "@/app/components/frontend/Navbar";
 import Footer from "@/app/components/frontend/Footer";
 import PackageCard from "@/app/components/frontend/PackageCard";
+import LucideIcon from "@/app/components/LucideIcon";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getCategoryIcon } from "@/app/utils/categoryMapping";
 
 async function getCategory(slug: string) {
   try {
@@ -77,19 +79,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         
         <div className="container-sv relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="text-7xl md:text-8xl drop-shadow-2xl animate-bounce-subtle">
-              {category.icon}
-            </div>
             <div className="text-center md:text-left">
-              <nav className="flex items-center justify-center md:justify-start gap-2 text-white/60 text-xs font-bold uppercase tracking-widest mb-4">
-                <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                <span>/</span>
-                <Link href="/categories" className="hover:text-white transition-colors">Categories</Link>
-                <span>/</span>
-                <span className="text-white">{category.name}</span>
-              </nav>
-              <h1 className="font-display text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-                {category.name} <span className="text-white/40">Packages</span>
+              {/* Breadcrumb removed */}
+              <h1 className="font-display text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight flex flex-col md:flex-row items-center md:items-start gap-4">
+                <span className="text-[#EAEAEA] group-hover:scale-110 group-hover:text-[#C2A46D] transition-all duration-300 ease-in-out opacity-90 mt-2">
+                  <LucideIcon name={getCategoryIcon(category.name, category.icon)} size={32} strokeWidth={1.5} />
+                </span>
+                <span>{category.name} <span className="text-white/40">Packages</span></span>
               </h1>
               <p className="text-white/80 text-lg md:text-xl max-w-2xl leading-relaxed font-light">
                 {category.description || `Discover hand-picked itineraries specifically curated for ${category.name.toLowerCase()} enthusiasts.`}

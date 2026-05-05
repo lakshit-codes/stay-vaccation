@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { fetchPackages, updatePackage } from "@/app/store/features/packages/packageThunks";
-import { Package } from "@/app/components/AdminCore";
+import { Package } from "@/app/store/features/packages/types";
 
 export default function EditPackageContent({ id }: { id: string }) {
   const router = useRouter();

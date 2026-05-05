@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PackagesState } from "./types";
-import { Package } from "@/app/components/AdminCore";
+import { Package } from "./types";
 import {
   fetchPackages,
   createPackage,

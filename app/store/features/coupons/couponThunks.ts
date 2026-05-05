@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../apiUtils";
 import { CouponsState } from "./types";
-import { Coupon } from "@/app/components/AdminCore";
+import { Coupon } from "./types";
 
 export const fetchCoupons = createAsyncThunk(
   "coupons/fetchCoupons",

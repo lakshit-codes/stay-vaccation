@@ -19,6 +19,12 @@ import { setRegions } from "@/app/store/features/regions/regionSlice";
 import { fetchRegions, createRegion, updateRegion, deleteRegion } from "@/app/store/features/regions/regionThunks";
 import { setCategories } from "@/app/store/features/categories/categorySlice";
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from "@/app/store/features/categories/categoryThunks";
+import { MasterActivity } from "@/app/store/features/activities/types";
+import { MasterHotel } from "@/app/store/features/hotels/types";
+import { Category } from "@/app/store/features/categories/types";
+import { Destination, DestinationStatus } from "@/app/store/features/destinations/types";
+
+export type { MasterActivity, MasterHotel, Category, Destination, DestinationStatus };
 import { logout } from "@/app/store/features/auth/authThunks";
 import { apiFetch } from "@/app/store/apiUtils";
 
@@ -95,24 +101,7 @@ const ACT_BADGE = {
 };
 
 // ─── INTERFACES ───────────────────────────────────────────────────
-export interface MasterActivity {
-  _id: string;
-  title: string;
-  description: string;
-  activityType: string;
-  defaultDuration: string;
-  location: string;
-  state?: string;
-  country?: string;
-  price?: number;
-  discountPrice?: number;
-  rating?: number;
-  highlights?: string[];
-  isEnabled?: boolean;
-  destinationSlug?: string;
-  tags: string[];
-  images: string[];
-}
+// MasterActivity moved to feature types
 
 
 
@@ -124,157 +113,14 @@ export interface Region {
   isActive?: boolean;
 }
 
-export type DestinationStatus = "Visible" | "Hidden" | "Draft" | "Unpublished";
+// Destination moved to feature types
 
-export interface Destination {
-  _id: string;
-  name: string;
-  slug: string;
-  regionId: string;
-  image: string;
-  description: string;
-  isEnabled: boolean;
-  isActive: boolean;
-  packageCount?: number;
-  isTrending?: boolean;
-  category?: "India" | "International";
-  displayOrder?: number;
-  status: DestinationStatus;
-}
+// Category moved to feature types
 
-export interface Category {
-  _id?: string;
-  name: string;
-  slug: string;
-  description?: string;
-  icon?: string;
-  isActive: boolean;
-  color?: string; // keeping for UI gradient
-  gradient?: string; // explicitly naming for fallback
-  image?: string;    // [NEW]
-  link?: string;  // keeping for UI
-  order?: number; // keeping for UI
-  shortLocationList?: string;
-}
+// MasterHotel moved to feature types
 
-export interface MasterHotel {
-  _id: string;
-  hotelName: string;
-  city: string;
-  starRating: string;
-  description: string;
-  roomTypes: string[];
-  amenities: string[];
-  images: string[];
-}
+import { DayActivity, DayHotel, Transfer, Faq, KBYG, ItineraryDay, Package } from "../store/features/packages/types";
 
-export interface DayActivity {
-  id: string;
-  activityRef: string | null;
-  time: string;
-  customTitle: string;
-  customDescription: string;
-  customImages: string[];
-  guideIncluded: boolean;
-  ticketIncluded: boolean;
-  coverTitle: string;
-}
-
-export interface DayHotel {
-  id: string;
-  hotelRef: string | null;
-  customRoomType: string;
-  checkInTime: string;
-  checkOutTime: string;
-  customNotes: string;
-  customImages: string[];
-  mealInclusions: {
-    breakfast: boolean;
-    lunch: boolean;
-    dinner: boolean;
-  };
-}
-
-export interface Transfer {
-  id: string;
-  source: "custom" | "existing";
-  transferId: string | null;
-  transferType: string;
-  vehicleType: string;
-  from: string;
-  to: string;
-  startTime: string;
-  endTime: string;
-  notes: string;
-}
-
-export interface Faq {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-export interface KBYG {
-  id: string;
-  point: string;
-}
-
-export interface ItineraryDay {
-  id: string;
-  dayNumber: number;
-  title: string;
-  city: string;
-  dayType: string;
-  mealsIncluded: string[];
-  notes: string;
-  description: string;
-  hotelStays: DayHotel[];
-  transfers: Transfer[];
-  activities: DayActivity[];
-}
-
-export interface Package {
-  id: string;
-  _id?: string;
-  slug?: string;
-  title: string;
-  destination: string;
-  destinationId?: string;
-  destinationSlug?: string;
-  categoryId?: string;
-  categorySlug?: string;
-  tripDuration: string;
-  travelStyle: string;
-  tourType: string;
-  exclusivityLevel: string;
-  price: {
-    currency: string;
-    amount: number | string;
-  };
-  shortDescription: string;
-  availability: {
-    availableMonths: string[];
-    fixedDepartureDates: string[];
-    blackoutDates: string[];
-  };
-  inclusions: string[];
-  exclusions: string[];
-  knowBeforeYouGo: KBYG[];
-  additionalInfo: {
-    aboutDestination: string;
-    quickInfo: {
-      destinationsCovered: string;
-      duration: string;
-      startPoint: string;
-      endPoint: string;
-    };
-    experiencesCovered: string[];
-    notToMiss: string[];
-  };
-  faqs: Faq[];
-  itinerary: ItineraryDay[];
-  createdAt: string;
-}
 
 export interface Coupon {
   _id: string;
@@ -328,7 +174,7 @@ const emptyTransfer = (): Transfer => ({ id: uid(), source: "custom", transferId
 const emptyFaq = (): Faq => ({ id: uid(), question: "", answer: "" });
 const emptyKBYG = (): KBYG => ({ id: uid(), point: "" });
 const emptyAdditionalInfo = () => ({ aboutDestination: "", quickInfo: { destinationsCovered: "", duration: "", startPoint: "", endPoint: "" }, experiencesCovered: [], notToMiss: [] });
-const makeDay = (n: number): ItineraryDay => ({ id: uid(), dayNumber: n, title: n === 1 ? "Arrival Day" : `Day ${n}`, city: "", dayType: n === 1 ? "arrival" : "sightseeing", mealsIncluded: [], notes: "", description: "", hotelStays: [], transfers: [], activities: [] });
+const makeDay = (n: number): ItineraryDay => ({ id: uid(), day: n, dayNumber: n, title: n === 1 ? "Arrival Day" : `Day ${n}`, city: "", dayType: n === 1 ? "arrival" : "sightseeing", mealsIncluded: [], notes: "", description: "", images: [], hotelStays: [], transfers: [], activities: [] });
 
 const emptyCategory = (): Category => ({ name: "", slug: "", icon: "Beach", color: "from-cyan-400 to-blue-500", gradient: "from-cyan-400 to-blue-500", image: "", link: "", order: 0, description: "", shortLocationList: "", isActive: true });
 
@@ -413,13 +259,13 @@ const INIT_PACKAGES: Package[] = [
     ],
     itinerary: [
       {
-        id: "d1", dayNumber: 1, title: "Arrival & Welcome", city: "Seminyak", dayType: "arrival", mealsIncluded: ["Dinner"], notes: "Private airport transfer included.", description: "",
+        id: "d1", day: 1, dayNumber: 1, title: "Arrival & Welcome", city: "Seminyak", dayType: "arrival", mealsIncluded: ["Dinner"], notes: "Private airport transfer included.", description: "", images: [],
         hotelStays: [{ id: "dh1", hotelRef: "mh-001", customRoomType: "Private Pool Villa", checkInTime: "15:00", checkOutTime: "11:00", customNotes: "Welcome fruit basket.", customImages: [], mealInclusions: { breakfast: true, lunch: false, dinner: true } }],
         transfers: [{ id: "dt1", source: "custom", transferId: null, transferType: "Private", vehicleType: "SUV", from: "Ngurah Rai Airport", to: "Seminyak", startTime: "14:00", endTime: "15:00", notes: "Name board at arrivals." }],
         activities: [{ id: "da1", activityRef: "ma-002", time: "06:30", customTitle: "", customDescription: "", customImages: [], guideIncluded: true, ticketIncluded: false, coverTitle: "Start your day right" }]
       },
       {
-        id: "d2", dayNumber: 2, title: "Temples & Rice Terraces", city: "Ubud", dayType: "sightseeing", mealsIncluded: ["Breakfast", "Lunch"], notes: "Wear modest clothing.", description: "",
+        id: "d2", day: 2, dayNumber: 2, title: "Temples & Rice Terraces", city: "Ubud", dayType: "sightseeing", mealsIncluded: ["Breakfast", "Lunch"], notes: "Wear modest clothing.", description: "", images: [],
         hotelStays: [{ id: "dh2", hotelRef: "mh-003", customRoomType: "Uma Suite", checkInTime: "14:00", checkOutTime: "11:00", customNotes: "", customImages: [], mealInclusions: { breakfast: true, lunch: true, dinner: false } }],
         transfers: [{ id: "dt2", source: "custom", transferId: null, transferType: "Private", vehicleType: "Sedan", from: "Seminyak", to: "Ubud", startTime: "08:00", endTime: "09:00", notes: "" }],
         activities: [
@@ -427,15 +273,15 @@ const INIT_PACKAGES: Package[] = [
           { id: "da3", activityRef: "ma-004", time: "14:00", customTitle: "", customDescription: "", customImages: [], guideIncluded: false, ticketIncluded: false, coverTitle: "" },
         ]
       },
-      { id: "d3", dayNumber: 3, title: "Beach Leisure", city: "Seminyak", dayType: "leisure", mealsIncluded: ["Breakfast"], notes: "", description: "", hotelStays: [{ id: "dh3", hotelRef: "mh-001", customRoomType: "", checkInTime: "14:00", checkOutTime: "11:00", customNotes: "", customImages: [], mealInclusions: { breakfast: true, lunch: false, dinner: false } }], transfers: [], activities: [] },
+      { id: "d3", day: 3, dayNumber: 3, title: "Beach Leisure", city: "Seminyak", dayType: "leisure", mealsIncluded: ["Breakfast"], notes: "", description: "", images: [], hotelStays: [{ id: "dh3", hotelRef: "mh-001", customRoomType: "", checkInTime: "14:00", checkOutTime: "11:00", customNotes: "", customImages: [], mealInclusions: { breakfast: true, lunch: false, dinner: false } }], transfers: [], activities: [] },
       {
-        id: "d4", dayNumber: 4, title: "Island Adventure", city: "Nusa Penida", dayType: "sightseeing", mealsIncluded: ["Breakfast", "Lunch"], notes: "Speedboat at 7:30 AM.", description: "",
+        id: "d4", day: 4, dayNumber: 4, title: "Island Adventure", city: "Nusa Penida", dayType: "sightseeing", mealsIncluded: ["Breakfast", "Lunch"], notes: "Speedboat at 7:30 AM.", description: "", images: [],
         hotelStays: [{ id: "dh4", hotelRef: "mh-001", customRoomType: "", checkInTime: "14:00", checkOutTime: "11:00", customNotes: "", customImages: [], mealInclusions: { breakfast: true, lunch: false, dinner: false } }],
         transfers: [{ id: "dt3", source: "custom", transferId: null, transferType: "Private", vehicleType: "Speedboat", from: "Sanur Beach", to: "Nusa Penida", startTime: "07:30", endTime: "08:15", notes: "" }],
         activities: [{ id: "da4", activityRef: "ma-003", time: "09:00", customTitle: "", customDescription: "", customImages: [], guideIncluded: true, ticketIncluded: true, coverTitle: "Jaw-dropping vistas" }]
       },
       {
-        id: "d5", dayNumber: 5, title: "Departure", city: "Denpasar", dayType: "departure", mealsIncluded: ["Breakfast"], notes: "Check-out 11 AM.", description: "",
+        id: "d5", day: 5, dayNumber: 5, title: "Departure", city: "Denpasar", dayType: "departure", mealsIncluded: ["Breakfast"], notes: "Check-out 11 AM.", description: "", images: [],
         hotelStays: [], transfers: [{ id: "dt4", source: "custom", transferId: null, transferType: "Private", vehicleType: "SUV", from: "Seminyak", to: "Airport", startTime: "12:30", endTime: "13:15", notes: "" }], activities: []
       },
     ],
@@ -2471,7 +2317,9 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
           <div><FL>Travel Style</FL><Sel options={OPTIONS.travelStyle} placeholder="Select…" value={form.travelStyle || ""} onChange={e => upd("travelStyle", e.target.value)} /></div>
           <div><FL>Exclusivity</FL><Sel options={OPTIONS.exclusivity} placeholder="Select…" value={form.exclusivityLevel || ""} onChange={e => upd("exclusivityLevel", e.target.value)} /></div>
           <div className="col-span-2"><FL>Short Description</FL><Inp placeholder="1-line teaser for listing cards" value={form.shortDescription || ""} onChange={e => upd("shortDescription", e.target.value)} /></div>
-          <div className="col-span-2"><FL optional>Full Description</FL><TA placeholder="Detailed narrative about the package…" value={form.longDescription || ""} onChange={e => upd("longDescription", e.target.value)} rows={3} /></div>
+          <div className="col-span-2"><FL optional>Summary Tags (Comma separated)</FL><Inp placeholder="e.g. Best Seller, New, Romantic" value={form.summary?.tags?.join(", ") || ""} onChange={e => upd("summary", { ...form.summary, tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean) })} /></div>
+          <div><FL optional>Rating (1-5)</FL><Inp type="number" min="1" max="5" step="0.1" placeholder="e.g. 4.8" value={form.rating || ""} onChange={e => upd("rating", parseFloat(e.target.value))} /></div>
+          <div className="col-span-2"><FL optional>Highlights (Comma separated)</FL><TA placeholder="Key highlights of this package..." value={form.highlights?.join(",\n") || ""} onChange={e => upd("highlights", e.target.value.split(",").map(t => t.trim()).filter(Boolean))} rows={3} /></div>
         </div>
       </Card>
 
@@ -2517,6 +2365,61 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
 
       {/* SECTION 6 — Additional Information */}
       <AdditionalInfoSection info={additionalInfo} onChange={setAdditionalInfo} />
+
+      {/* SECTION 7 — Policies */}
+      <Card className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-7 h-7 rounded-lg bg-blue-950 text-white flex items-center justify-center text-sm font-bold">7</div>
+          <h3 className="font-bold text-gray-900">Policies</h3>
+        </div>
+        <div className="space-y-4">
+          <div><FL>Cancellation Policy</FL><TA value={form.policies?.cancellation || ""} onChange={e => upd("policies", { ...form.policies, cancellation: e.target.value })} rows={2} /></div>
+          <div><FL>Refund Policy</FL><TA value={form.policies?.refund || ""} onChange={e => upd("policies", { ...form.policies, refund: e.target.value })} rows={2} /></div>
+          <div><FL>Confirmation Policy</FL><TA value={form.policies?.confirmation || ""} onChange={e => upd("policies", { ...form.policies, confirmation: e.target.value })} rows={2} /></div>
+        </div>
+      </Card>
+
+      {/* SECTION 8 — Visuals (Gallery & Cover) */}
+      <Card className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-7 h-7 rounded-lg bg-blue-950 text-white flex items-center justify-center text-sm font-bold">7</div>
+          <h3 className="font-bold text-gray-900">Package Visuals</h3>
+        </div>
+        <div className="space-y-6">
+          <div>
+            <FL required>Hero / Cover Image</FL>
+            <div className="space-y-3">
+              <Inp 
+                placeholder="Enter cover image URL…" 
+                value={form.coverImage || ""} 
+                onChange={e => upd("coverImage", e.target.value)} 
+              />
+              <ImageUploader 
+                images={form.coverImage ? [form.coverImage] : []} 
+                onAdd={url => upd("coverImage", url)} 
+                onRemove={() => upd("coverImage", "")}
+                label="Upload Cover Image"
+              />
+              <p className="text-[10px] text-gray-400 italic flex items-center gap-1">
+                <Ic.Info /> This image appears at the top of the package detail page and on search cards. Recommended: 1920x800px.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <FL>Image Gallery</FL>
+            <ImageUploader 
+              images={form.images || []} 
+              onAdd={url => upd("images", [...(form.images || []), url])} 
+              onRemove={i => upd("images", (form.images || []).filter((_, j) => j !== i))}
+              label="Upload Gallery Images"
+            />
+            <p className="text-[10px] text-gray-400 italic mt-2 flex items-center gap-1">
+              <Ic.Info /> Add multiple high-quality photos of the destination, hotels, and activities.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <div className="flex justify-end gap-3">
         <Btn variant="outline" onClick={onCancel}>Cancel</Btn>
@@ -3693,8 +3596,8 @@ export const CategoryForm = ({ initial, onSave, onCancel }: { initial: Category;
           <Inp value={data.slug} onChange={e => setData({ ...data, slug: e.target.value })} placeholder="e.g. beach-islands" />
         </div>
         <div>
-          <FL>Icon (Emoji or Icon Name)</FL>
-          <Inp value={data.icon} onChange={e => setData({ ...data, icon: e.target.value })} placeholder="e.g. 🏖️" />
+          <FL>Icon (Lucide Icon Name)</FL>
+          <Inp value={data.icon} onChange={e => setData({ ...data, icon: e.target.value })} placeholder="e.g. Umbrella, Heart, Mountain" />
         </div>
         <div>
           <FL>Display Order</FL>

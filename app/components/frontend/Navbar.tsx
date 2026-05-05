@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { logout } from "@/app/store/features/auth/authThunks";
 import { setCurrency } from "@/app/store/features/currency/currencySlice";
 import { fetchCurrencies } from "@/app/store/features/currency/currencyThunks";
+import LucideIcon from "../LucideIcon";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -121,7 +122,9 @@ export default function Navbar() {
                   onClick={() => setCurrencyMenuOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-all duration-200"
                 >
-                  <span className="text-base leading-none">{selectedCurrency.flag}</span>
+                  <div className="text-white/60">
+                    <LucideIcon name="Globe" size={16} />
+                  </div>
                   <span>{selectedCurrency.code} {selectedCurrency.symbol}</span>
                   <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${currencyMenuOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
@@ -154,7 +157,8 @@ export default function Navbar() {
                                 background: user.role === "admin" ? "rgba(251,191,36,0.18)" : "rgba(47,163,242,0.18)",
                                 color: user.role === "admin" ? "#fbbf24" : "#2fa3f2",
                               }}>
-                              {user.role === "admin" ? "⭐ Admin" : "👤 Member"}
+                              <LucideIcon name={user.role === "admin" ? "Star" : "User"} size={10} className="mr-1" />
+                              {user.role === "admin" ? "Admin" : "Member"}
                             </span>
                           </div>
                           {user.role === "admin" && (
@@ -249,7 +253,7 @@ export default function Navbar() {
                   className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all text-white/80 hover:text-white hover:bg-white/10"
                 >
                   <span className="flex items-center gap-2">
-                    <span className="text-base">{selectedCurrency.flag}</span>
+                    <LucideIcon name="Globe" size={16} className="text-[#2fa3f2]" />
                     <span>{selectedCurrency.code} {selectedCurrency.symbol}</span>
                   </span>
                   <svg className={`w-4 h-4 transition-transform duration-200 ${currencyMenuOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>

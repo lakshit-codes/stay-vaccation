@@ -1,7 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../apiUtils";
+import { Region } from "./types";
 import { TransfersState } from "./types";
-import { TransferRecord } from "@/app/components/AdminCore";
+import { TransferRecord } from "./types";
 
 export const fetchTransfers = createAsyncThunk(
   "transfers/fetchTransfers",
