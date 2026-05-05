@@ -11,6 +11,7 @@ import HeroSection from "./components/HeroSection";
 import DestinationSlider from "./components/DestinationSlider";
 import DestinationCard from "./components/DestinationCard";
 import BestSellerCard from "./components/BestSellerCard";
+import LucideIcon from "@/app/components/LucideIcon";
 
 // ─── Shared Types ─────────────────────────────────────────────────────────────
 export interface Destination {
@@ -26,19 +27,7 @@ export interface Destination {
   startingPrice?: number;
 }
 
-export interface Package {
-  id: string;
-  title: string;
-  images: string[];
-  price: {
-    currency: string;
-    amount: number;
-    originalAmount: number;
-  };
-  tripDuration: string;
-  destination: string;
-  travelStyle: string;
-}
+import { Package } from "@/app/store/features/packages/types";
 
 export interface Region {
   _id: string;
@@ -58,24 +47,24 @@ export interface Category {
 
 // ─── Theme styles mapping ─────────────────────────────────────────────────────
 const THEME_STYLES: Record<string, { gradient: string; icon: string }> = {
-  Spiritual: { icon: "🕌", gradient: "from-orange-500 via-amber-600 to-yellow-700" },
-  Honeymoon: { icon: "💑", gradient: "from-rose-500 via-pink-600 to-fuchsia-700" },
-  Luxury: { icon: "💎", gradient: "from-slate-700 via-gray-800 to-zinc-900" },
-  Wildlife: { icon: "🐆", gradient: "from-green-700 via-emerald-800 to-teal-900" },
-  Adventure: { icon: "🏔️", gradient: "from-sky-500 via-blue-600 to-indigo-700" },
-  Beach: { icon: "🏖️", gradient: "from-cyan-400 via-sky-500 to-blue-600" },
-  Cultural: { icon: "🏛️", gradient: "from-purple-600 via-violet-700 to-indigo-800" },
-  Family: { icon: "👨‍👩‍👧‍👦", gradient: "from-lime-500 via-green-600 to-emerald-700" },
+  Spiritual: { icon: "Compass", gradient: "from-orange-500 via-amber-600 to-yellow-700" },
+  Honeymoon: { icon: "Heart", gradient: "from-rose-500 via-pink-600 to-fuchsia-700" },
+  Luxury: { icon: "Gem", gradient: "from-slate-700 via-gray-800 to-zinc-900" },
+  Wildlife: { icon: "Leaf", gradient: "from-green-700 via-emerald-800 to-teal-900" },
+  Adventure: { icon: "Mountain", gradient: "from-sky-500 via-blue-600 to-indigo-700" },
+  Beach: { icon: "Waves", gradient: "from-cyan-400 via-sky-500 to-blue-600" },
+  Cultural: { icon: "Landmark", gradient: "from-purple-600 via-violet-700 to-indigo-800" },
+  Family: { icon: "Users", gradient: "from-lime-500 via-green-600 to-emerald-700" },
 };
 
-const DEFAULT_THEME_STYLE = { icon: "🌍", gradient: "from-[#1a3f4e] via-[#2a5f74] to-[#2fa3f2]" };
+const DEFAULT_THEME_STYLE = { icon: "Globe", gradient: "from-[#1a3f4e] via-[#2a5f74] to-[#2fa3f2]" };
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
 type TabKey = string;
 interface TabOption {
   key: TabKey;
   label: string;
-  emoji: string;
+  icon: string;
 }
 
 function getTabConfig(regions: Region[], destinations: Destination[], override?: string): TabOption[] {
@@ -86,11 +75,11 @@ function getTabConfig(regions: Region[], destinations: Destination[], override?:
       r.name.toLowerCase() !== "around"
     );
     return [
-      { key: "All", label: "All India", emoji: "🇮🇳" },
+      { key: "All", label: "All India", icon: "Map" },
       ...indiaRegions.map(r => ({
         key: r._id,
         label: r.name,
-        emoji: r.icon || "📍",
+        icon: r.icon || "MapPin",
       })),
     ];
   }
@@ -100,24 +89,24 @@ function getTabConfig(regions: Region[], destinations: Destination[], override?:
       destinations.some(d => d.regionId === r._id && d.category === "International")
     );
     return [
-      { key: "All", label: "All International", emoji: "✈️" },
+      { key: "All", label: "All International", icon: "Plane" },
       ...intlRegions.map(r => ({
         key: r._id,
         label: r.name,
-        emoji: r.icon || "📍",
+        icon: r.icon || "MapPin",
       })),
     ];
   }
 
   const fixed: TabOption[] = [
-    { key: "All", label: "All Destinations", emoji: "🌎" },
-    { key: "India", label: "India", emoji: "🇮🇳" },
-    { key: "International", label: "International", emoji: "✈️" },
+    { key: "All", label: "All Destinations", icon: "Globe" },
+    { key: "India", label: "India", icon: "Map" },
+    { key: "International", label: "International", icon: "Plane" },
   ];
   const regionTabs = regions.map(r => ({
     key: r._id,
     label: r.name,
-    emoji: r.icon || "📍",
+    icon: r.icon || "MapPin",
   }));
   return [...fixed, ...regionTabs];
 }
@@ -261,10 +250,9 @@ export default function DestinationsPageContent({
                     </div>
 
                     <div className="absolute inset-0 opacity-[0.03] z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
-                    <div className={`absolute -bottom-8 -right-8 w-36 h-36 rounded-full bg-white/10 group-hover:scale-125 transition-transform duration-700 z-0`} />
                     <div className="relative z-10 p-6 md:p-8 flex flex-col h-full min-h-[200px] md:min-h-[240px]">
-                      <div className={`w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-2xl mb-auto group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 shadow-lg border border-white/20`}>
-                        {cat.icon || style.icon}
+                      <div className="absolute top-6 right-8 text-[#EAEAEA] group-hover:scale-110 group-hover:text-[#C2A46D] transition-all duration-300 ease-in-out z-10 opacity-90">
+                        <LucideIcon name={cat.icon || style.icon} size={24} strokeWidth={1.5} />
                       </div>
                       <div className="mt-6">
                         <h3 className="text-white font-display font-bold text-xl md:text-2xl leading-tight mb-1.5 drop-shadow">{cat.name}</h3>
@@ -332,7 +320,9 @@ export default function DestinationsPageContent({
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold tracking-wide uppercase transition-all duration-300 whitespace-nowrap ${isActive ? "bg-[#1a3f4e] text-white shadow-lg shadow-[#1a3f4e]/30 scale-105" : "bg-white text-gray-500 border border-gray-200 hover:border-[#2fa3f2]/40 hover:text-[#1a3f4e] hover:bg-[#F4F9E9]"}`}
                   >
-                    <span className="text-sm leading-none">{tab.emoji}</span>
+                    <span className="leading-none text-[#2fa3f2]">
+                      <LucideIcon name={tab.icon} size={16} strokeWidth={2} />
+                    </span>
                     <span>{tab.label}</span>
                     <span className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center ${isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-400"}`}>{count}</span>
                   </button>

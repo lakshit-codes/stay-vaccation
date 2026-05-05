@@ -1,6 +1,8 @@
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
 import Link from "next/link";
+import LucideIcon from "../components/LucideIcon";
+import { getCategoryIcon } from "../utils/categoryMapping";
 
 export const metadata = {
   title: "Tour Categories — Stay Vacation",
@@ -110,8 +112,8 @@ export default async function CategoriesPage() {
                       {cat.packageCount} {cat.packageCount === 1 ? 'Package' : 'Packages'} Available
                     </p>
                   </div>
-                  <div className="text-5xl drop-shadow-2xl group-hover:scale-110 transition-transform duration-500 relative">
-                    {cat.icon}
+                  <div className="absolute top-6 right-8 text-[#EAEAEA] group-hover:scale-110 group-hover:text-[#C2A46D] transition-all duration-300 ease-in-out z-10 opacity-90">
+                    <LucideIcon name={getCategoryIcon(cat.name, cat.icon)} size={24} strokeWidth={1.5} />
                   </div>
                 </div>
 

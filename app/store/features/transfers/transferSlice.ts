@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { TransfersState } from "./types";
-import { TransferRecord } from "@/app/components/AdminCore";
+import { TransferRecord } from "./types";
 import {
   fetchTransfers,
   createTransfer,

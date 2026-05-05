@@ -44,19 +44,7 @@ const FALLBACK_DESTINATIONS: Destination[] = [
 ];
 
 
-interface Package {
-  id: string;
-  title: string;
-  destination: string;
-  tripDuration: string;
-  travelStyle: string;
-  tourType: string;
-  exclusivityLevel: string;
-  price: { currency: string; amount: number | string };
-  shortDescription: string;
-  inclusions?: string[];
-  itinerary?: any[];
-}
+import { Package } from "@/app/store/features/packages/types";
 
 export default async function DestinationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -135,14 +123,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
         <div className="absolute inset-0 bg-black/40" />
 
         <div className="container-sv relative z-10 text-center text-white">
-          {/* Breadcrumb */}
-          <nav className="flex items-center justify-center gap-2 mb-6 text-sm font-medium text-white/60">
-            <Link href="/" className="hover:text-[#2fa3f2] transition-colors">Home</Link>
-            <span className="text-white/20">/</span>
-            <Link href="/locations" className="hover:text-[#2fa3f2] transition-colors">Destinations</Link>
-            <span className="text-white/20">/</span>
-            <span className="text-white">{destination.name}</span>
-          </nav>
+          {/* Breadcrumb removed */}
 
           <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-4 drop-shadow-md">
             {destination.type === "india" ? "India" : "International Gateway"}

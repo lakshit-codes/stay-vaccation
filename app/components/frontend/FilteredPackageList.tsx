@@ -3,20 +3,9 @@
 import { useState, useMemo } from "react";
 import PackageCard from "./PackageCard";
 import Link from "next/link";
+import LucideIcon from "../LucideIcon";
 
-interface Package {
-  id: string;
-  title: string;
-  destination: string;
-  tripDuration: string;
-  travelStyle: string;
-  tourType: string;
-  exclusivityLevel: string;
-  price: { currency: string; amount: number | string };
-  shortDescription: string;
-  inclusions?: string[];
-  itinerary?: any[];
-}
+import { Package } from "@/app/store/features/packages/types";
 
 interface FilteredPackageListProps {
   packages: Package[];
@@ -115,9 +104,9 @@ export default function FilteredPackageList({ packages, destinationTitle }: Filt
               onChange={(e) => setSortOrder(e.target.value as SortType)}
               className="appearance-none bg-white border border-gray-100 px-6 py-2.5 rounded-2xl text-xs font-bold text-[#1a3f4e] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2fa3f2]/20 cursor-pointer pr-10"
             >
-              <option value="popular">🔥 Popular</option>
-              <option value="price-asc">💰 Price: Low to High</option>
-              <option value="price-desc">💎 Price: High to Low</option>
+              <option value="popular">Popular</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -135,8 +124,8 @@ export default function FilteredPackageList({ packages, destinationTitle }: Filt
         </div>
       ) : (
         <div className="text-center py-24 bg-white rounded-[40px] border-2 border-dashed border-gray-100 max-w-4xl mx-auto">
-          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl">
-            {activeTab === "group" ? "👥" : activeTab === "recommended" ? "✨" : "🏝️"}
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-[#2fa3f2]">
+            <LucideIcon name={activeTab === "group" ? "Users" : activeTab === "recommended" ? "Sparkles" : "MapPin"} size={40} strokeWidth={1.5} />
           </div>
           <h3 className="text-2xl font-bold text-[#1a3f4e] mb-4">
             No {tabs.find(t => t.id === activeTab)?.label} Found

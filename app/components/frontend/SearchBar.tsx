@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { fetchSuggestions } from "@/app/store/features/search/searchThunks";
 import { clearSearch } from "@/app/store/features/search/searchSlice";
 import { SearchDestination as Destination } from "@/app/store/types";
+import LucideIcon from "../LucideIcon";
 
 // Highlight matched text within a string
 function Highlight({ text, query }: { text: string; query: string }) {
@@ -209,8 +210,9 @@ export default function SearchBar({
               <>
                 <div className="px-4 py-3 flex items-center justify-between sticky top-0 z-10 bg-[#0c1e28] shadow-sm"
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#2fa3f2]">
-                    {popular ? "✨ Popular Choices" : "📍 Suggestions"}
+                  <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#2fa3f2] flex items-center gap-1.5">
+                    <LucideIcon name={popular ? "Sparkles" : "MapPin"} size={12} />
+                    {popular ? "Popular Choices" : "Suggestions"}
                   </span>
                   <span className="text-[10px] text-white/30 font-medium">
                     {results.length} Found
@@ -233,7 +235,13 @@ export default function SearchBar({
                             background: isActive ? "rgba(47,163,242,0.15)" : "transparent",
                           }}
                         >
-                          <span className="text-2xl w-8 text-center flex-shrink-0">{dest.emoji}</span>
+                           <div className="w-8 flex justify-center flex-shrink-0 text-[#2fa3f2]">
+                            <LucideIcon 
+                              name={dest.type === "state" ? "Map" : dest.type === "city" ? "MapPin" : "Navigation"} 
+                              size={20} 
+                              strokeWidth={1.5} 
+                            />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <span className="text-sm font-bold text-white leading-none">
@@ -266,7 +274,9 @@ export default function SearchBar({
               </>
             ) : query.length > 0 && (
               <div className="p-12 text-center bg-[#0c1e28]">
-                <div className="text-4xl mb-4 opacity-50">🏝️</div>
+                <div className="flex justify-center mb-4 opacity-20 text-[#2fa3f2]">
+                  <LucideIcon name="SearchX" size={48} strokeWidth={1} />
+                </div>
                 <p className="text-sm font-bold text-white mb-1">No destinations found</p>
                 <p className="text-xs text-white/40 mb-6">We couldn't find &ldquo;{query}&rdquo;. Try another name?</p>
                 <button

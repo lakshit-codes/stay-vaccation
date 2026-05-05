@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../apiUtils";
 import { ActivitiesState } from "./types";
-import { MasterActivity } from "@/app/components/AdminCore";
+import { MasterActivity } from "./types";
 
 export const fetchActivities = createAsyncThunk(
   "activities/fetchActivities",

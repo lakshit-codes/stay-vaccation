@@ -63,13 +63,7 @@ export default function ActivityClientPage({
         </div>
 
         <div className="container-sv relative z-10 text-center text-white pt-20">
-          <nav className="flex items-center justify-center gap-2 text-sm font-medium mb-6 animate-fadeUp opacity-80">
-            <Link href="/" className="hover:text-[#2fa3f2] transition-colors">Home</Link>
-            <span>/</span>
-            <Link href="/activities" className="hover:text-[#2fa3f2] transition-colors">Activities</Link>
-            <span>/</span>
-            <span className="text-[#2fa3f2]">{destination?.name || slug}</span>
-          </nav>
+          {/* Breadcrumb removed */}
 
           <h1 className="text-4xl md:text-6xl font-display font-bold mb-4 animate-fadeUp delay-100 uppercase tracking-tight">
             Things to do in <span className="text-[#2fa3f2]">{destination?.name || slug}</span>

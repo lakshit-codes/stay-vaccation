@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ActivitiesState } from "./types";
-import { MasterActivity } from "@/app/components/AdminCore";
+import { MasterActivity } from "./types";
 import {
   fetchActivities,
   createActivity,

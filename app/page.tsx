@@ -5,6 +5,8 @@ import SearchBar from "./components/frontend/SearchBar";
 import TrendingDestinations from "./components/frontend/TrendingDestinations";
 import Link from "next/link";
 import { getAllDestinations } from "./utils/getDestinations";
+import LucideIcon from "./components/LucideIcon";
+import { getCategoryIcon } from "./utils/categoryMapping";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +60,12 @@ export default async function HomePage() {
     subheadline: "Curated luxury escapes, cultural journeys, and adventure tours — crafted for those who live to explore.",
     badgeText: "Premium Travel Experiences Await"
   };
-  const highlights = settings?.highlights || [];
+  const highlights = settings?.highlights || [
+    { title: "50+ Destinations", desc: "Handpicked locations across the globe", icon: "Map" },
+    { title: "24/7 Support", desc: "Always here when you need us", icon: "Headphones" },
+    { title: "Best Price", desc: "Guaranteed value for your money", icon: "Tag" },
+    { title: "Expert Guides", desc: "Local experts to show you the way", icon: "UserCheck" },
+  ];
   const cta = settings?.cta || {
     title: "Ready to Start Your Journey?",
     subtitle: "Talk to our travel experts and get a custom itinerary crafted just for you.",
@@ -152,7 +159,9 @@ export default async function HomePage() {
                   className="text-center p-6 rounded-2xl hover:bg-[#F4F9E9] transition-colors group"
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform inline-block">{h.icon}</div>
+                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform inline-block text-[#2fa3f2]">
+                    <LucideIcon name={h.icon} size={40} strokeWidth={1.5} />
+                  </div>
                   <h3 className="font-bold text-[#1a3f4e] text-sm mb-1">{displayTitle}</h3>
                   <p className="text-gray-400 text-xs leading-relaxed">{h.desc}</p>
                 </div>
@@ -198,7 +207,9 @@ export default async function HomePage() {
                     </>
                   )}
                 </div>
-                <div className="absolute top-4 right-4 text-3xl group-hover:scale-110 transition-transform z-10">{cat.icon}</div>
+                <div className="absolute top-4 right-4 text-[#EAEAEA] group-hover:scale-110 group-hover:text-[#C2A46D] transition-all duration-300 z-10 opacity-90">
+                  <LucideIcon name={getCategoryIcon(cat.name, cat.icon)} size={22} strokeWidth={1.5} />
+                </div>
                 <div className="relative z-10">
                   <span className="block text-white text-sm font-bold leading-tight">{cat.name}</span>
                   <span className="block text-white/60 text-[10px] font-bold uppercase tracking-tighter mt-1">

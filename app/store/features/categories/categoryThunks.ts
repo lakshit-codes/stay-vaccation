@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../apiUtils";
 import { CategoriesState } from "./types";
-import { Category } from "@/app/components/AdminCore";
+import { Category } from "./types";
 
 export const fetchCategories = createAsyncThunk(
   "categories/fetchCategories",

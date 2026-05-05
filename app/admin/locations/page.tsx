@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, Ic, Btn, Badge, Modal, RegionForm, Region, DestinationForm, Destination } from "@/app/components/AdminCore";
+import LucideIcon from "@/app/components/LucideIcon";
 
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { fetchRegions, updateRegion, deleteRegion, createRegion } from "@/app/store/features/regions/regionThunks";
@@ -96,8 +97,8 @@ export default function LocationsAdminPage() {
             <div key={region._id} className="space-y-4">
               {/* Region Header */}
               <div className="flex items-center gap-4 group/header">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center text-2xl shadow-lg border border-white/10`}>
-                  {region.icon}
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center text-white shadow-lg border border-white/10`}>
+                  <LucideIcon name={region.icon || "MapPin"} size={24} strokeWidth={1.5} />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
@@ -126,7 +127,9 @@ export default function LocationsAdminPage() {
                 {regionDestinations.map((dest) => (
                   <Card key={dest._id} className="p-4 hover:border-blue-200 transition-all group">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="text-3xl">{dest.name.split(',')[0] === "Bali" ? "🌺" : "📍"}</div>
+                      <div className="text-blue-500">
+                        <LucideIcon name={dest.name.split(',')[0] === "Bali" ? "Palmtree" : "MapPin"} size={32} strokeWidth={1.5} />
+                      </div>
                       <div className="flex flex-col items-end gap-1">
                         <Badge className="bg-blue-50 text-blue-700 border-blue-100 italic">
                           {dest.packageCount || 0} Pkgs
@@ -135,13 +138,13 @@ export default function LocationsAdminPage() {
                           {dest.isActive ? "Active" : "Inactive"}
                         </Badge>
                         {dest.isTrending && (
-                          <Badge className="bg-amber-50 text-amber-700 border-amber-200">
-                            🔥 Trending
+                          <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+                            <LucideIcon name="Flame" size={10} /> Trending
                           </Badge>
                         )}
                         {dest.category && (
-                          <Badge className={dest.category === "India" ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-blue-50 text-blue-700 border-blue-200"}>
-                            {dest.category === "India" ? "🇮🇳 India" : "🌍 Intl"}
+                          <Badge className={dest.category === "India" ? "bg-orange-50 text-orange-700 border-orange-200 flex items-center gap-1" : "bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1"}>
+                            <LucideIcon name={dest.category === "India" ? "Map" : "Globe"} size={10} /> {dest.category === "India" ? "India" : "Intl"}
                           </Badge>
                         )}
                       </div>
@@ -200,7 +203,7 @@ export default function LocationsAdminPage() {
                 {uncategorized.map((dest) => (
                   <Card key={dest._id} onClick={() => { setSelectedDest(dest); setTargetRegionId(null); setDestModalOpen(true); }} className="p-4 border-amber-100 bg-amber-50/20 hover:border-amber-200 transition-all group cursor-pointer border-dashed">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="text-3xl">⚠️</div>
+                      <div className="text-amber-500"><LucideIcon name="AlertTriangle" size={32} /></div>
                       <Badge className="bg-amber-100 text-amber-700 border-amber-200">Needs Region</Badge>
                     </div>
                     <h4 className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors">{dest.name}</h4>

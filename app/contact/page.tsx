@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/frontend/Navbar";
 import Footer from "../components/frontend/Footer";
+import LucideIcon from "../components/LucideIcon";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -41,25 +42,25 @@ export default function ContactPage() {
 
   const CONTACT_INFO = [
     { 
-      icon: "📍", 
+      icon: "MapPin", 
       label: "Visit Us", 
       value: contact.address || "123 Travel Lane, Mumbai, India 400001", 
       sub: contact.workingHours || "Mon–Sat 9am – 6pm" 
     },
     { 
-      icon: "📞", 
+      icon: "Phone", 
       label: "Call Us", 
       value: contact.phone || "+91 98765 43210", 
       sub: contact.supportText || "Support available daily" 
     },
     { 
-      icon: "✉️", 
+      icon: "Mail", 
       label: "Email Us", 
       value: contact.email || "hello@stayvacation.com", 
       sub: contact.emailText || "We reply within 24 hours" 
     },
     { 
-      icon: "💬", 
+      icon: "MessageSquare", 
       label: "WhatsApp", 
       value: contact.whatsapp || "+91 98765 43210", 
       sub: contact.whatsappText || "Quick response guaranteed" 
@@ -101,7 +102,7 @@ export default function ContactPage() {
                   key={info.label}
                   className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all"
                 >
-                  <div className="text-3xl">{info.icon}</div>
+                  <div className="text-[#2fa3f2]"><LucideIcon name={info.icon} size={32} /></div>
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">{info.label}</p>
                     <p className="font-bold text-[#1a3f4e] text-sm">{info.value}</p>
@@ -131,7 +132,9 @@ export default function ContactPage() {
             <div className="lg:col-span-2">
               {sent ? (
                 <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center h-full flex flex-col items-center justify-center">
-                  <div className="text-6xl mb-5">🎉</div>
+                  <div className="text-[#2fa3f2] mb-5">
+                    <LucideIcon name="PartyPopper" size={64} strokeWidth={1} />
+                  </div>
                   <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Enquiry Sent!</h2>
                   <p className="text-gray-500 text-sm max-w-sm leading-relaxed mb-6">
                     {formSettings.successMessage ? (
@@ -238,7 +241,9 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center h-full flex flex-col items-center justify-center">
-                   <div className="text-6xl mb-5">📵</div>
+                   <div className="text-gray-300 mb-5">
+                     <LucideIcon name="Construction" size={64} strokeWidth={1} />
+                   </div>
                    <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Form Temporarily Offline</h2>
                    <p className="text-gray-500 text-sm max-w-sm leading-relaxed">
                      Our online enquiry form is currently undergoing maintenance. Please use the contact details on the left to reach us directly.
@@ -253,7 +258,9 @@ export default function ContactPage() {
       {/* Map placeholder */}
       <section className="h-80 bg-gradient-to-br from-[#1a3f4e] to-[#2a5f74] flex items-center justify-center">
         <div className="text-center text-white p-6">
-          <div className="text-5xl mb-4">🗺️</div>
+          <div className="text-[#2fa3f2] mb-4 flex justify-center">
+            <LucideIcon name="Map" size={64} strokeWidth={1} />
+          </div>
           <p className="font-bold text-xl mb-1">{office.title || "Visit Our Office"}</p>
           <p className="text-white/60 text-sm max-w-md mx-auto">
             {office.address || "123 Travel Lane, Mumbai, India 400001"}

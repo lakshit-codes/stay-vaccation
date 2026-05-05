@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Package",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "location": { "type": "string" },
+    "duration": { "type": "string" },
+    "price": { "type": ["string", "number", "object"] },
+    "rating": { "type": ["string", "number"] },
+    "coverImage": { "type": "string" },
+    "images": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "highlights": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "itinerary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "images": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["day", "title", "description", "images"]
+      }
+    },
+    "inclusions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hotels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "location": { "type": "string" },
+          "image": { "type": "string" }
+        }
+      }
+    },
+    "transfers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "activities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policies": {
+      "type": "object",
+      "properties": {
+        "cancellation": { "type": "string" },
+        "refund": { "type": "string" },
+        "confirmation": { "type": "string" }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "rating": { "type": ["string", "number"] },
+          "comment": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["title", "location", "duration", "price", "coverImage", "itinerary"]
+}

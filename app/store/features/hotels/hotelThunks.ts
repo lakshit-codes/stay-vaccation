@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../apiUtils";
 import { HotelsState } from "./types";
-import { MasterHotel } from "@/app/components/AdminCore";
+import { MasterHotel } from "./types";
 
 export const fetchHotels = createAsyncThunk(
   "hotels/fetchHotels",

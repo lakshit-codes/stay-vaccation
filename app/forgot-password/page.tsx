@@ -35,13 +35,7 @@ export default function ForgotPasswordPage() {
           style={{ background: "rgba(244,249,233,0.04)", filter: "blur(50px)" }} />
 
         <div className="relative z-10 w-full max-w-md mx-auto px-4">
-          <p className="text-white/40 text-xs text-center mb-6 tracking-widest uppercase">
-            <Link href="/" className="hover:text-white/70 transition-colors">Home</Link>
-            {" / "}
-            <Link href="/login" className="hover:text-white/70 transition-colors">Sign In</Link>
-            {" / "}
-            <span className="text-[#2fa3f2]">Reset</span>
-          </p>
+          {/* Breadcrumb removed */}
 
           <div className="text-center mb-8">
             <h1 className="font-display text-4xl font-bold text-white mb-2">

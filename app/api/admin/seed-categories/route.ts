@@ -9,7 +9,7 @@ export async function POST() {
       { 
         name: "Beach & Islands", 
         slug: "beach-islands",
-        icon: "🏖️", 
+        icon: "Waves", 
         color: "from-sky-500 to-blue-700", 
         link: "/packages?type=Beach", 
         order: 1,
@@ -20,7 +20,7 @@ export async function POST() {
       { 
         name: "Heritage & Culture", 
         slug: "heritage-culture",
-        icon: "🏛️", 
+        icon: "Landmark", 
         color: "from-amber-500 to-orange-700", 
         link: "/packages?type=Heritage", 
         order: 2,
@@ -31,7 +31,7 @@ export async function POST() {
       { 
         name: "Adventure Sports", 
         slug: "adventure-sports",
-        icon: "🧗", 
+        icon: "Mountain", 
         color: "from-emerald-500 to-teal-700", 
         link: "/packages?type=Adventure%20Sports", 
         order: 3,
@@ -42,7 +42,7 @@ export async function POST() {
       { 
         name: "Wildlife & Nature", 
         slug: "wildlife-nature",
-        icon: "🦁", 
+        icon: "Leaf", 
         color: "from-lime-500 to-green-700", 
         link: "/packages?type=Wildlife", 
         order: 4,
@@ -53,7 +53,7 @@ export async function POST() {
       { 
         name: "Honeymoon", 
         slug: "honeymoon",
-        icon: "💑", 
+        icon: "Heart", 
         color: "from-rose-500 to-pink-700", 
         link: "/packages?type=Honeymoon", 
         order: 5,
@@ -64,7 +64,7 @@ export async function POST() {
       { 
         name: "Family Tours", 
         slug: "family-tours",
-        icon: "👨‍👩‍👧", 
+        icon: "Users", 
         color: "from-violet-500 to-purple-700", 
         link: "/packages?type=Family", 
         order: 6,
@@ -75,7 +75,7 @@ export async function POST() {
       { 
         name: "Relaxation & Wellness", 
         slug: "relaxation-wellness",
-        icon: "🧘", 
+        icon: "Wind", 
         color: "from-teal-500 to-cyan-700", 
         link: "/packages?type=Relaxation", 
         order: 7,
@@ -86,7 +86,7 @@ export async function POST() {
       { 
         name: "Religious & Spiritual", 
         slug: "religious-spiritual",
-        icon: "🕌", 
+        icon: "Compass", 
         color: "from-yellow-500 to-amber-700", 
         link: "/packages?type=Religious", 
         order: 8,
