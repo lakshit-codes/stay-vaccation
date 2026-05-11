@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "../components/frontend/Navbar";
-import Footer from "../components/frontend/Footer";
+import LayoutV2 from "../layouts-v2/LayoutV2";
+import PageHeroV2 from "../components-v2/PageHeroV2";
+import ButtonV2 from "../components-v2/ButtonV2";
 import LucideIcon from "../components/LucideIcon";
 
 export default function ContactPage() {
@@ -74,52 +75,68 @@ export default function ContactPage() {
   ];
 
   return (
-    <>
-      <Navbar />
+    <LayoutV2>
+      <PageHeroV2 
+        title={hero.title || "Let&apos;s Start Your Journey"} 
+        subtitle={hero.description || "Have a question or want to plan your dream trip? Our travel experts are here to help you craft the perfect itinerary."}
+        badge="Get in touch"
+        image="https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=1800&auto=format&fit=crop&q=80"
+      />
 
-      {/* Hero */}
-      <section className="hero-bg pt-32 pb-20 text-center">
-        <div className="container-sv">
-          <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-4">Get in touch</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">
-            {hero.title || "Contact Us"}
-          </h1>
-          <p className="text-white/70 text-lg max-w-xl mx-auto">
-            {hero.description || "Have a question or want to plan your dream trip? Our travel experts are here to help."}
-          </p>
-        </div>
-      </section>
-
-      {/* Main */}
-      <section className="section-pad bg-gray-50">
-        <div className="container-sv">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-            {/* Contact info */}
-            <div className="space-y-5">
-              {CONTACT_INFO.map(info => (
-                <div
-                  key={info.label}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all"
+      <section style={{ padding: '6rem 0', background: 'var(--white)' }}>
+        <div className="container-v2">
+          <div style={{ display: 'flex', gap: '4rem', flexWrap: 'wrap' }}>
+            
+            {/* Contact Info Sidebar */}
+            <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {CONTACT_INFO.map((info, i) => (
+                <div 
+                  key={info.label} 
+                  className="reveal visible"
+                  style={{ 
+                    padding: '2rem', 
+                    borderRadius: '2rem', 
+                    background: 'var(--cream)', 
+                    border: '1px solid #f1f5f9',
+                    display: 'flex',
+                    gap: '1.5rem',
+                    alignItems: 'center',
+                    animationDelay: `${i * 100}ms`,
+                    transition: 'transform 0.3s'
+                  }}
                 >
-                  <div className="text-[#2fa3f2]"><LucideIcon name={info.icon} size={32} /></div>
+                  <div style={{ color: 'var(--sky)' }}>
+                    <LucideIcon name={info.icon} size={32} strokeWidth={1.5} />
+                  </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">{info.label}</p>
-                    <p className="font-bold text-[#1a3f4e] text-sm">{info.value}</p>
-                    <p className="text-gray-400 text-xs mt-0.5">{info.sub}</p>
+                    <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>{info.label}</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text)' }}>{info.value}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{info.sub}</p>
                   </div>
                 </div>
               ))}
 
-              {/* Social */}
-              <div className="bg-[#1a3f4e] rounded-2xl p-6 text-white">
-                <p className="font-bold text-sm mb-3">{social.title || "Follow Our Journeys"}</p>
-                <div className="flex gap-3">
+              {/* Social Box */}
+              <div style={{ padding: '2rem', borderRadius: '2rem', background: 'var(--sky-dk)', color: '#fff', marginTop: '1rem' }}>
+                <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1.1rem', marginBottom: '1.5rem' }}>{social.title || "Follow Our Journeys"}</h3>
+                <div style={{ display: 'flex', gap: '0.8rem' }}>
                   {socialLinks.map(s => (
                     <button 
                       key={s.label} 
                       onClick={() => s.url && window.open(s.url, "_blank")}
-                      className={`flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium transition-colors ${!s.url && "opacity-50 cursor-not-allowed"}`}
+                      style={{ 
+                        flex: 1, 
+                        padding: '0.8rem', 
+                        borderRadius: '1rem', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        color: '#fff',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        cursor: s.url ? 'pointer' : 'not-allowed',
+                        opacity: s.url ? 1 : 0.5,
+                        transition: 'all 0.3s'
+                      }}
                     >
                       {s.label}
                     </button>
@@ -128,147 +145,80 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Enquiry Form */}
-            <div className="lg:col-span-2">
-              {sent ? (
-                <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center h-full flex flex-col items-center justify-center">
-                  <div className="text-[#2fa3f2] mb-5">
-                    <LucideIcon name="PartyPopper" size={64} strokeWidth={1} />
-                  </div>
-                  <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Enquiry Sent!</h2>
-                  <p className="text-gray-500 text-sm max-w-sm leading-relaxed mb-6">
-                    {formSettings.successMessage ? (
-                       formSettings.successMessage.replace("{name}", form.name)
-                    ) : (
-                       <>Thank you, <strong>{form.name}</strong>! Our travel expert will reach out to you within 24 hours.</>
-                    )}
-                  </p>
-                  <button
-                    onClick={() => { setSent(false); setForm({ name: "", email: "", phone: "", destination: "", travelDate: "", adults: "2", message: "" }); }}
-                    className="px-8 py-3 bg-[#2fa3f2] text-white font-bold rounded-xl text-sm hover:-translate-y-0.5 transition-all"
-                  >
-                    Send Another Enquiry
-                  </button>
-                </div>
-              ) : formSettings.enabled !== false ? (
-                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                  <h2 className="text-xl font-bold text-[#1a3f4e] mb-2">Plan Your Trip</h2>
-                  <p className="text-gray-400 text-sm mb-7">Fill in the details below and we'll craft a personalised itinerary for you.</p>
-
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Full Name *</label>
-                        <input
-                          required value={form.name} onChange={e => upd("name", e.target.value)}
-                          placeholder="John Doe"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all placeholder:text-gray-300"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email Address *</label>
-                        <input
-                          required type="email" value={form.email} onChange={e => upd("email", e.target.value)}
-                          placeholder="john@example.com"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all placeholder:text-gray-300"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Phone Number</label>
-                        <input
-                          type="tel" value={form.phone} onChange={e => upd("phone", e.target.value)}
-                          placeholder="+91 98765 43210"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all placeholder:text-gray-300"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">No. of Travellers</label>
-                        <select
-                          value={form.adults} onChange={e => upd("adults", e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all bg-white cursor-pointer"
-                        >
-                          {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"].map(n => (
-                            <option key={n} value={n}>{n} Traveller{n !== "1" ? "s" : ""}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Destination</label>
-                        <input
-                          value={form.destination} onChange={e => upd("destination", e.target.value)}
-                          placeholder="e.g. Bali, Rajasthan, Maldives"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all placeholder:text-gray-300"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Preferred Travel Date</label>
-                        <input
-                          type="date" value={form.travelDate} onChange={e => upd("travelDate", e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all"
-                        />
-                      </div>
+            {/* Form Section */}
+            <div style={{ flex: '2 1 500px' }}>
+              <div style={{ padding: '3rem', borderRadius: '3rem', background: 'var(--white)', border: '1.5px solid #f1f5f9', boxShadow: 'var(--shadow)' }}>
+                {sent ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                    <div style={{ color: 'var(--sky)', marginBottom: '1.5rem' }}>
+                      <LucideIcon name="PartyPopper" size={80} strokeWidth={1} />
                     </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Your Message</label>
-                      <textarea
-                        rows={5} value={form.message} onChange={e => upd("message", e.target.value)}
-                        placeholder="Tell us about your dream trip — budget, interests, special requirements…"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-[#2fa3f2] focus:ring-2 focus:ring-[#2fa3f2]/10 transition-all resize-none placeholder:text-gray-300"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={sending}
-                      className="w-full py-4 bg-[#1a3f4e] hover:bg-[#2a5f74] text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                    >
-                      {sending ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          Sending Enquiry…
-                        </span>
-                      ) : "Send Enquiry →"}
-                    </button>
-
-                    <p className="text-gray-400 text-xs text-center">
-                      By submitting, you agree to our privacy policy. We never share your details.
+                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>Enquiry Sent!</h2>
+                    <p style={{ color: 'var(--muted)', fontSize: '1rem', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+                      {formSettings.successMessage ? (
+                        formSettings.successMessage.replace("{name}", form.name)
+                      ) : (
+                        <>Thank you, <strong>{form.name}</strong>! Our travel expert will reach out to you within 24 hours.</>
+                      )}
                     </p>
-                  </form>
-                </div>
-              ) : (
-                <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center h-full flex flex-col items-center justify-center">
-                   <div className="text-gray-300 mb-5">
-                     <LucideIcon name="Construction" size={64} strokeWidth={1} />
-                   </div>
-                   <h2 className="font-display text-2xl font-bold text-[#1a3f4e] mb-3">Form Temporarily Offline</h2>
-                   <p className="text-gray-500 text-sm max-w-sm leading-relaxed">
-                     Our online enquiry form is currently undergoing maintenance. Please use the contact details on the left to reach us directly.
-                   </p>
-                </div>
-              )}
+                    <ButtonV2 onClick={() => { setSent(false); setForm({ name: "", email: "", phone: "", destination: "", travelDate: "", adults: "2", message: "" }); }} variant="sky">Send Another Enquiry</ButtonV2>
+                  </div>
+                ) : (
+                  <>
+                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1.6rem', marginBottom: '0.5rem' }}>Plan Your Trip</h2>
+                    <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '2.5rem' }}>Fill in the details below and we&apos;ll craft a personalised itinerary for you.</p>
+
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem' }}>Full Name *</label>
+                          <input required value={form.name} onChange={e => upd("name", e.target.value)} placeholder="John Doe" style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.3s' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem' }}>Email Address *</label>
+                          <input required type="email" value={form.email} onChange={e => upd("email", e.target.value)} placeholder="john@example.com" style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.3s' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem' }}>Phone Number</label>
+                          <input type="tel" value={form.phone} onChange={e => upd("phone", e.target.value)} placeholder="+91 98765 43210" style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.3s' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem' }}>Travellers</label>
+                          <select value={form.adults} onChange={e => upd("adults", e.target.value)} style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', background: 'var(--white)', cursor: 'pointer' }}>
+                            {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"].map(n => <option key={n} value={n}>{n} Traveller{n !== "1" ? "s" : ""}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem' }}>Message</label>
+                        <textarea rows={4} value={form.message} onChange={e => upd("message", e.target.value)} placeholder="Tell us about your dream trip..." style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', fontSize: '0.9rem', outline: 'none', resize: 'none', transition: 'border-color 0.3s' }} />
+                      </div>
+
+                      <ButtonV2 type="submit" variant="sky" style={{ padding: '1.2rem' }} disabled={sending}>
+                        {sending ? "Sending Enquiry..." : "Send Enquiry →"}
+                      </ButtonV2>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Map placeholder */}
-      <section className="h-80 bg-gradient-to-br from-[#1a3f4e] to-[#2a5f74] flex items-center justify-center">
-        <div className="text-center text-white p-6">
-          <div className="text-[#2fa3f2] mb-4 flex justify-center">
-            <LucideIcon name="Map" size={64} strokeWidth={1} />
+      {/* Office Section */}
+      <section style={{ padding: '6rem 0', background: 'var(--cream)', borderTop: '1px solid #f1f5f9' }}>
+        <div className="container-v2" style={{ textAlign: 'center' }}>
+          <div style={{ color: 'var(--sky)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <LucideIcon name="Map" size={60} strokeWidth={1} />
           </div>
-          <p className="font-bold text-xl mb-1">{office.title || "Visit Our Office"}</p>
-          <p className="text-white/60 text-sm max-w-md mx-auto">
+          <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>{office.title || "Visit Our Office"}</h2>
+          <p style={{ color: 'var(--muted)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
             {office.address || "123 Travel Lane, Mumbai, India 400001"}
           </p>
         </div>
       </section>
-
-      <Footer />
-    </>
+    </LayoutV2>
   );
 }

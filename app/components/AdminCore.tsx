@@ -501,9 +501,8 @@ const MasterActivityForm = ({ initial, onSave, onClose }) => {
   const [tagIn, setTagIn] = useState("");
   const [highIn, setHighIn] = useState("");
 
-  useEffect(() => {
-    setForm(initial || emptyMasterActivity());
-  }, [initial]);
+  // Removed useEffect as component is keyed by parent
+
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
   
@@ -607,9 +606,8 @@ const MasterActivityForm = ({ initial, onSave, onClose }) => {
 const MasterHotelForm = ({ initial, onSave, onClose }) => {
   const [form, setForm] = useState(initial || emptyMasterHotel());
 
-  useEffect(() => {
-    setForm(initial || emptyMasterHotel());
-  }, [initial]);
+  // Removed useEffect as component is keyed by parent
+
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
   return (
@@ -754,7 +752,8 @@ export const MasterActivitiesPage = () => {
       </div>
       <p className="text-xs text-gray-400 text-center">{masterActivities.length} master activities · {Object.values(usageCount).reduce((a, b) => Number(a) + Number(b), 0)} total usages</p>
       <Modal open={!!modal} onClose={() => setModal(null)} title={modal?.mode === "create" ? "Create Master Activity" : "Edit Master Activity"}>
-        <MasterActivityForm initial={modal?.data} onSave={handleSave} onClose={() => setModal(null)} />
+        <MasterActivityForm key={modal?.data?._id || "new"} initial={modal?.data} onSave={handleSave} onClose={() => setModal(null)} />
+
       </Modal>
     </div>
   );
@@ -839,7 +838,8 @@ export const MasterHotelsPage = () => {
         })}
       </div>
       <Modal open={!!modal} onClose={() => setModal(null)} title={modal?.mode === "create" ? "Create Master Hotel" : "Edit Master Hotel"} wide>
-        <MasterHotelForm initial={modal?.data} onSave={handleSave} onClose={() => setModal(null)} />
+        <MasterHotelForm key={modal?.data?._id || "new"} initial={modal?.data} onSave={handleSave} onClose={() => setModal(null)} />
+
       </Modal>
     </div>
   );
@@ -1405,7 +1405,8 @@ const SummarisedView = ({ itinerary, pkg }) => {
                             {/* Activity Images */}
                             {act.images?.length > 0 && (
                               <div className="mt-2">
-                                {act.coverTitle && <p className="text-xs font-semibold text-blue-900 mb-1.5 italic">"{act.coverTitle}"</p>}
+                                {act.coverTitle && <p className="text-xs font-semibold text-blue-900 mb-1.5 italic">&quot;{act.coverTitle}&quot;</p>}
+
                                 <div className="grid grid-cols-4 gap-1.5">
                                   {act.images.map((url, j) => (
                                     <div key={j} className="aspect-square rounded-lg overflow-hidden bg-gray-100 shadow-sm">
@@ -1510,8 +1511,13 @@ const SummarisedView = ({ itinerary, pkg }) => {
 // ─── DAY DESCRIPTION FIELD — stable top-level to avoid focus loss on each keystroke ──
 const DayDescriptionField = ({ dayId, value, onCommit }) => {
   const [local, setLocal] = useState(value || "");
-  const prevId = useRef(dayId);
-  if (prevId.current !== dayId) { prevId.current = dayId; setLocal(value || ""); }
+  const [prevId, setPrevId] = useState(dayId);
+  if (dayId !== prevId) {
+    setPrevId(dayId);
+    setLocal(value || "");
+  }
+
+
   return (
     <textarea
       rows={4}
@@ -1608,7 +1614,8 @@ const ItineraryBuilder = ({ itinerary, setItinerary }) => {
                     </div>
                     <Btn variant="d-em" size="sm" onClick={() => addHotel(day.id)}><Ic.Plus />Add Hotel</Btn>
                   </div>
-                  {day.hotelStays.length === 0 && <p className="text-xs text-center text-gray-400 py-4 border-2 border-dashed border-emerald-200 rounded-xl bg-emerald-50/30">Click "Add Hotel" to link from master catalog</p>}
+                  {day.hotelStays.length === 0 && <p className="text-xs text-center text-gray-400 py-4 border-2 border-dashed border-emerald-200 rounded-xl bg-emerald-50/30">Click &quot;Add Hotel&quot; to link from master catalog</p>}
+
                   <div className="space-y-2">{day.hotelStays.map(hs => <HotelPicker key={hs.id} dayHotel={hs} dayId={day.id} onUpdate={(did, hid, f, v) => updateHotel(did, hid, f, v)} onRemove={(did, hid) => removeHotel(did, hid)} />)}</div>
                 </div>
 
@@ -1640,7 +1647,8 @@ const ItineraryBuilder = ({ itinerary, setItinerary }) => {
                     </div>
                     <Btn variant="dashed" size="sm" onClick={() => addAct(day.id)}><Ic.Plus />Add Activity</Btn>
                   </div>
-                  {day.activities.length === 0 && <p className="text-xs text-center text-gray-400 py-4 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/30">Click "Add Activity" to link from master catalog</p>}
+                  {day.activities.length === 0 && <p className="text-xs text-center text-gray-400 py-4 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50/30">Click &quot;Add Activity&quot; to link from master catalog</p>}
+
                   <div className="space-y-2">{day.activities.map(act => <ActivityPicker key={act.id} dayAct={act} dayId={day.id} onUpdate={updateAct} onRemove={removeAct} />)}</div>
                 </div>
               </div>
@@ -1657,11 +1665,15 @@ const ItineraryBuilder = ({ itinerary, setItinerary }) => {
 const EditableListItem = ({ value, onBlur, onRemove, icon, rowCls, iconCls }) => {
   const [local, setLocal] = useState(value);
   // sync if parent pushes a new value (e.g. after delete re-index)
-  const prevRef = useRef(value);
-  if (prevRef.current !== value && (document.activeElement as HTMLElement)?.dataset?.itemid !== String(value)) {
-    prevRef.current = value;
-    setLocal(value);
+  const [prevVal, setPrevVal] = useState(value);
+  if (value !== prevVal) {
+    setPrevVal(value);
+    if ((document.activeElement as HTMLElement)?.dataset?.itemid !== String(value)) {
+      setLocal(value);
+    }
   }
+
+
   return (
     <div className={cls("flex items-center gap-2 px-3 py-2.5 rounded-lg group", rowCls)}>
       <span className={cls("flex-shrink-0 font-bold text-sm", iconCls)}>{icon}</span>
@@ -1709,8 +1721,10 @@ const InclusionsExclusionsSection = ({ inclusions, exclusions, onChangeInc, onCh
       <div className="flex items-center gap-3 mb-5">
         <div className="w-7 h-7 rounded-lg bg-blue-950 text-white flex items-center justify-center text-sm font-bold">3</div>
         <div>
-          <h3 className="font-bold text-gray-900">What's Inside the Package?</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Add inclusions (what's covered) and exclusions (what's not covered)</p>
+          <h3 className="font-bold text-gray-900">What&apos;s Inside the Package?</h3>
+
+          <p className="text-xs text-gray-400 mt-0.5">Add inclusions (what&apos;s covered) and exclusions (what&apos;s not covered)</p>
+
         </div>
       </div>
 
@@ -1810,8 +1824,13 @@ const InclusionsExclusionsSection = ({ inclusions, exclusions, onChangeInc, onCh
 // Uses internal state per item via a stable sub-component to avoid re-mount on each keystroke
 const KBYGItem = ({ item, index, onBlur, onRemove }) => {
   const [local, setLocal] = useState(item.point);
-  const prevRef = useRef(item.point);
-  if (prevRef.current !== item.point) { prevRef.current = item.point; setLocal(item.point); }
+  const [prevPoint, setPrevPoint] = useState(item.point);
+  if (item.point !== prevPoint) {
+    setPrevPoint(item.point);
+    setLocal(item.point);
+  }
+
+
   return (
     <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl group">
       <div className="w-5 h-5 rounded-full bg-amber-400 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{index + 1}</div>
@@ -1894,8 +1913,13 @@ const KnowBeforeYouGoSection = ({ points, onChange }) => {
 const StringListItem = ({ value, icon, iconCls, rowCls, onCommit, onRemove }) => {
   const [loc, setLoc] = useState(value);
   // Only sync from parent when value changes externally (e.g. after delete re-index)
-  const extRef = useRef(value);
-  if (extRef.current !== value) { extRef.current = value; setLoc(value); }
+  const [prevVal, setPrevVal] = useState(value);
+  if (value !== prevVal) {
+    setPrevVal(value);
+    setLoc(value);
+  }
+
+
   return (
     <div className={cls("flex items-center gap-2 px-3 py-2 rounded-lg group", rowCls)}>
       <span className={cls("text-sm flex-shrink-0", iconCls)}>{icon}</span>
@@ -2048,8 +2072,14 @@ const FAQItemForm = ({ faq, index, onUpdate, onRemove }) => {
   const [q, setQ] = useState(faq.question);
   const [a, setA] = useState(faq.answer);
   // Sync if parent sends a reset (e.g. edit loads new data)
-  const prevId = useRef(faq.id);
-  if (prevId.current !== faq.id) { prevId.current = faq.id; setQ(faq.question); setA(faq.answer); }
+  const [prevId, setPrevId] = useState(faq.id);
+  if (faq.id !== prevId) {
+    setPrevId(faq.id);
+    setQ(faq.question);
+    setA(faq.answer);
+  }
+
+
   return (
     <div className="border border-blue-100 rounded-xl overflow-hidden bg-white shadow-sm">
       <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-blue-100">
@@ -2491,7 +2521,8 @@ export const ViewPackage = ({ pkg, onEdit }: any) => {
       {/* What's Inside Tab */}
       {tab === "inclusions" && (
         <Card className="p-6">
-          <h3 className="text-base font-bold text-gray-900 mb-5">What's Inside the Package?</h3>
+          <h3 className="text-base font-bold text-gray-900 mb-5">What&apos;s Inside the Package?</h3>
+
           <div className="grid grid-cols-2 gap-8">
             {/* Inclusions */}
             <div>
@@ -2732,7 +2763,8 @@ export const CouponsPage = () => {
               ))}
             </tr></thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.length === 0 && <tr><td colSpan={8} className="text-center py-12 text-gray-400 text-sm">No coupons yet. Click "New Coupon" to add one.</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="text-center py-12 text-gray-400 text-sm">No coupons yet. Click &quot;New Coupon&quot; to add one.</td></tr>}
+
               {filtered.map(c => {
                 const st = getStatus(c);
                 return (
@@ -3166,7 +3198,8 @@ export const DuplicatePackageModal = ({ isOpen, onClose, basePkgId, setBasePkgId
   
   React.useEffect(() => {
     if (basePkg) setDays(minDays);
-  }, [basePkgId]);
+  }, [basePkgId, basePkg, minDays]);
+
 
   if (!isOpen) return null;
 

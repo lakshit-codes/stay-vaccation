@@ -1,0 +1,92 @@
+export const heroSectionData = {
+  "id": "hero-section-main",
+  "type": "section",
+  "adminTitle": "Homepage Hero Section",
+  "props": {
+    "badge": {
+      "en": "✈ Explore the World with stayVacation"
+    },
+    "heading": {
+      "en": "Your Dream Vacation Starts Here:"
+    },
+    "heading_highlight": {
+      "en": "Stays, Tours & Adventures"
+    },
+    "description": {
+      "en": "Discover luxury stays and epic journeys worldwide. From hidden beaches to mountain peaks — we craft memories that last a lifetime."
+    },
+    "primary_btn_text": {
+      "en": "🌍 Explore Now"
+    },
+    "primary_btn_link": "/destinations",
+    "secondary_btn_text": {
+      "en": "📋 Plan Trip"
+    },
+    "secondary_btn_link": "/contact",
+    "overlay_color": "rgba(10, 15, 40, 0.45)",
+    "overlay_opacity": 0.6,
+    "search_label_destination": {
+      "en": "📍 Destination"
+    },
+    "search_placeholder_destination": {
+      "en": "Where do you want to go?"
+    },
+    "search_label_checkin": {
+      "en": "📅 Check-in"
+    },
+    "search_label_checkout": {
+      "en": "📅 Check-out"
+    },
+    "search_label_guests": {
+      "en": "👥 Guests"
+    },
+    "search_placeholder_guests": {
+      "en": "2 Guests"
+    },
+    "search_btn_text": {
+      "en": "Search"
+    }
+  },
+  "content": [
+    {
+      "id": "hero-slide-1",
+      "type": "hero-slide",
+      "props": {
+        "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1800&auto=format&fit=crop&q=80",
+        "title": {
+          "en": "Crystal Clear Maldives"
+        }
+      }
+    },
+    {
+      "id": "hero-slide-2",
+      "type": "hero-slide",
+      "props": {
+        "image": "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1800&auto=format&fit=crop&q=80",
+        "title": {
+          "en": "Alpine Lakes Escape"
+        }
+      }
+    },
+    {
+      "id": "hero-slide-3",
+      "type": "hero-slide",
+      "props": {
+        "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&auto=format&fit=crop&q=80",
+        "title": {
+          "en": "Mountain Peaks Adventure"
+        }
+      }
+    },
+    {
+      "id": "hero-slide-4",
+      "type": "hero-slide",
+      "props": {
+        "image": "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1800&auto=format&fit=crop&q=80",
+        "title": {
+          "en": "Santorini Sunsets"
+        }
+      }
+    }
+  ]
+};

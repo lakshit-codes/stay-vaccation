@@ -3,8 +3,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Navbar from "@/app/components/frontend/Navbar";
-import Footer from "@/app/components/frontend/Footer";
+import LayoutV2 from "@/app/layouts-v2/LayoutV2";
+import PageHeroV2 from "@/app/components-v2/PageHeroV2";
+import TourCardV2 from "@/app/components-v2/TourCardV2";
+import SectionHeaderV2 from "@/app/components-v2/SectionHeaderV2";
+import ButtonV2 from "@/app/components-v2/ButtonV2";
 
 // Sub-components
 import HeroSection from "./components/HeroSection";
@@ -188,209 +191,158 @@ export default function DestinationsPageContent({
   }, [destinations, regions, indiaCnt, intlCnt]);
 
   return (
-    <>
-      <Navbar />
-
-      <HeroSection 
-        type={(initialTypeOverride as any) || "all"}
-        totalCount={destinations.length}
-        indiaCount={indiaCnt}
-        intlCount={intlCnt}
-        trendingCount={trendingDestinations.length}
+    <LayoutV2>
+      <PageHeroV2 
+        title={initialTypeOverride === "india" ? "Destinations in India" : initialTypeOverride === "international" ? "International Destinations" : "Explore the World"}
+        subtitle="Discover breathtaking landscapes, vibrant cultures, and hidden gems across the globe."
+        badge="Discovery"
+        image="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&auto=format&fit=crop&q=80"
       />
 
-      <DestinationSlider destinations={trendingDestinations} />
-
-      {/* ── Explore Themes (Dynamic Categories) ─────────────────── */}
-      {categories.length > 0 && (
-        <section className="section-pad bg-[#f8fafc]">
-          <div className="container-sv">
-            <div className="text-center mb-12">
-              <p className="text-[#2fa3f2] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-                Travel Your Way
-              </p>
-              <h2 className="font-display text-3xl md:text-5xl font-bold text-[#1a3f4e] mb-4 leading-tight">
-                Explore by Theme
-              </h2>
-              <p className="text-gray-500 text-base max-w-lg mx-auto leading-relaxed">
-                Every journey has a soul. Pick a theme that speaks to yours and we'll match you with the perfect destinations.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {categories.map((cat, i) => {
-                const style = THEME_STYLES[cat.name] || DEFAULT_THEME_STYLE;
-                return (
-                  <Link
-                    key={cat._id}
-                    href={`/packages?categoryId=${cat._id}`}
-                    className="group relative overflow-hidden rounded-[2rem] cursor-pointer h-full flex flex-col min-h-[200px] md:min-h-[240px]"
-                    style={{ animationDelay: `${i * 60}ms` }}
-                  >
-                    {/* Background image or gradient fallback */}
-                    <div className="absolute inset-0 z-0">
-                      {cat.image ? (
-                        <>
-                          <img 
-                            src={cat.image} 
-                            alt={cat.name} 
-                            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110" 
-                            loading="lazy"
-                            decoding="async"
-                          />
-                          {/* Sophisticated dark gradient for readability */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/95 transition-colors" />
-                        </>
-                      ) : (
-                        <>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient || style.gradient} opacity-90 group-hover:opacity-100 transition-opacity duration-500`} />
-                          <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                        </>
-                      )}
-                    </div>
-
-                    <div className="absolute inset-0 opacity-[0.03] z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
-                    <div className="relative z-10 p-6 md:p-8 flex flex-col h-full min-h-[200px] md:min-h-[240px]">
-                      <div className="absolute top-6 right-8 text-[#EAEAEA] group-hover:scale-110 group-hover:text-[#C2A46D] transition-all duration-300 ease-in-out z-10 opacity-90">
-                        <LucideIcon name={cat.icon || style.icon} size={24} strokeWidth={1.5} />
-                      </div>
-                      <div className="mt-6">
-                        <h3 className="text-white font-display font-bold text-xl md:text-2xl leading-tight mb-1.5 drop-shadow">{cat.name}</h3>
-                        {cat.description && <p className="text-white/70 text-xs font-medium leading-relaxed line-clamp-2">{cat.description}</p>}
-                      </div>
-                      <div className="mt-4 flex items-center gap-1.5 text-white/80 group-hover:text-white transition-colors">
-                        <span className="text-[11px] font-bold uppercase tracking-wider">Explore</span>
-                        <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Best Selling Packages ──────────────────────────────────── */}
-      {bestSellers.length > 0 && (
-        <section className="section-pad bg-white">
-          <div className="container-sv">
-            <div className="flex items-end justify-between mb-10 gap-4">
-              <div>
-                <p className="text-[#2fa3f2] font-bold text-xs uppercase tracking-[0.3em] mb-2">Top Choices</p>
-                <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3f4e] leading-tight">Best Selling Packages</h2>
-              </div>
-              <Link href="/packages" className="flex-shrink-0 hidden sm:flex items-center gap-2 text-[#1a3f4e] font-bold text-sm hover:text-[#2fa3f2] transition-colors group">
-                <span className="border-b-2 border-[#2fa3f2]/30 group-hover:border-[#2fa3f2] pb-0.5 transition-colors">View All</span>
-                <svg className="w-4 h-4 text-[#2fa3f2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {bestSellers.map((pkg, i) => (
-                <BestSellerCard key={pkg.id} pkg={pkg} index={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── All Destinations Grid ────────────────────────────────── */}
-      <section id="all-destinations" className="section-pad bg-[#f8fafc] min-h-[600px]">
-        <div className="container-sv">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
-              <p className="text-[#2fa3f2] font-bold text-xs uppercase tracking-[0.3em] mb-3">Discovery</p>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-[#1a3f4e] leading-tight">All Destinations</h2>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-8">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-              {tabs.map(tab => {
-                const count = tabCounts[tab.key] ?? 0;
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold tracking-wide uppercase transition-all duration-300 whitespace-nowrap ${isActive ? "bg-[#1a3f4e] text-white shadow-lg shadow-[#1a3f4e]/30 scale-105" : "bg-white text-gray-500 border border-gray-200 hover:border-[#2fa3f2]/40 hover:text-[#1a3f4e] hover:bg-[#F4F9E9]"}`}
-                  >
-                    <span className="leading-none text-[#2fa3f2]">
-                      <LucideIcon name={tab.icon} size={16} strokeWidth={2} />
-                    </span>
-                    <span>{tab.label}</span>
-                    <span className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center ${isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-400"}`}>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between mt-5 gap-4 flex-wrap">
-              <p className="text-sm text-gray-400 font-medium">Showing <span className="text-[#1a3f4e] font-bold">{filtered.length}</span> destination{filtered.length !== 1 ? "s" : ""}{search ? ` for "${search}"` : ""}</p>
-              <div className="relative">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by name…" className="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2fa3f2]/30 focus:border-[#2fa3f2] transition-all w-52" />
-                {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>}
-              </div>
-            </div>
-          </div>
-
-          {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filtered.map((dest, i) => (
-                <DestinationCard key={dest._id} dest={dest} index={i} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-gray-200 shadow-sm">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">🏜️</div>
-              <h3 className="text-[#1a3f4e] font-bold text-2xl mb-2">No destinations available</h3>
-              <p className="text-gray-400 text-sm max-w-xs mx-auto leading-relaxed mb-10">
-                We couldn't find any destinations matching your criteria. Try adjusting your filters or browse our full collection of packages.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      {/* Trending Slider - V2 Style */}
+      {trendingDestinations.length > 0 && (
+        <section style={{ padding: '5rem 0', background: 'var(--white)' }}>
+          <div className="container-v2">
+            <SectionHeaderV2 
+              label="Trending Now"
+              title="Most Popular"
+              titleHighlight="Destinations"
+              subtitle="The places everyone is talking about this season. Book early to secure your spot."
+              className="mb-10"
+            />
+            <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1.5rem' }}>
+              {trendingDestinations.map((dest, i) => (
                 <Link 
-                  href="/packages" 
-                  className="px-8 py-3 bg-[#1a3f4e] text-white font-bold rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                  key={dest._id} 
+                  href={`/destinations/${dest.slug}`}
+                  style={{ flex: '0 0 300px', borderRadius: '1.5rem', overflow: 'hidden', position: 'relative', height: '400px' }}
                 >
-                  Browse all packages
+                  <img src={dest.image} alt={dest.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }} />
+                  <div style={{ position: 'absolute', bottom: '1.5rem', left: '1.5rem', right: '1.5rem' }}>
+                    <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>{dest.name}</h3>
+                    <p style={{ color: 'var(--orange)', fontSize: '0.75rem', fontWeight: 700 }}>{dest.packageCount} Packages</p>
+                  </div>
                 </Link>
-                <button 
-                  onClick={() => { setActiveTab("All"); setSearch(""); }} 
-                  className="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-all"
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Best Sellers - V2 Style */}
+      {bestSellers.length > 0 && (
+        <section style={{ padding: '5rem 0', background: 'var(--cream)' }}>
+          <div className="container-v2">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+              <SectionHeaderV2 
+                label="Top Choices"
+                title="Best Selling"
+                titleHighlight="Packages"
+              />
+              <ButtonV2 href="/packages" variant="outline">View All</ButtonV2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+              {bestSellers.map((pkg: any, i) => (
+                <TourCardV2 key={pkg.id} pkg={pkg} index={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* All Destinations Grid - V2 Style */}
+      <section style={{ padding: '5rem 0', background: 'var(--white)' }}>
+        <div className="container-v2">
+          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <SectionHeaderV2 
+              label="The Collection"
+              title="All"
+              titleHighlight="Destinations"
+              subtitle="Browse our entire portfolio of travel locations."
+              centered
+            />
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '3rem' }}>
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '2rem',
+                    border: '1.5px solid',
+                    borderColor: isActive ? 'var(--sky)' : '#e5e7eb',
+                    background: isActive ? 'var(--sky)' : 'var(--white)',
+                    color: isActive ? '#fff' : 'var(--text)',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
                 >
-                  Clear all filters
+                  {tab.label}
                 </button>
-              </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '2rem' }}>
+            {filtered.map((dest, i) => (
+              <Link 
+                key={dest._id} 
+                href={`/destinations/${dest.slug}`}
+                className="reveal visible"
+                style={{ 
+                  borderRadius: '1.5rem', 
+                  overflow: 'hidden', 
+                  background: 'var(--cream)', 
+                  border: '1px solid #e5e7eb',
+                  animationDelay: `${i * 50}ms`
+                }}
+              >
+                <div style={{ height: '200px', overflow: 'hidden' }}>
+                  <img src={dest.image} alt={dest.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '1.5rem' }}>
+                  <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>{dest.name}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{dest.packageCount} Packages</span>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--sky)' }}>Explore →</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '5rem 0', background: 'var(--cream)', borderRadius: '2rem', border: '2px dashed #e5e7eb' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏜️</div>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1.4rem' }}>No destinations found</h3>
             </div>
           )}
         </div>
       </section>
 
-      {/* ── CTA Section ────────────────────────────────────────── */}
-      <section className="section-pad bg-white">
-        <div className="container-sv">
-          <div className="relative rounded-[3rem] overflow-hidden bg-[#1a3f4e] p-8 md:p-16 text-center shadow-2xl">
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} />
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <h2 className="font-display text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">Can't find your <span className="text-[#2fa3f2]">dream destination</span>?</h2>
-              <p className="text-white/70 text-lg mb-10 leading-relaxed">We cover 100+ hidden gems worldwide. Tell us what you're looking for and our experts will craft a bespoke itinerary just for you.</p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/contact" className="w-full sm:w-auto px-10 py-4 bg-[#2fa3f2] text-white font-bold rounded-2xl hover:scale-105 transition-all shadow-lg shadow-[#2fa3f2]/30">Plan Custom Trip</Link>
-                <Link href="/packages" className="w-full sm:w-auto px-10 py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-all backdrop-blur-md border border-white/20">Browse All Packages</Link>
-              </div>
-            </div>
+      {/* CTA */}
+      <section style={{ padding: '6rem 0', background: 'var(--sky-dk)', position: 'relative', overflow: 'hidden' }}>
+        <div className="container-v2" style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 900, fontSize: '2.5rem', marginBottom: '1.5rem', color: '#fff' }}>
+            Can't find your <span style={{ color: 'var(--orange)' }}>dream destination</span>?
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', maxWidth: '700px', margin: '0 auto 2.5rem', lineHeight: 1.6 }}>
+            We cover 100+ hidden gems worldwide. Tell us what you're looking for and our experts will craft a bespoke itinerary just for you.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <ButtonV2 href="/contact" variant="orange">Plan Custom Trip</ButtonV2>
+            <ButtonV2 href="/packages" variant="outline" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Browse Packages</ButtonV2>
           </div>
         </div>
       </section>
-
-      <Footer />
-    </>
+    </LayoutV2>
   );
 }

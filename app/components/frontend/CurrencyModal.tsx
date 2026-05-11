@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useCurrency } from "@/app/hooks/useCurrency";
-
 import { Currency } from "@/app/store/features/currency/types";
+import LucideIcon from "../LucideIcon";
 
 interface CurrencyModalProps {
   isOpen: boolean;
@@ -28,8 +28,6 @@ export default function CurrencyModal({ isOpen, onClose, selectedCurrency, onSel
   }, [searchQuery, enabledCurrencies]);
 
   const commonCurrencies = useMemo(() => {
-     // For now, let's just pick the first few or some specific ones if we had a field
-     // Or just use the first 6 enabled ones as "Common"
      return enabledCurrencies.slice(0, 6);
   }, [enabledCurrencies]);
 
@@ -43,20 +41,22 @@ export default function CurrencyModal({ isOpen, onClose, selectedCurrency, onSel
           onSelectCurrency(curr);
           onClose();
         }}
-        className={`flex items-center justify-between w-full p-3 rounded-xl transition-all ${
+        className={`flex items-center justify-between w-full p-4 rounded-2xl transition-all duration-300 border group ${
           isSelected 
-            ? "bg-[#2fa3f2]/10 border border-[#2fa3f2]/30" 
-            : "hover:bg-white/5 border border-transparent"
+            ? "bg-sky-50 border-sky-200 shadow-sm" 
+            : "bg-white hover:bg-sky-50/50 border-gray-100 hover:border-sky-100 hover:-translate-y-0.5"
         }`}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl leading-none">{curr.flag}</span>
+        <div className="flex items-center gap-3.5">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all duration-300 ${isSelected ? 'bg-white shadow-sm' : 'bg-gray-50 group-hover:bg-white group-hover:rotate-6'}`}>
+            {curr.flag}
+          </div>
           <div className="text-left">
-            <div className={`font-bold text-sm ${isSelected ? "text-[#2fa3f2]" : "text-white"}`}>{curr.code}</div>
-            <div className="text-xs text-white/50">{curr.name}</div>
+            <div className={`font-['Poppins'] font-black text-[0.88rem] leading-none mb-1 ${isSelected ? "text-sky-600" : "text-[#1a1a2e]"}`}>{curr.code}</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]/70">{curr.name}</div>
           </div>
         </div>
-        <div className={`text-sm font-semibold ${isSelected ? "text-[#2fa3f2]" : "text-white/70"}`}>
+        <div className={`font-black text-[0.95rem] ${isSelected ? "text-sky-600" : "text-[#1a1a2e]/40 group-hover:text-[#1a1a2e]"}`}>
           {curr.symbol}
         </div>
       </button>
@@ -66,91 +66,90 @@ export default function CurrencyModal({ isOpen, onClose, selectedCurrency, onSel
   return (
     <>
       <div
-        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-[1000] bg-[#1a1a2e]/40 backdrop-blur-md animate-in fade-in duration-300"
         onClick={onClose}
-        style={{ animation: "fadeIn 0.2s ease" }}
       />
       
       <div
-        className="fixed z-[101] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl mx-4"
-        style={{ animation: "modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1)" }}
+        className="fixed z-[1001] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 animate-in zoom-in-95 fade-in slide-in-from-bottom-8 duration-500"
       >
         <div
-          className="rounded-3xl shadow-2xl overflow-hidden w-full flex flex-col max-h-[85vh]"
-          style={{
-            background: "rgba(15,42,53,0.97)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid rgba(255,255,255,0.12)",
-          }}
+          className="bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_80px_rgba(26,26,46,0.15)] border border-white overflow-hidden w-full flex flex-col max-h-[85vh]"
         >
           {/* Header */}
-          <div className="p-5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <h2 className="text-lg font-bold text-white">Select Currency</h2>
+          <div className="px-8 pt-8 pb-5 flex items-center justify-between">
+            <div>
+               <div className="inline-flex items-center gap-2 bg-sky-50 text-sky-600 text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full mb-2.5">
+                  <LucideIcon name="Globe" size={10} />
+                  Preferences
+               </div>
+               <h2 className="text-2xl font-['Poppins'] font-black text-[#1a1a2e] tracking-tight">Select Currency</h2>
+            </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 bg-gray-50 hover:bg-gray-100 text-[#1a1a2e]/30 hover:text-[#1a1a2e] hover:rotate-90"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <LucideIcon name="X" size={20} />
             </button>
           </div>
 
           {/* Search */}
-          <div className="p-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          <div className="px-8 pb-4">
+            <div className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1a1a2e]/30 group-focus-within:text-sky-500 transition-colors">
+                <LucideIcon name="Search" size={18} />
+              </div>
               <input
                 type="text"
-                placeholder="Search currency by code or name..."
+                placeholder="Search by code or name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-white outline-none transition-all placeholder-white/30"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.13)" }}
-                onFocus={(e) => { e.target.style.border = "1px solid #2fa3f2"; e.target.style.boxShadow = "0 0 0 3px rgba(47,163,242,0.18)"; }}
-                onBlur={(e) => { e.target.style.border = "1px solid rgba(255,255,255,0.13)"; e.target.style.boxShadow = "none"; }}
+                className="w-full pl-12 pr-6 py-4 rounded-2xl text-[0.92rem] font-bold text-[#1a1a2e] outline-none transition-all duration-300 placeholder-[#64748b]/40 bg-gray-50 border border-gray-100 focus:bg-white focus:border-sky-300 focus:shadow-[0_0_0_4px_rgba(74,144,226,0.1)]"
               />
             </div>
           </div>
 
           {/* List */}
-          <div className="overflow-y-auto flex-1 p-4" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.1) transparent" }}>
+          <div className="overflow-y-auto flex-1 px-8 pb-8 custom-scrollbar">
             {!searchQuery && (
-              <div className="mb-6">
-                <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 px-2">Common Currencies</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4 px-1">
+                   <div className="h-[1px] flex-1 bg-gray-100"></div>
+                   <h3 className="text-[10px] font-black text-[#64748b]/50 uppercase tracking-[0.2em]">Common</h3>
+                   <div className="h-[1px] flex-1 bg-gray-100"></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {commonCurrencies.map(c => <CurrencyBtn key={`common-${c.code}`} curr={c} />)}
                 </div>
               </div>
             )}
             
             <div>
-              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 px-2">
-                {searchQuery ? "Search Results" : "All Currencies"}
-              </h3>
+              <div className="flex items-center gap-3 mb-4 px-1">
+                 <div className="h-[1px] flex-1 bg-gray-100"></div>
+                 <h3 className="text-[10px] font-black text-[#64748b]/50 uppercase tracking-[0.2em]">
+                    {searchQuery ? "Search Results" : "Global Options"}
+                 </h3>
+                 <div className="h-[1px] flex-1 bg-gray-100"></div>
+              </div>
               {filteredCurrencies.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredCurrencies.map(c => <CurrencyBtn key={`all-${c.code}`} curr={c} />)}
                 </div>
               ) : (
-                <div className="text-center py-8 text-white/40 text-sm">
-                  No currencies found for "{searchQuery}"
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 rounded-3xl bg-gray-50 flex items-center justify-center text-gray-200 mb-4">
+                     <LucideIcon name="SearchX" size={32} />
+                  </div>
+                  <p className="text-[#1a1a2e] font-black text-sm">No results found</p>
+                  <p className="text-xs text-[#64748b] mt-1">We couldn't find any currency matching "{searchQuery}"</p>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-      
-      <style>{`
-        @keyframes modalIn {
-          from { opacity: 0; transform: translate(-50%, -46%) scale(0.95); }
-          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-      `}</style>
     </>
   );
 }
+

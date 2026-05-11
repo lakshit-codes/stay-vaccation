@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Navbar from "../components/frontend/Navbar";
-import Footer from "../components/frontend/Footer";
-import PackageCard from "../components/frontend/PackageCard";
+import LayoutV2 from "../layouts-v2/LayoutV2";
+import PageHeroV2 from "../components-v2/PageHeroV2";
+import TourCardV2 from "../components-v2/TourCardV2";
+import ButtonV2 from "../components-v2/ButtonV2";
 import { useAppSelector } from "@/app/store/hooks";
 
 
@@ -85,169 +86,130 @@ function PackagesContent() {
   const clearFilters = () => { setType(""); setStyle(""); setDuration(""); setSearch(""); setDestParam(""); setSort("default"); };
 
   return (
-    <>
-      <Navbar />
+    <LayoutV2>
+      <PageHeroV2 
+        title="All Packages" 
+        subtitle="Browse our complete collection of handcrafted travel experiences across the globe."
+        badge="Curated for you"
+        image="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1800&auto=format&fit=crop&q=80"
+      />
 
-      {/* Page Hero */}
-      <section className="hero-bg pt-32 pb-16">
-        <div className="container-sv text-center">
-          <p className="text-[#2fa3f2] font-semibold text-sm uppercase tracking-widest mb-3">Curated for you</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-5">All Packages</h1>
-          <p className="text-white/70 text-lg max-w-xl mx-auto mb-8">
-            Browse our complete collection of handcrafted travel experiences.
-          </p>
-          {/* Search bar */}
-          <div className="max-w-lg mx-auto">
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search destinations, packages…"
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#2fa3f2] transition-colors text-sm"
-              />
+      <section style={{ padding: '4rem 0', background: 'var(--white)' }}>
+        <div className="container-v2">
+          {/* Search bar inside the page */}
+          <div style={{ maxWidth: '600px', margin: '-6rem auto 4rem', position: 'relative', zIndex: 10 }}>
+            <div className="hero-search-v2" style={{ position: 'relative', width: '100%', bottom: 'auto', left: 'auto', transform: 'none', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(15px)', padding: '1rem', borderRadius: '1.5rem', boxShadow: 'var(--shadow2)', display: 'flex', gap: '0.5rem' }}>
+              <div className="hs-field" style={{ flex: 1 }}>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search destinations, packages…"
+                  className="hs-input"
+                  style={{ width: '100%', border: 'none', background: 'transparent' }}
+                />
+              </div>
+              <button className="hs-btn" style={{ borderRadius: '1rem', padding: '0 1.5rem' }}>Search</button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Main content */}
-      <section className="section-pad bg-gray-50 min-h-screen">
-        <div className="container-sv">
-          <div className="flex gap-8">
-
-            {/* ── Sidebar Filters (desktop) ── */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-[#1a3f4e] text-sm">Filters</h3>
-                    {activeFilters > 0 && (
-                      <button onClick={clearFilters} className="text-xs text-red-500 hover:underline font-medium">
-                        Clear all ({activeFilters})
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Tour Type */}
-                  <div className="mb-5">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Tour Type</p>
-                    <div className="space-y-1">
-                      {TOUR_TYPES.map(t => (
-                        <button
-                          key={t}
-                          onClick={() => setType(type === t ? "" : t)}
-                          className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-all ${type === t ? "bg-[#1a3f4e] text-white font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
-                        >
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Travel Style */}
-                  <div className="mb-5">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Travel Style</p>
-                    <div className="space-y-1">
-                      {TRAVEL_STYLES.map(s => (
-                        <button
-                          key={s}
-                          onClick={() => setStyle(style === s ? "" : s)}
-                          className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-all ${style === s ? "bg-[#2fa3f2] text-white font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Duration */}
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Duration</p>
-                    <div className="space-y-1">
-                      {DURATIONS.map(d => (
-                        <button
-                          key={d}
-                          onClick={() => setDuration(duration === d ? "" : d)}
-                          className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-all ${duration === d ? "bg-[#1a3f4e] text-white font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+          <div style={{ display: 'flex', gap: '3rem', flexDirection: 'row', flexWrap: 'wrap' }}>
+            {/* Sidebar Filters */}
+            <aside style={{ flex: '0 0 280px' }} className="hidden lg:block">
+              <div style={{ position: 'sticky', top: '100px', background: 'var(--cream)', padding: '2rem', borderRadius: '1.5rem', border: '1.5px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                  <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1rem' }}>Filters</h3>
+                  {activeFilters > 0 && (
+                    <button onClick={clearFilters} style={{ fontSize: '0.75rem', color: 'var(--orange)', fontWeight: 700, border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                      Clear All ({activeFilters})
+                    </button>
+                  )}
                 </div>
+
+                {/* Filter Groups */}
+                {[
+                  { label: 'Tour Type', options: TOUR_TYPES, state: type, setter: setType },
+                  { label: 'Travel Style', options: TRAVEL_STYLES, state: style, setter: setStyle },
+                  { label: 'Duration', options: DURATIONS, state: duration, setter: setDuration }
+                ].map((group) => (
+                  <div key={group.label} style={{ marginBottom: '2rem' }}>
+                    <h4 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>{group.label}</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {group.options.map(opt => (
+                        <button
+                          key={opt}
+                          onClick={() => group.setter(group.state === opt ? "" : opt)}
+                          style={{
+                            textAlign: 'left',
+                            fontSize: '0.85rem',
+                            padding: '0.6rem 1rem',
+                            borderRadius: '0.75rem',
+                            border: '1px solid',
+                            borderColor: group.state === opt ? 'var(--sky)' : 'transparent',
+                            background: group.state === opt ? 'var(--white)' : 'transparent',
+                            color: group.state === opt ? 'var(--sky)' : 'var(--text)',
+                            fontWeight: group.state === opt ? 700 : 500,
+                            transition: 'all 0.3s',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </aside>
 
-            {/* ── Package Grid ── */}
-            <div className="flex-1 min-w-0">
-              {/* Toolbar */}
-              <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <p className="text-gray-500 text-sm flex-1">
-                  {loading ? "Loading…" : (
-                    <><span className="font-bold text-[#1a3f4e]">{filtered.length}</span> package{filtered.length !== 1 ? "s" : ""} found</>
+            {/* Main Content Area */}
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
+                  {loading ? "Loading packages..." : (
+                    <>Found <span style={{ color: 'var(--text)', fontWeight: 800 }}>{filtered.length}</span> adventures for you</>
                   )}
                 </p>
-                {/* Mobile filter button */}
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-                  </svg>
-                  Filters {activeFilters > 0 && <span className="bg-[#2fa3f2] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{activeFilters}</span>}
-                </button>
-                {/* Sort */}
-                <select
-                  value={sort}
-                  onChange={e => setSort(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 bg-white focus:outline-none focus:border-[#2fa3f2] cursor-pointer"
-                >
-                  {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)' }}>Sort by:</span>
+                  <select
+                    value={sort}
+                    onChange={e => setSort(e.target.value)}
+                    style={{ padding: '0.6rem 1.2rem', borderRadius: '1rem', border: '1.5px solid #e5e7eb', background: 'var(--white)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}
+                  >
+                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
               </div>
 
               {/* Active filter pills */}
               {(type || style || duration || destParam) && (
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {destParam && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2fa3f2] text-white rounded-full text-xs font-semibold">Destination: {destParam} <button onClick={() => setDestParam("")} className="text-white/60 hover:text-white">✕</button></span>}
-                  {type && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1a3f4e] text-white rounded-full text-xs font-semibold">{type} <button onClick={() => setType("")} className="text-white/60 hover:text-white">✕</button></span>}
-                  {style && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2fa3f2] text-white rounded-full text-xs font-semibold">{style} <button onClick={() => setStyle("")} className="text-white/60 hover:text-white">✕</button></span>}
-                  {duration && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1a3f4e]/70 text-white rounded-full text-xs font-semibold">{duration} <button onClick={() => setDuration("")} className="text-white/60 hover:text-white">✕</button></span>}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '2rem' }}>
+                  {destParam && <span className="dest-tag" style={{ background: 'var(--sky)', color: '#fff' }}>Location: {destParam} <button onClick={() => setDestParam("")} style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '0.4rem', cursor: 'pointer' }}>✕</button></span>}
+                  {type && <span className="dest-tag" style={{ background: 'var(--sky)', color: '#fff' }}>{type} <button onClick={() => setType("")} style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '0.4rem', cursor: 'pointer' }}>✕</button></span>}
+                  {style && <span className="dest-tag" style={{ background: 'var(--orange)', color: '#fff' }}>{style} <button onClick={() => setStyle("")} style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '0.4rem', cursor: 'pointer' }}>✕</button></span>}
+                  {duration && <span className="dest-tag" style={{ background: 'var(--sky-dk)', color: '#fff' }}>{duration} <button onClick={() => setDuration("")} style={{ background: 'transparent', border: 'none', color: '#fff', marginLeft: '0.4rem', cursor: 'pointer' }}>✕</button></span>}
                 </div>
               )}
 
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="rounded-2xl overflow-hidden border border-gray-100">
-                      <div className="h-52 skeleton" />
-                      <div className="p-4 space-y-3">
-                        <div className="h-4 skeleton rounded w-3/4" />
-                        <div className="h-3 skeleton rounded w-full" />
-                        <div className="h-3 skeleton rounded w-1/2" />
-                      </div>
-                    </div>
+                    <div key={i} style={{ height: '380px', background: 'var(--cream)', borderRadius: '1.5rem', animation: 'pulse 2s infinite' }} />
                   ))}
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="text-center py-24 border-2 border-dashed border-gray-200 rounded-2xl">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <p className="text-gray-500 font-semibold text-lg">No packages found</p>
-                  <p className="text-gray-400 text-sm mt-1 mb-6">Try adjusting your filters or search term</p>
-                  <button onClick={clearFilters} className="px-6 py-3 bg-[#1a3f4e] text-white rounded-xl text-sm font-semibold hover:bg-[#2a5f74] transition-colors">
-                    Clear All Filters
-                  </button>
+                <div style={{ textAlign: 'center', padding: '5rem 0', background: 'var(--cream)', borderRadius: '2rem', border: '2px dashed #e5e7eb' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏜️</div>
+                  <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '1.4rem', marginBottom: '1rem' }}>No packages found</h3>
+                  <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Try adjusting your filters to find your perfect trip.</p>
+                  <ButtonV2 onClick={clearFilters} variant="orange">Clear All Filters</ButtonV2>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
                   {filtered.map((pkg, i) => (
-                    <PackageCard key={pkg.id} pkg={pkg} index={i} />
+                    <TourCardV2 key={pkg.id} pkg={pkg} index={i} />
                   ))}
                 </div>
               )}
@@ -255,53 +217,7 @@ function PackagesContent() {
           </div>
         </div>
       </section>
-
-      {/* Mobile Filter Drawer */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-[#1a3f4e] text-lg">Filters</h3>
-              <button onClick={() => setSidebarOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">✕</button>
-            </div>
-            <div className="mb-5">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Tour Type</p>
-              <div className="flex flex-wrap gap-2">
-                {TOUR_TYPES.map(t => (
-                  <button key={t} onClick={() => setType(type === t ? "" : t)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${type === t ? "bg-[#1a3f4e] text-white border-[#1a3f4e]" : "border-gray-200 text-gray-600"}`}>{t}</button>
-                ))}
-              </div>
-            </div>
-            <div className="mb-5">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Travel Style</p>
-              <div className="flex flex-wrap gap-2">
-                {TRAVEL_STYLES.map(s => (
-                  <button key={s} onClick={() => setStyle(style === s ? "" : s)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${style === s ? "bg-[#2fa3f2] text-white border-[#2fa3f2]" : "border-gray-200 text-gray-600"}`}>{s}</button>
-                ))}
-              </div>
-            </div>
-            <div className="mb-6">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Duration</p>
-              <div className="flex flex-wrap gap-2">
-                {DURATIONS.map(d => (
-                  <button key={d} onClick={() => setDuration(duration === d ? "" : d)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${duration === d ? "bg-[#1a3f4e] text-white border-[#1a3f4e]" : "border-gray-200 text-gray-600"}`}>{d}</button>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => { clearFilters(); setSidebarOpen(false); }} className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600">Clear All</button>
-              <button onClick={() => setSidebarOpen(false)} className="flex-1 py-3 bg-[#1a3f4e] text-white rounded-xl text-sm font-semibold">Apply Filters</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Footer />
-    </>
+    </LayoutV2>
   );
 }
 
