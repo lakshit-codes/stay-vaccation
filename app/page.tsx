@@ -1,12 +1,12 @@
 import LayoutV2 from "./layouts-v2/LayoutV2";
 import HeroSection from "./sections-v2/HeroSection/HeroSection";
-import DestinationsSectionV2 from "./sections-v2/DestinationsSectionV2";
+import TopDestinations from "./sections-v2/topDestinations/TopDestinations";
 import FeaturedToursSectionV2 from "./sections-v2/FeaturedToursSectionV2";
-import WhyUsSectionV2 from "./sections-v2/WhyUsSectionV2";
-import PromoBannerV2 from "./sections-v2/PromoBannerV2";
-import TestimonialsSectionV2 from "./sections-v2/TestimonialsSectionV2";
+import WhyStayVacation from "./sections-v2/whyStayVacation/WhyStayVacation";
+import OurImpact from "./sections-v2/ourImpact/OurImpact";
+import TravelerStories from "./sections-v2/travelerStories/TravelerStories";
 import FaqSection from "./sections-v2/FaqSection/FaqSection";
-import BookingSectionV2 from "./sections-v2/BookingSectionV2";
+import BookingPlan from "./sections-v2/bookingPlan/BookingPlan";
 import NewsletterSectionV2 from "./sections-v2/NewsletterSectionV2";
 import { getAllDestinations } from "./utils/getDestinations";
 
@@ -89,13 +89,13 @@ export default async function HomePage() {
     <LayoutV2>
       <HeroSection section={heroSection} destinations={v2Destinations} />
 
-      <DestinationsSectionV2 section={destinationsSection} destinations={v2Destinations} />
+      <TopDestinations section={destinationsSection} destinations={v2Destinations} />
       <FeaturedToursSectionV2 packages={v2Packages} />
-      <WhyUsSectionV2 />
-      <PromoBannerV2 />
-      <TestimonialsSectionV2 />
+      <WhyStayVacation />
+      <OurImpact />
+      <TravelerStories />
       <FaqSection section={faqSection} />
-      <BookingSectionV2 />
+      <BookingPlan />
       <NewsletterSectionV2 />
     </LayoutV2>
   );
