@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import LayoutV2 from "../layouts-v2/LayoutV2";
-import PageHeroV2 from "../components-v2/PageHeroV2";
+import PackagesHero from "../sections-v2/packagespage/packagesHero/PackagesHero";
 import TourCardV2 from "../components-v2/TourCardV2";
 import ButtonV2 from "../components-v2/ButtonV2";
 import { useAppSelector } from "@/app/store/hooks";
@@ -87,33 +87,13 @@ function PackagesContent() {
 
   return (
     <LayoutV2>
-      <PageHeroV2 
-        title="All Packages" 
-        subtitle="Browse our complete collection of handcrafted travel experiences across the globe."
-        badge="Curated for you"
-        image="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1800&auto=format&fit=crop&q=80"
+      <PackagesHero
+        searchValue={search}
+        onSearchChange={setSearch}
       />
 
       <section className="py-24 bg-[#f8f9fa]">
         <div className="container-v2">
-          {/* Search bar inside the page */}
-          <div className="max-w-[640px] mx-auto -mt-36 mb-16 relative z-10 px-4">
-            <div className="bg-white/95 backdrop-blur-xl p-2 rounded-2.5xl shadow-[0_20px_50px_rgba(15,23,42,0.12)] border border-white/40 flex items-center gap-2 group transition-all duration-300 hover:shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
-              <div className="flex-1 flex items-center gap-3 px-4.5 py-3">
-                <span className="text-gray-400 text-base">🔍</span>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search destinations, packages, style..."
-                  className="w-full border-none bg-transparent outline-none text-sm font-bold text-[#1a3f4e] placeholder-gray-400"
-                />
-              </div>
-              <button className="px-7 py-3.5 bg-gradient-to-r from-[#ff9500] to-[#ff6b00] text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-[0_4px_12px_rgba(255,149,0,0.2)] hover:shadow-[0_6px_20px_rgba(255,149,0,0.35)] hover:-translate-y-0.5 transition-all duration-300">
-                Search
-              </button>
-            </div>
-          </div>
 
           <div className="flex flex-col lg:flex-row gap-12">
             {/* Sidebar Filters */}

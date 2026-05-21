@@ -1,12 +1,12 @@
 import LayoutV2 from "./layouts-v2/LayoutV2";
-import HeroSection from "./sections-v2/HeroSection/HeroSection";
-import TopDestinations from "./sections-v2/topDestinations/TopDestinations";
+import HeroSection from "./sections-v2/homepage/HeroSection/HeroSection";
+import TopDestinations from "./sections-v2/homepage/topDestinations/TopDestinations";
 import FeaturedToursSectionV2 from "./sections-v2/FeaturedToursSectionV2";
-import WhyStayVacation from "./sections-v2/whyStayVacation/WhyStayVacation";
-import OurImpact from "./sections-v2/ourImpact/OurImpact";
-import TravelerStories from "./sections-v2/travelerStories/TravelerStories";
-import FaqSection from "./sections-v2/FaqSection/FaqSection";
-import BookingPlan from "./sections-v2/bookingPlan/BookingPlan";
+import WhyStayVacation from "./sections-v2/homepage/whyStayVacation/WhyStayVacation";
+import OurImpact from "./sections-v2/homepage/ourImpact/OurImpact";
+import TravelerStories from "./sections-v2/homepage/travelerStories/TravelerStories";
+import FaqSection from "./sections-v2/homepage/FaqSection/FaqSection";
+import BookingPlan from "./sections-v2/homepage/bookingPlan/BookingPlan";
 import NewsletterSectionV2 from "./sections-v2/NewsletterSectionV2";
 import { getAllDestinations } from "./utils/getDestinations";
 

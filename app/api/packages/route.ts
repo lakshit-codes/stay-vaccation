@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     const result = await collection.insertOne({
       ...body,
-      id: newPackageId,         
+      id: newPackageId,
       destinationId: safeObjectId(body.destinationId),
       categoryId: safeObjectId(body.categoryId),
       itinerary: cleanedItinerary,
@@ -134,11 +134,11 @@ export async function GET(req: NextRequest) {
           id: day.id || randomUUID(),
           mealsIncluded: Array.isArray(day.mealsIncluded) ? day.mealsIncluded
             : typeof day.mealsIncluded === "string" && day.mealsIncluded
-            ? day.mealsIncluded.split(",").map((s: string) => s.trim()).filter(Boolean)
-            : [],
-          hotelStays:  (day.hotelStays  || []).map((h: any) => ({ ...h, id: h.id  || randomUUID() })),
-          activities:  (day.activities  || []).map((a: any) => ({ ...a, id: a.id  || randomUUID() })),
-          transfers:   (day.transfers   || []).map((t: any) => ({ ...t, id: t.id  || randomUUID() })),
+              ? day.mealsIncluded.split(",").map((s: string) => s.trim()).filter(Boolean)
+              : [],
+          hotelStays: (day.hotelStays || []).map((h: any) => ({ ...h, id: h.id || randomUUID() })),
+          activities: (day.activities || []).map((a: any) => ({ ...a, id: a.id || randomUUID() })),
+          transfers: (day.transfers || []).map((t: any) => ({ ...t, id: t.id || randomUUID() })),
         })),
       };
       return NextResponse.json(
@@ -180,49 +180,49 @@ export async function GET(req: NextRequest) {
       }
     }
 
-   // IMPORTANT NORMALIZATION
-const normalizedPackages = packages.map((pkg) => {
-  const { _id, id: originalId, ...rest } = pkg;
+    // IMPORTANT NORMALIZATION
+    const normalizedPackages = packages.map((pkg) => {
+      const { _id, id: originalId, ...rest } = pkg;
 
-  return {
-    ...rest,
-    id: _id.toString(), // Convert Mongo _id to string
-    packageId: originalId, // Preserve human-readable ID
-    destinationId: rest.destinationId?.toString() || "",
-    categoryId: rest.categoryId?.toString() || "",
+      return {
+        ...rest,
+        id: _id.toString(), // Convert Mongo _id to string
+        packageId: originalId, // Preserve human-readable ID
+        destinationId: rest.destinationId?.toString() || "",
+        categoryId: rest.categoryId?.toString() || "",
 
-    itinerary: (rest.itinerary || []).map((day: any) => ({
-      ...day,
-      id: day.id || randomUUID(),
+        itinerary: (rest.itinerary || []).map((day: any) => ({
+          ...day,
+          id: day.id || randomUUID(),
 
-      // Ensure mealsIncluded is always an array (may come back as string or undefined from DB)
-      mealsIncluded: Array.isArray(day.mealsIncluded)
-        ? day.mealsIncluded
-        : typeof day.mealsIncluded === "string" && day.mealsIncluded
-        ? day.mealsIncluded.split(",").map((s: string) => s.trim()).filter(Boolean)
-        : [],
+          // Ensure mealsIncluded is always an array (may come back as string or undefined from DB)
+          mealsIncluded: Array.isArray(day.mealsIncluded)
+            ? day.mealsIncluded
+            : typeof day.mealsIncluded === "string" && day.mealsIncluded
+              ? day.mealsIncluded.split(",").map((s: string) => s.trim()).filter(Boolean)
+              : [],
 
-      hotelStays: (day.hotelStays || []).map((h: any) => ({
-        ...h,
-        id: h.id || randomUUID(),
-      })),
+          hotelStays: (day.hotelStays || []).map((h: any) => ({
+            ...h,
+            id: h.id || randomUUID(),
+          })),
 
-      activities: (day.activities || []).map((a: any) => ({
-        ...a,
-        id: a.id || randomUUID(),
-      })),
+          activities: (day.activities || []).map((a: any) => ({
+            ...a,
+            id: a.id || randomUUID(),
+          })),
 
-      transfers: (day.transfers || []).map((t: any) => ({
-        ...t,
-        id: t.id || randomUUID(),
-      })),
-    })),
-  };
-});
+          transfers: (day.transfers || []).map((t: any) => ({
+            ...t,
+            id: t.id || randomUUID(),
+          })),
+        })),
+      };
+    });
 
     return NextResponse.json(
       { success: true, data: normalizedPackages },
-      { 
+      {
         status: 200,
         headers: {
           "Cache-Control": "no-store, max-age=0",
