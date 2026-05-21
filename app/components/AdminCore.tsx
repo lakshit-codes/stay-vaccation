@@ -310,7 +310,7 @@ export const Sel = ({ options, placeholder, value, onChange, className = "", dis
     })}
   </select>
 );
-export const Card = ({ children, className = "", ...props }: { children: React.ReactNode; className?: string; [key: string]: any }) => (
+export const Card = ({ children, className = "", ...props }: { children: React.ReactNode; className?: string;[key: string]: any }) => (
   <div className={cls("bg-white rounded-2xl border border-slate-100/80 shadow-[0_4px_24px_rgba(74,144,226,0.05)] hover:shadow-[0_12px_40px_rgba(74,144,226,0.1)] transition-all duration-300", className)} {...props}>
     {children}
   </div>
@@ -505,7 +505,7 @@ const MasterActivityForm = ({ initial, onSave, onClose }) => {
 
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
-  
+
   return (
     <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
       <div className="grid grid-cols-2 gap-4">
@@ -513,22 +513,22 @@ const MasterActivityForm = ({ initial, onSave, onClose }) => {
           <FL required>Activity Title</FL>
           <Inp placeholder="e.g. Amber Fort Guided Tour" value={form.title} onChange={e => upd("title", e.target.value)} />
         </div>
-        
+
         <div>
           <FL>Destination Link</FL>
-          <Sel 
-            placeholder="Link to destination…" 
-            options={destinations.map(d => ({ label: d.name, value: d.slug }))} 
-            value={form.destinationSlug || ""} 
-            onChange={e => upd("destinationSlug", e.target.value)} 
+          <Sel
+            placeholder="Link to destination…"
+            options={destinations.map(d => ({ label: d.name, value: d.slug }))}
+            value={form.destinationSlug || ""}
+            onChange={e => upd("destinationSlug", e.target.value)}
           />
         </div>
-        
+
         <div><FL>Activity Type</FL><Sel options={OPTIONS.activityType} value={form.activityType} onChange={e => upd("activityType", e.target.value)} /></div>
-        
+
         <div><FL>State</FL><Inp placeholder="e.g. Rajasthan" value={form.state || ""} onChange={e => upd("state", e.target.value)} /></div>
         <div><FL>Country</FL><Inp placeholder="e.g. India" value={form.country || ""} onChange={e => upd("country", e.target.value)} /></div>
-        
+
         <div><FL>Default Duration</FL><Inp placeholder="e.g. 2 hrs" value={form.defaultDuration} onChange={e => upd("defaultDuration", e.target.value)} /></div>
         <div>
           <FL>Rating (1-5)</FL>
@@ -584,7 +584,7 @@ const MasterActivityForm = ({ initial, onSave, onClose }) => {
       </div>
 
       <ImageUploader images={form.images} onAdd={url => upd("images", [...form.images, url])} onRemove={i => upd("images", form.images.filter((_, j) => j !== i))} />
-      
+
       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
         <label className="flex items-center gap-2 cursor-pointer group">
           <div className={cls("w-10 h-5 rounded-full relative transition-all", form.isEnabled !== false ? "bg-emerald-500" : "bg-gray-300")}>
@@ -849,7 +849,7 @@ export const MasterHotelsPage = () => {
 // ─── DESTINATION FORM ──────────────────────────────────────────
 export const DestinationForm = ({ initial, onSave, onCancel }) => {
   const [data, setData] = useState(initial || { name: "", slug: "", image: "", description: "", isEnabled: true, isTrending: false, category: "India" });
-  
+
   const slugify = (text: string) => text.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
   const upd = (f, v) => setData(p => ({ ...p, [f]: v }));
@@ -859,36 +859,36 @@ export const DestinationForm = ({ initial, onSave, onCancel }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <FL required>Name</FL>
-          <Inp 
-            placeholder="e.g. Dubai" 
-            value={data.name || ""} 
-            onChange={e => setData({ 
-              ...data, 
-              name: e.target.value, 
-              slug: slugify(e.target.value) 
-            })} 
+          <Inp
+            placeholder="e.g. Dubai"
+            value={data.name || ""}
+            onChange={e => setData({
+              ...data,
+              name: e.target.value,
+              slug: slugify(e.target.value)
+            })}
           />
         </div>
         <div>
           <FL required>Slug</FL>
-          <Inp 
-            placeholder="e.g. dubai" 
-            value={data.slug || ""} 
-            onChange={e => upd("slug", slugify(e.target.value))} 
+          <Inp
+            placeholder="e.g. dubai"
+            value={data.slug || ""}
+            onChange={e => upd("slug", slugify(e.target.value))}
           />
         </div>
       </div>
-      
+
       <div><FL>Description</FL><TA value={data.description || ""} onChange={e => upd("description", e.target.value)} rows={3} placeholder="A brief overview of this destination..." /></div>
-      
+
       <div>
         <FL>Hero Image</FL>
         <div className="space-y-3">
           <Inp value={data.image || ""} onChange={e => upd("image", e.target.value)} placeholder="Enter image URL..." />
-          <ImageUploader 
-            images={data.image ? [data.image] : []} 
-            onAdd={url => upd("image", url)} 
-            onRemove={() => upd("image", "")} 
+          <ImageUploader
+            images={data.image ? [data.image] : []}
+            onAdd={url => upd("image", url)}
+            onRemove={() => upd("image", "")}
           />
         </div>
       </div>
@@ -961,7 +961,7 @@ export const DestinationForm = ({ initial, onSave, onCancel }) => {
 // ─── REGION FORM ──────────────────────────────────────────────
 export const RegionForm = ({ initial, onSave, onCancel }) => {
   const [data, setData] = useState(initial || { name: "", icon: "📍", order: 0, isActive: true });
-  
+
   const upd = (f, v) => setData(p => ({ ...p, [f]: v }));
 
   return (
@@ -969,18 +969,18 @@ export const RegionForm = ({ initial, onSave, onCancel }) => {
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-3">
           <FL required>Region Name</FL>
-          <Inp 
-            placeholder="e.g. South East Asia" 
-            value={data.name || ""} 
-            onChange={e => upd("name", e.target.value)} 
+          <Inp
+            placeholder="e.g. South East Asia"
+            value={data.name || ""}
+            onChange={e => upd("name", e.target.value)}
           />
         </div>
         <div>
           <FL required>Icon / Emoji</FL>
-          <Inp 
-            placeholder="📍" 
-            value={data.icon || ""} 
-            onChange={e => upd("icon", e.target.value)} 
+          <Inp
+            placeholder="📍"
+            value={data.icon || ""}
+            onChange={e => upd("icon", e.target.value)}
           />
         </div>
       </div>
@@ -988,20 +988,20 @@ export const RegionForm = ({ initial, onSave, onCancel }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <FL>Display Order</FL>
-          <Inp 
-            type="number" 
-            value={data.order || 0} 
-            onChange={e => upd("order", parseInt(e.target.value) || 0)} 
+          <Inp
+            type="number"
+            value={data.order || 0}
+            onChange={e => upd("order", parseInt(e.target.value) || 0)}
           />
         </div>
         <div className="flex items-end pb-2">
-           <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={cls("w-10 h-5 rounded-full relative transition-all", data.isActive !== false ? "bg-emerald-500" : "bg-gray-300")}>
-                <div className={cls("absolute top-1 w-3 h-3 bg-white rounded-full transition-all", data.isActive !== false ? "right-1" : "left-1")} />
-              </div>
-              <input type="checkbox" className="sr-only" checked={data.isActive !== false} onChange={e => upd("isActive", e.target.checked)} />
-              <span className="text-xs font-bold text-gray-600 group-hover:text-gray-900 transition-colors">Active for Frontend</span>
-           </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className={cls("w-10 h-5 rounded-full relative transition-all", data.isActive !== false ? "bg-emerald-500" : "bg-gray-300")}>
+              <div className={cls("absolute top-1 w-3 h-3 bg-white rounded-full transition-all", data.isActive !== false ? "right-1" : "left-1")} />
+            </div>
+            <input type="checkbox" className="sr-only" checked={data.isActive !== false} onChange={e => upd("isActive", e.target.checked)} />
+            <span className="text-xs font-bold text-gray-600 group-hover:text-gray-900 transition-colors">Active for Frontend</span>
+          </label>
         </div>
       </div>
 
@@ -1018,7 +1018,7 @@ export const ActivityRefSelector = ({ value, onChange, label, className = "" }: 
   return (
     <div className={className}>
       {label && <FL>{label}</FL>}
-      <Sel 
+      <Sel
         placeholder="— Select from catalog —"
         options={masterActivities.map(a => ({ label: a.title, value: a._id }))}
         value={value || ""}
@@ -1033,7 +1033,7 @@ export const HotelRefSelector = ({ value, onChange, label, className = "" }: { v
   return (
     <div className={className}>
       {label && <FL>{label}</FL>}
-      <Sel 
+      <Sel
         placeholder="— Select from catalog —"
         options={masterHotels.map(h => ({ label: h.hotelName, value: h._id }))}
         value={value || ""}
@@ -1048,7 +1048,7 @@ export const TransferRefSelector = ({ value, onChange, label, className = "" }: 
   return (
     <div className={className}>
       {label && <FL>{label}</FL>}
-      <Sel 
+      <Sel
         placeholder="— Select from routes —"
         options={transfers.map(t => ({ label: `${t.pickupLocation} → ${t.dropLocation}`, value: t._id }))}
         value={value || ""}
@@ -1230,7 +1230,7 @@ const TransferPicker = ({ dayTr, dayId, onUpdate, onRemove }) => {
             {dayTr.source === "existing" ? (
               <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5"><Ic.Check />Linked</span>
             ) : (
-                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-bold">Custom</span>
+              <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-bold">Custom</span>
             )}
           </div>
         </div>
@@ -1247,35 +1247,35 @@ const TransferPicker = ({ dayTr, dayId, onUpdate, onRemove }) => {
 
           {dayTr.source === "existing" && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-                <FL className="text-blue-700">Link to Existing Transfer</FL>
-                <Sel 
-                    placeholder="— Select from routes —"
-                    options={transfers.map(t => ({ label: `${t.pickupLocation} → ${t.dropLocation} (${t.vehicleType})`, value: t._id || "" }))}
-                    value={dayTr.transferId || ""}
-                    onChange={e => {
-                        const t = transfers.find(x => x._id === e.target.value);
-                        if (t) {
-                            upd("transferId", t._id);
-                            upd("from", t.pickupLocation);
-                            upd("to", t.dropLocation);
-                            upd("vehicleType", t.vehicleType);
-                            if (t.defaultStartTime) upd("startTime", t.defaultStartTime);
-                            if (t.defaultEndTime) upd("endTime", t.defaultEndTime);
-                        }
-                    }}
-                />
+              <FL className="text-blue-700">Link to Existing Transfer</FL>
+              <Sel
+                placeholder="— Select from routes —"
+                options={transfers.map(t => ({ label: `${t.pickupLocation} → ${t.dropLocation} (${t.vehicleType})`, value: t._id || "" }))}
+                value={dayTr.transferId || ""}
+                onChange={e => {
+                  const t = transfers.find(x => x._id === e.target.value);
+                  if (t) {
+                    upd("transferId", t._id);
+                    upd("from", t.pickupLocation);
+                    upd("to", t.dropLocation);
+                    upd("vehicleType", t.vehicleType);
+                    if (t.defaultStartTime) upd("startTime", t.defaultStartTime);
+                    if (t.defaultEndTime) upd("endTime", t.defaultEndTime);
+                  }
+                }}
+              />
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-             <div className="col-span-2 grid grid-cols-2 gap-3">
-                <div><FL>From</FL><Inp placeholder="Pickup" value={dayTr.from} onChange={e => upd("from", e.target.value)} /></div>
-                <div><FL>To</FL><Inp placeholder="Drop" value={dayTr.to} onChange={e => upd("to", e.target.value)} /></div>
-             </div>
-             <div><FL>Transfer Type</FL><Sel options={OPTIONS.transferType} value={dayTr.transferType} onChange={e => upd("transferType", e.target.value)} /></div>
-             <div><FL>Vehicle</FL><Sel options={OPTIONS.vehicleType} value={dayTr.vehicleType} onChange={e => upd("vehicleType", e.target.value)} /></div>
-             <div><FL>Start Time</FL><Inp type="time" value={dayTr.startTime} onChange={e => upd("startTime", e.target.value)} /></div>
-             <div><FL>End Time</FL><Inp type="time" value={dayTr.endTime} onChange={e => upd("endTime", e.target.value)} /></div>
+            <div className="col-span-2 grid grid-cols-2 gap-3">
+              <div><FL>From</FL><Inp placeholder="Pickup" value={dayTr.from} onChange={e => upd("from", e.target.value)} /></div>
+              <div><FL>To</FL><Inp placeholder="Drop" value={dayTr.to} onChange={e => upd("to", e.target.value)} /></div>
+            </div>
+            <div><FL>Transfer Type</FL><Sel options={OPTIONS.transferType} value={dayTr.transferType} onChange={e => upd("transferType", e.target.value)} /></div>
+            <div><FL>Vehicle</FL><Sel options={OPTIONS.vehicleType} value={dayTr.vehicleType} onChange={e => upd("vehicleType", e.target.value)} /></div>
+            <div><FL>Start Time</FL><Inp type="time" value={dayTr.startTime} onChange={e => upd("startTime", e.target.value)} /></div>
+            <div><FL>End Time</FL><Inp type="time" value={dayTr.endTime} onChange={e => upd("endTime", e.target.value)} /></div>
           </div>
           <div><FL optional>Notes</FL><TA placeholder="Special instructions…" value={dayTr.notes || ""} onChange={e => upd("notes", e.target.value)} rows={2} /></div>
         </div>
@@ -1365,15 +1365,16 @@ const SummarisedView = ({ itinerary, pkg }) => {
                       {day.transfers.map(tr => {
                         const resolved = resolveTransfer(tr, transfers);
                         return (
-                        <div key={tr.id} className="flex items-center gap-2 text-xs text-gray-700">
-                          <span className="font-semibold text-gray-400 w-14 flex-shrink-0">{fmt12(tr.startTime)}</span>
-                          <span className="font-semibold truncate max-w-[90px]">{resolved.from || "—"}</span>
-                          <div className="flex items-center gap-1 text-orange-400 flex-shrink-0"><div className="w-3 h-px bg-orange-200" /><Ic.Arrow /><div className="w-3 h-px bg-orange-200" /></div>
-                          <span className="font-semibold truncate max-w-[90px]">{resolved.to || "—"}</span>
-                          <span className={cls("ml-auto text-xs px-2 py-0.5 rounded-full border flex-shrink-0", "bg-orange-50 text-orange-700 border-orange-200")}>{resolved.vehicleType}</span>
-                          {resolved.isExistingSource && <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">Linked</span>}
-                        </div>
-                      ); })}
+                          <div key={tr.id} className="flex items-center gap-2 text-xs text-gray-700">
+                            <span className="font-semibold text-gray-400 w-14 flex-shrink-0">{fmt12(tr.startTime)}</span>
+                            <span className="font-semibold truncate max-w-[90px]">{resolved.from || "—"}</span>
+                            <div className="flex items-center gap-1 text-orange-400 flex-shrink-0"><div className="w-3 h-px bg-orange-200" /><Ic.Arrow /><div className="w-3 h-px bg-orange-200" /></div>
+                            <span className="font-semibold truncate max-w-[90px]">{resolved.to || "—"}</span>
+                            <span className={cls("ml-auto text-xs px-2 py-0.5 rounded-full border flex-shrink-0", "bg-orange-50 text-orange-700 border-orange-200")}>{resolved.vehicleType}</span>
+                            {resolved.isExistingSource && <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">Linked</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -2267,10 +2268,10 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
           <div className="col-span-2"><FL required>Package Title</FL><Inp placeholder="e.g. Bali Royal Escape" value={form.title || ""} onChange={e => upd("title", e.target.value)} /></div>
           <div>
             <FL required>Destination</FL>
-            <Sel 
-              placeholder="Select destination…" 
-              options={destinations.map(d => ({ label: d.name, value: d._id }))} 
-              value={form.destinationId || ""} 
+            <Sel
+              placeholder="Select destination…"
+              options={destinations.map(d => ({ label: d.name, value: d._id }))}
+              value={form.destinationId || ""}
               onChange={e => {
                 const dest = destinations.find(d => d._id === e.target.value);
                 if (dest) {
@@ -2281,15 +2282,15 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
                     destinationSlug: dest.slug
                   }));
                 }
-              }} 
+              }}
             />
           </div>
           <div>
             <FL>Category</FL>
-            <Sel 
-              placeholder="Select category…" 
-              options={categories.map(c => ({ label: c.name, value: c._id || "" }))} 
-              value={form.categoryId || ""} 
+            <Sel
+              placeholder="Select category…"
+              options={categories.map(c => ({ label: c.name, value: c._id || "" }))}
+              value={form.categoryId || ""}
               onChange={e => {
                 const cat = categories.find(c => c._id === e.target.value);
                 setForm(p => ({
@@ -2297,7 +2298,7 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
                   categoryId: cat?._id || "",
                   categorySlug: cat?.slug || ""
                 }));
-              }} 
+              }}
             />
           </div>
           <div>
@@ -2419,14 +2420,14 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
           <div>
             <FL required>Hero / Cover Image</FL>
             <div className="space-y-3">
-              <Inp 
-                placeholder="Enter cover image URL…" 
-                value={form.coverImage || ""} 
-                onChange={e => upd("coverImage", e.target.value)} 
+              <Inp
+                placeholder="Enter cover image URL…"
+                value={form.coverImage || ""}
+                onChange={e => upd("coverImage", e.target.value)}
               />
-              <ImageUploader 
-                images={form.coverImage ? [form.coverImage] : []} 
-                onAdd={url => upd("coverImage", url)} 
+              <ImageUploader
+                images={form.coverImage ? [form.coverImage] : []}
+                onAdd={url => upd("coverImage", url)}
                 onRemove={() => upd("coverImage", "")}
                 label="Upload Cover Image"
               />
@@ -2438,9 +2439,9 @@ export const PackageForm = ({ initial, onSave, onCancel, mode }) => {
 
           <div className="pt-4 border-t border-gray-100">
             <FL>Image Gallery</FL>
-            <ImageUploader 
-              images={form.images || []} 
-              onAdd={url => upd("images", [...(form.images || []), url])} 
+            <ImageUploader
+              images={form.images || []}
+              onAdd={url => upd("images", [...(form.images || []), url])}
               onRemove={i => upd("images", (form.images || []).filter((_, j) => j !== i))}
               label="Upload Gallery Images"
             />
@@ -2719,7 +2720,7 @@ export const CouponsPage = () => {
   const handleSave = async () => {
     if (!form.code.trim()) { alert("Coupon code is required"); return; }
     const payload = { ...form, discountValue: Number(form.discountValue) || 0, minOrderValue: Number(form.minOrderValue) || 0, maxUses: Number(form.maxUses) || 0 };
-    
+
     if (modal?.mode === "create") {
       dispatch(createCoupon(payload)).then((res) => {
         if (createCoupon.fulfilled.match(res)) setModal(null);
@@ -2847,14 +2848,14 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
             amount: 8999
           },
           shortDescription: "Experience Jaipur’s royal heritage with forts, culture, and local experiences.",
-          
+
           inclusions: [
             "2 nights hotel stay",
             "Daily breakfast",
             "Private cab transfers",
             "Sightseeing tours"
           ],
-          
+
           exclusions: [
             "Airfare/train tickets",
             "Personal expenses",
@@ -2869,7 +2870,7 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
               city: "Jaipur",
               dayType: "arrival",
               mealsIncluded: ["Dinner"],
-              
+
               hotelStays: [
                 {
                   id: "h1",
@@ -3101,9 +3102,9 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
       <Modal open={importModalOpen} onClose={() => !isImporting && setImportModalOpen(false)} title="Import Packages">
         <div className="p-6 space-y-4">
           <p className="text-sm text-gray-600">Select a valid .json file containing travel packages export data.</p>
-          <input 
-            type="file" 
-            accept=".json" 
+          <input
+            type="file"
+            accept=".json"
             onChange={(e) => setImportFile(e.target.files?.[0] || null)}
             className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-[1px] file:border-blue-100 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
           />
@@ -3113,7 +3114,7 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
             <div className="mt-3 space-y-3 text-gray-600">
               <p>The uploaded file must precisely match this format:</p>
               <pre className="bg-slate-900 text-teal-400 p-3 rounded-lg text-xs overflow-x-auto">
-{`{
+                {`{
   "success": true,
   "data": [ 
     { 
@@ -3135,54 +3136,54 @@ export const PackagesListing = ({ setPage, setSelectedId, onDuplicate }) => {
             <Btn variant="outline" size="sm" onClick={downloadSample}>Download Sample JSON</Btn>
             <div className="flex gap-3">
               <Btn variant="ghost" onClick={() => setImportModalOpen(false)} disabled={isImporting}>Cancel</Btn>
-              <Btn 
-                variant="success" 
-                disabled={!importFile || isImporting} 
+              <Btn
+                variant="success"
+                disabled={!importFile || isImporting}
                 onClick={async () => {
-                if (!importFile) return;
-                try {
-                  setIsImporting(true);
-                  const text = await importFile.text();
-                  
-                  let parsed;
+                  if (!importFile) return;
                   try {
-                    parsed = JSON.parse(text);
-                  } catch (e) {
-                    alert("Invalid file: File must be a valid JSON.");
-                    setIsImporting(false);
-                    return;
-                  }
+                    setIsImporting(true);
+                    const text = await importFile.text();
 
-                  if (typeof parsed.success !== "boolean" || !Array.isArray(parsed.data)) {
-                     alert("Invalid format: JSON must contain 'success' as boolean and 'data' as an array.");
-                     setIsImporting(false);
-                     return;
-                  }
-
-                  const dataToImport = parsed.data;
-                  dispatch(importPackages(dataToImport)).then((res) => {
-                    if (importPackages.fulfilled.match(res)) {
-                      const result = res.payload;
-                      let msg = `Import complete: ${result.imported} imported, ${result.skipped} skipped out of ${result.total} total.`;
-                      if (result.errors?.length) {
-                        msg += `\nErrors: ${result.errors.map((e: any) => e.packageTitle + " - " + e.reason).join(" | ")}`;
-                      }
-                      alert(msg);
-                      dispatch(fetchPackages()); // Refresh the list
-                    } else {
-                      alert("Import failed: " + (res.error?.message || "Unknown error"));
+                    let parsed;
+                    try {
+                      parsed = JSON.parse(text);
+                    } catch (e) {
+                      alert("Invalid file: File must be a valid JSON.");
+                      setIsImporting(false);
+                      return;
                     }
+
+                    if (typeof parsed.success !== "boolean" || !Array.isArray(parsed.data)) {
+                      alert("Invalid format: JSON must contain 'success' as boolean and 'data' as an array.");
+                      setIsImporting(false);
+                      return;
+                    }
+
+                    const dataToImport = parsed.data;
+                    dispatch(importPackages(dataToImport)).then((res) => {
+                      if (importPackages.fulfilled.match(res)) {
+                        const result = res.payload;
+                        let msg = `Import complete: ${result.imported} imported, ${result.skipped} skipped out of ${result.total} total.`;
+                        if (result.errors?.length) {
+                          msg += `\nErrors: ${result.errors.map((e: any) => e.packageTitle + " - " + e.reason).join(" | ")}`;
+                        }
+                        alert(msg);
+                        dispatch(fetchPackages()); // Refresh the list
+                      } else {
+                        alert("Import failed: " + (res.error?.message || "Unknown error"));
+                      }
+                      setIsImporting(false);
+                    });
+                  } catch (err: any) {
+                    console.error(err);
+                    alert("Failed to import. Error: " + err.message);
                     setIsImporting(false);
-                  });
-                } catch (err: any) {
-                  console.error(err);
-                  alert("Failed to import. Error: " + err.message);
-                  setIsImporting(false);
-                }
-              }}
-            >
-              {isImporting ? "Importing..." : "Upload File"}
-            </Btn>
+                  }
+                }}
+              >
+                {isImporting ? "Importing..." : "Upload File"}
+              </Btn>
             </div>
           </div>
         </div>
@@ -3195,7 +3196,7 @@ export const DuplicatePackageModal = ({ isOpen, onClose, basePkgId, setBasePkgId
   const basePkg = packages.find((p: any) => p.id === basePkgId);
   const minDays = basePkg?.itinerary?.length || 1;
   const [days, setDays] = useState(5);
-  
+
   React.useEffect(() => {
     if (basePkg) setDays(minDays);
   }, [basePkgId, basePkg, minDays]);
@@ -3221,7 +3222,7 @@ export const DuplicatePackageModal = ({ isOpen, onClose, basePkgId, setBasePkgId
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">New Duration (Days)</label>
             <input type="number" min={minDays} max="15" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900" value={days} onChange={e => setDays(parseInt(e.target.value) || minDays)} />
-             <p className="text-[10px] text-gray-500 mt-1">Minimum {minDays} days. Maximum 15 days allowed.</p>
+            <p className="text-[10px] text-gray-500 mt-1">Minimum {minDays} days. Maximum 15 days allowed.</p>
           </div>
         </div>
         <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
@@ -3472,8 +3473,8 @@ export const Sidebar = ({ page, setPage, counts }) => {
             <button key={item.key} onClick={() => setPage(item.key)}
               className={cls(
                 "w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold transition-all duration-300 hover:scale-[1.01] relative",
-                isActive(item.key) 
-                  ? "bg-gradient-to-r from-[#4a90e2]/15 to-[#2563eb]/10 text-white border border-[#4a90e2]/30 shadow-[0_4px_20px_rgba(74,144,226,0.12)] after:content-[''] after:absolute after:right-3.5 after:w-1.5 after:h-1.5 after:bg-[#4a90e2] after:rounded-full after:animate-pulse" 
+                isActive(item.key)
+                  ? "bg-gradient-to-r from-[#4a90e2]/15 to-[#2563eb]/10 text-white border border-[#4a90e2]/30 shadow-[0_4px_20px_rgba(74,144,226,0.12)] after:content-[''] after:absolute after:right-3.5 after:w-1.5 after:h-1.5 after:bg-[#4a90e2] after:rounded-full after:animate-pulse"
                   : "text-slate-400 hover:bg-slate-900/50 hover:text-white"
               )}>
               <span className={cls("transition-colors", isActive(item.key) ? "text-[#87CEEB]" : "text-slate-400")}>{item.icon}</span>
@@ -3493,8 +3494,8 @@ export const Sidebar = ({ page, setPage, counts }) => {
             <button key={item.key} onClick={() => setPage(item.key)}
               className={cls(
                 "w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl text-xs font-bold transition-all duration-300 hover:scale-[1.01] relative",
-                isActive(item.key) 
-                  ? "bg-gradient-to-r from-[#4a90e2]/15 to-[#2563eb]/10 text-white border border-[#4a90e2]/30 shadow-[0_4px_20px_rgba(74,144,226,0.12)] after:content-[''] after:absolute after:right-3.5 after:w-1.5 after:h-1.5 after:bg-[#4a90e2] after:rounded-full after:animate-pulse" 
+                isActive(item.key)
+                  ? "bg-gradient-to-r from-[#4a90e2]/15 to-[#2563eb]/10 text-white border border-[#4a90e2]/30 shadow-[0_4px_20px_rgba(74,144,226,0.12)] after:content-[''] after:absolute after:right-3.5 after:w-1.5 after:h-1.5 after:bg-[#4a90e2] after:rounded-full after:animate-pulse"
                   : "text-slate-400 hover:bg-slate-900/50 hover:text-white"
               )}>
               <span className={cls("transition-colors", isActive(item.key) ? "text-[#87CEEB]" : "text-slate-400")}>{item.icon}</span>
@@ -3520,7 +3521,7 @@ export const Sidebar = ({ page, setPage, counts }) => {
             <p className="text-[8px] text-amber-500 uppercase tracking-widest font-black mt-0.5">Administrator</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[10px] font-black text-rose-400 bg-rose-500/5 border border-rose-500/10 hover:bg-rose-500/15 hover:text-rose-300 transition-all uppercase tracking-wider"
         >
@@ -3627,18 +3628,18 @@ export const CategoryForm = ({ initial, onSave, onCancel }: { initial: Category;
   const [data, setData] = useState<Category>(initial || emptyCategory());
   return (
     <div className="bg-white p-6 space-y-6">
-       <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         {/* ─── Image Priority ─── */}
         <div className="col-span-2 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
           <FL required>Category Hero Image</FL>
           <div className="space-y-3 mt-2">
             <div className="flex gap-2">
-               <Inp className="bg-white" value={data.image || ""} onChange={e => setData({ ...data, image: e.target.value })} placeholder="Enter image URL or upload below..." />
+              <Inp className="bg-white" value={data.image || ""} onChange={e => setData({ ...data, image: e.target.value })} placeholder="Enter image URL or upload below..." />
             </div>
-            <ImageUploader 
-              images={data.image ? [data.image] : []} 
-              onAdd={url => setData({ ...data, image: url })} 
-              onRemove={() => setData({ ...data, image: "" })} 
+            <ImageUploader
+              images={data.image ? [data.image] : []}
+              onAdd={url => setData({ ...data, image: url })}
+              onRemove={() => setData({ ...data, image: "" })}
             />
             <p className="text-[10px] text-blue-400 italic flex items-center gap-1"><Ic.Info /> Recommended: 1200x600px. This image will represent this category across the site.</p>
           </div>

@@ -7,10 +7,10 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const db = await getDatabase();
-    
+
     // Fetch CMS document for featured packages
     const cmsDoc = await db.collection("page_cms").findOne({ page: "featured-packages" });
-    
+
     const settings = cmsDoc?.data || {
       sectionTitle: "Featured Packages",
       sectionSubtitle: "Handpicked premium packages for your next vacation",
@@ -34,7 +34,7 @@ export async function GET() {
     }
 
     const selectedIds = settings.selectedPackages || [];
-    
+
     // Convert string IDs to ObjectId for query
     const objectIds = selectedIds
       .map((id: string) => ObjectId.isValid(id) ? new ObjectId(id) : null)

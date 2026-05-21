@@ -139,20 +139,20 @@ export interface Package {
   };
   faqs?: Faq[];
   itinerary?: ItineraryDay[];
-  
+
   // New premium schema alignment
-  location?: string; 
+  location?: string;
   duration?: string;
-  hotels?: PackageHotel[]; 
-  transfers?: string[]; 
-  activities?: string[]; 
+  hotels?: PackageHotel[];
+  transfers?: string[];
+  activities?: string[];
   policies?: PackagePolicies;
   reviews?: PackageReview[];
 
   // Legacy fields (kept for compatibility)
-  hotelsList?: PackageHotel[]; 
-  transfersList?: string[]; 
-  activitiesList?: string[]; 
+  hotelsList?: PackageHotel[];
+  transfersList?: string[];
+  activitiesList?: string[];
 
 
   coverImage?: string;

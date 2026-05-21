@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { heroSectionData } from './heroSectionData';
-import ButtonV2 from '../../components-v2/ButtonV2';
+import ButtonV2 from '../../../components-v2/ButtonV2';
 
 interface DynamicContent {
   [key: string]: string;
@@ -17,7 +17,7 @@ interface SectionItem {
   };
 }
 
-import SearchBarV2 from '../../components-v2/SearchBarV2';
+import SearchBarV2 from '../../../components-v2/SearchBarV2';
 
 interface HeroSectionProps {
   section?: {
@@ -49,7 +49,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destinations = [], lang = 'en' }) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  
+
   // Prioritize exported TS data
   const section = (heroSectionData as any) || propSection || {};
   const { props = {}, content = [] } = section;
@@ -69,10 +69,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destina
     <section id="hero-v2">
       <div className="hero-slides">
         {slides.map((slide: string, index: number) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`hero-slide ${index === activeSlide ? 'active' : ''}`}
-            style={{ 
+            style={{
               backgroundImage: `url('${slide}')`,
               '--overlay-color': props.overlay_color,
               '--overlay-opacity': props.overlay_opacity
@@ -87,11 +87,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destina
             {t(props.badge)}
           </div>
         )}
-        
+
         <div className="hero-logo-large reveal visible delay-1">
           stay<span>Vacation</span>
         </div>
-        
+
         {(props.heading || props.heading_highlight) && (
           <h1 className="hero-title-v2 reveal visible delay-2">
             {t(props.heading)}
@@ -103,13 +103,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destina
             )}
           </h1>
         )}
-        
+
         {props.description && (
           <p className="hero-sub-v2 reveal visible delay-3">
             {t(props.description)}
           </p>
         )}
-        
+
         <div className="hero-btns reveal visible delay-4">
           {props.primary_btn_text && (
             <ButtonV2 href={props.primary_btn_link || '/destinations'} variant="orange" pulse>
@@ -125,7 +125,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destina
       </div>
 
       {/* Search Bar Component */}
-      <SearchBarV2 
+      <SearchBarV2
         destinations={destinations}
         labels={{
           destination: t(props.search_label_destination),
@@ -142,8 +142,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ section: propSection, destina
       {slides.length > 1 && (
         <div className="hero-dots">
           {slides.map((_: any, index: number) => (
-            <button 
-              key={index} 
+            <button
+              key={index}
               className={`hero-dot ${index === activeSlide ? 'active' : ''}`}
               onClick={() => setActiveSlide(index)}
             />
